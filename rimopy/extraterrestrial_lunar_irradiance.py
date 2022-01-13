@@ -7,6 +7,7 @@ import math
 from typing import List
 import coefficients as coeffs
 import correction_factor as corr_f
+import esi
 
 class Moon_Data:
     """
@@ -144,7 +145,19 @@ def getCorrectionFactor(wavelength_nm: float, mpa: float) -> float:
     return rcf
 
 def getExtraterrestrialSolarIrradiance(wavelength_nm: float) -> float:
-    pass
+    """Gets the expected extraterrestrial solar irradiance at a concrete wavelength
+    
+    Parameters
+    ----------
+    wavelength_nm : float
+        Wavelength (in nanometers) of which the extraterrestrial solar irradiance will be obtained
+    
+    Returns
+    -------
+    float
+        The expected extraterrestrial solar irradiance in W/sm
+    """
+    return esi.getESI(wavelength_nm)
 
 def getIrradianceForWavelength(wavelength_nm: float, absolute_MPA_degrees: float, moon_data: 'Moon_Data') -> float:
     """Calculation of Extraterrestrial Lunar Irradiance following Eq 3 in Roman et al., 2020
