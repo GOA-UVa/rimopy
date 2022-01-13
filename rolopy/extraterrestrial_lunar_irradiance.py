@@ -50,34 +50,78 @@ class Moon_Data:
         self.long_obs = long_obs
 
 def summatory_a(k: int, gr: float) -> float:
+    """The first summatory of Eq. 2 in Roman et al., 2020
+
+    Parameters
+    ----------
+    k : int
+        Index of the wavelength from which the moon's disk reflectance is being calculated
+    gr : float
+        Absolute value of MPA in radians
+
+    Returns
+    -------
+    float
+        Result of the computation of the first summatory
+    """
     count: float = 0.0
-    a: List[List[float]] = coeffs.getCoefficientsA()
+    a: List[List[float]] = coeffs.getCoefficientsA(k)
     for i in range (len(a)):
-        count = count + a[i][k] * gr ^ i 
+        count = count + a[i] * gr ^ i 
     return count
 
 def summatory_b(k: int, phi: float) -> float:
+    """The second summatory of Eq. 2 in Roman et al., 2020
+
+    Parameters
+    ----------
+    k : int
+        Index of the wavelength from which the moon's disk reflectance is being calculated
+    phi : float
+        Selenographic longitude of the Sun (in radians)
+
+    Returns
+    -------
+    float
+        Result of the computation of the second summatory
+    """
     count: float = 0.0
-    b: List[List[float]] = coeffs.getCoefficientsB()
+    b: List[List[float]] = coeffs.getCoefficientsB(k)
     for j in range (len(b)):
-        count = count + b[j][k] * phi ^ (2*(j + 1) - 1)
+        count = count + b[j] * phi ^ (2*(j + 1) - 1)
     return count
 
 def ln_moon_disk_reflectance(absolute_MPA_degrees: float, wavelength_index: int, moon_data: 'Moon_Data') -> float:
+    """The calculation of the ln of the reflectance of the Moon's disk, following Eq.2 in Roman et al., 2020
+
+    Parameters
+    ----------
+    absolute_MPA_degrees : float
+        Absolute Moon phase angle (in degrees)
+    wavelength_index : int
+        Index of the wavelength from which one wants to obtain the MDR. The index is the position of the wavelength on coefficients.getWavelengths() returned list
+    moon_data : 'Moon_Data'
+        Moon data needed to calculate Moon's irradiance
+
+    Returns
+    -------
+    float
+        The ln of the reflectance of the Moon's disk for the inputed data
+    """
     k = wavelength_index
     gd = absolute_MPA_degrees
     gr = math.radians(gd)
     phi = moon_data.long_sun_radians
     c: List[float] = coeffs.getCoefficientsC()
-    d: List[List[float]] = coeffs.getCoefficientsD()
+    d: List[float] = coeffs.getCoefficientsD(k)
     p: List[float] = coeffs.getCoefficientsP()
     l_theta = moon_data.lat_obs
     l_phi = moon_data.long_obs
     sum_a = summatory_a(k, gr)
     sum_b = summatory_b(k, phi)
-    d1 = d[0][k] * math.exp( - gd / p[0])
-    d2 = d[1][k] * math.exp( - gd / p[1])
-    d3 = d[2][k] * math.cos( (gd - p[2]) / p[3])
+    d1 = d[0] * math.exp( - gd / p[0])
+    d2 = d[1] * math.exp( - gd / p[1])
+    d3 = d[2] * math.cos( (gd - p[2]) / p[3])
     result = sum_a + sum_b + c[0] * l_phi + c[1] * l_theta + c[2] * phi * l_phi + c[3] * phi * l_theta + d1 + d2 + d3
     return result
 
