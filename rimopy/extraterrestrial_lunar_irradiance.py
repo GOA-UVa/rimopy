@@ -71,7 +71,7 @@ def summatory_a(k: int, gr: float) -> float:
     return count
 
 def summatory_b(k: int, phi: float) -> float:
-    """The second summatory of Eq. 2 in Roman et al., 2020
+    """The second summatory of Eq. 2 in Roman et al., 2020, without the erratum
 
     Parameters
     ----------
@@ -125,18 +125,40 @@ def ln_moon_disk_reflectance(absolute_MPA_degrees: float, wavelength_index: int,
     result = sum_a + sum_b + c[0] * l_phi + c[1] * l_theta + c[2] * phi * l_phi + c[3] * phi * l_theta + d1 + d2 + d3
     return result
 
+def getCorrectionFactor(wavelength_nm: float) -> float:
+    pass
+
 def getExtraterrestrialSolarIrradiance(wavelength_nm: float) -> float:
     pass
 
 def getIrradianceForWavelength(wavelength_nm: float, absolute_MPA_degrees: float, moon_data: 'Moon_Data') -> float:
-    index = coeffs.getWavelengths().index(wavelength_nm)
-    lnAk = ln_moon_disk_reflectance(absolute_MPA_degrees, index, moon_data)
-    ak = math.exp(lnAk)
+    """Calculation of Extraterrestrial Lunar Irradiance following Eq 3 in Roman et al., 2020
+
+    Parameters
+    ----------
+    wavelength_nm : float
+        Wavelength (in nanometers) of which the extraterrestrial lunar irradiance will be calculated
+    absolute_MPA_degrees : float
+        Absolute Moon phase angle (in degrees)
+    moon_data : 'Moon_Data'
+        Moon data needed to calculate Moon's irradiance
+
+    Returns
+    -------
+    float
+        The extraterrestrial lunar irradiance calculated
+    """
+    wavelength_index = coeffs.getWavelengths().index(wavelength_nm)
+    ln_moon_reflectance = ln_moon_disk_reflectance(absolute_MPA_degrees, wavelength_index, moon_data)
+    mr_correction_factor = getCorrectionFactor(wavelength_nm)
     solid_angle_moon: float = 6.4177 * 10 ^ -5
-    distance_earth_moon_km: int = 384400
+
+    a_l = math.exp(ln_moon_reflectance) * mr_correction_factor
     omega = solid_angle_moon
     esk = getExtraterrestrialSolarIrradiance(wavelength_nm)
     dsm = moon_data.distance_sun_moon
     dom = moon_data.distance_observer_moon
-    em = ((ak * omega * esk) / math.pi) * ((1 / dsm) ^ 2) * (distance_earth_moon_km / dom) ^ 2
+    distance_earth_moon_km: int = 384400
+
+    em = ((a_l * omega * esk) / math.pi) * ((1 / dsm) ^ 2) * (distance_earth_moon_km / dom) ^ 2
     return em

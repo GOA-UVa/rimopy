@@ -1,3 +1,3 @@
-# Rolopy
+# Rimopy
 
-Rolopy is library consisting of an implementation of the ROLO model, made in python.
+Rimopy is library consisting of an implementation of the ROLO model, imitating RIMO, made in python.
