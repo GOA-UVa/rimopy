@@ -6,12 +6,11 @@ This module is important
 import math
 from typing import List
 import coefficients as coeffs
+import correction_factor as corr_f
 
 class Moon_Data:
     """
     Moon data needed to calculate Moon's irradiance, probably obtained from NASA's SPICE Toolbox
-
-    ...
 
     Attributes
     ----------
@@ -67,7 +66,7 @@ def summatory_a(k: int, gr: float) -> float:
     count: float = 0.0
     a: List[List[float]] = coeffs.getCoefficientsA(k)
     for i in range (len(a)):
-        count = count + a[i] * gr ^ i 
+        count = count + a[i] * gr ** i 
     return count
 
 def summatory_b(k: int, phi: float) -> float:
@@ -88,7 +87,7 @@ def summatory_b(k: int, phi: float) -> float:
     count: float = 0.0
     b: List[List[float]] = coeffs.getCoefficientsB(k)
     for j in range (len(b)):
-        count = count + b[j] * phi ^ (2*(j + 1) - 1)
+        count = count + b[j] * phi ** (2*(j + 1) - 1)
     return count
 
 def ln_moon_disk_reflectance(absolute_MPA_degrees: float, wavelength_index: int, moon_data: 'Moon_Data') -> float:
@@ -125,8 +124,24 @@ def ln_moon_disk_reflectance(absolute_MPA_degrees: float, wavelength_index: int,
     result = sum_a + sum_b + c[0] * l_phi + c[1] * l_theta + c[2] * phi * l_phi + c[3] * phi * l_theta + d1 + d2 + d3
     return result
 
-def getCorrectionFactor(wavelength_nm: float) -> float:
-    pass
+def getCorrectionFactor(wavelength_nm: float, mpa: float) -> float:
+    """Calculation of RIMO correction factor (RCF) following Eq 9 in Roman et al., 2020
+
+    Parameters
+    ----------
+    wavelength_nm : float
+        Wavelength (in nanometers) of which the extraterrestrial lunar irradiance will be calculated
+    mpa : float
+        Absolute Moon phase angle (in degrees)
+
+    Returns
+    -------
+    float
+        The calculated RCF
+    """
+    params = corr_f.getCorrectionParams(wavelength_nm)
+    rcf = params.a + params.b *mpa + params.c * mpa ** 2
+    return rcf
 
 def getExtraterrestrialSolarIrradiance(wavelength_nm: float) -> float:
     pass
@@ -150,8 +165,8 @@ def getIrradianceForWavelength(wavelength_nm: float, absolute_MPA_degrees: float
     """
     wavelength_index = coeffs.getWavelengths().index(wavelength_nm)
     ln_moon_reflectance = ln_moon_disk_reflectance(absolute_MPA_degrees, wavelength_index, moon_data)
-    mr_correction_factor = getCorrectionFactor(wavelength_nm)
-    solid_angle_moon: float = 6.4177 * 10 ^ -5
+    mr_correction_factor = getCorrectionFactor(wavelength_nm, absolute_MPA_degrees)
+    solid_angle_moon: float = 6.4177 * 10 ** -5
 
     a_l = math.exp(ln_moon_reflectance) * mr_correction_factor
     omega = solid_angle_moon
@@ -160,5 +175,5 @@ def getIrradianceForWavelength(wavelength_nm: float, absolute_MPA_degrees: float
     dom = moon_data.distance_observer_moon
     distance_earth_moon_km: int = 384400
 
-    em = ((a_l * omega * esk) / math.pi) * ((1 / dsm) ^ 2) * (distance_earth_moon_km / dom) ^ 2
+    em = ((a_l * omega * esk) / math.pi) * ((1 / dsm) ** 2) * (distance_earth_moon_km / dom) ** 2
     return em
