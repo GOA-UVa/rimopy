@@ -1,6 +1,11 @@
-"""Extraterrestrial Lunar Irradiance
+"""ELI Extraterrestrial Lunar Irradiance
 
-This module is important
+This module is the main module, as it allowes the user to calculate the Extraterrestrial Lunar Irradiance
+at a concrete wavelength, at an absolute Moon phase angle, and giving selenographic parameters.
+
+It exports the foollowing functions:
+
+    * getELI - returns the expected extraterrestrial lunar irradiation of a concrete wavelength
 """
 
 import math
@@ -158,7 +163,7 @@ def getExtraterrestrialSolarIrradiance(wavelength_nm: float) -> float:
     """
     return esi.getESI(wavelength_nm)
 
-def getIrradianceForWavelength(wavelength_nm: float, absolute_MPA_degrees: float, moon_data: 'Moon_Data') -> float:
+def getELI(wavelength_nm: float, absolute_MPA_degrees: float, moon_data: 'Moon_Data') -> float:
     """Calculation of Extraterrestrial Lunar Irradiance following Eq 3 in Roman et al., 2020
 
     Parameters
