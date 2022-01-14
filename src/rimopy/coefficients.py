@@ -85,8 +85,11 @@ def getCoefficientsA(wavelength_nm: float) -> List[float]:
         return y[0]
     if wavelength_nm > wvs[-1]:
         return y[-1]
-    f = interp1d(wvs, y, 'cubic')
-    y2 = f(wavelength_nm).item()
+    f0 = interp1d(wvs, [elem[0] for elem in y], 'cubic')
+    f1 = interp1d(wvs, [elem[1] for elem in y], 'cubic')
+    f2 = interp1d(wvs, [elem[2] for elem in y], 'cubic')
+    f3 = interp1d(wvs, [elem[3] for elem in y], 'cubic')
+    y2 = [f0(wavelength_nm).item(), f1(wavelength_nm).item(), f2(wavelength_nm).item(), f3(wavelength_nm).item()]
     return y2
 
 def getCoefficientsB(wavelength_nm: float) -> List[float]:
@@ -110,8 +113,10 @@ def getCoefficientsB(wavelength_nm: float) -> List[float]:
         return y[0]
     if wavelength_nm > wvs[-1]:
         return y[-1]
-    f = interp1d(wvs, y, 'cubic')
-    y2 = f(wavelength_nm).item()
+    f0 = interp1d(wvs, [elem[0] for elem in y], 'cubic')
+    f1 = interp1d(wvs, [elem[1] for elem in y], 'cubic')
+    f2 = interp1d(wvs, [elem[2] for elem in y], 'cubic')
+    y2 = [f0(wavelength_nm).item(), f1(wavelength_nm).item(), f2(wavelength_nm).item()]
     return y2
 
 def getCoefficientsD(wavelength_nm: float) -> List[float]:
@@ -135,8 +140,10 @@ def getCoefficientsD(wavelength_nm: float) -> List[float]:
         return y[0]
     if wavelength_nm > wvs[-1]:
         return y[-1]
-    f = interp1d(wvs, y, 'cubic')
-    y2 = f(wavelength_nm).item()
+    f0 = interp1d(wvs, [elem[0] for elem in y], 'cubic')
+    f1 = interp1d(wvs, [elem[1] for elem in y], 'cubic')
+    f2 = interp1d(wvs, [elem[2] for elem in y], 'cubic')
+    y2 = [f0(wavelength_nm).item(), f1(wavelength_nm).item(), f2(wavelength_nm).item()]
     return y2
 
 def getCoefficientsC() -> List[float]:

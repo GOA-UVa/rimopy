@@ -14,7 +14,7 @@ from . import coefficients as coeffs
 from . import correction_factor as corr_f
 from . import esi
 
-class Moon_Data:
+class MoonData:
     """
     Moon data needed to calculate Moon's irradiance, probably obtained from NASA's SPICE Toolbox
 
@@ -96,7 +96,7 @@ def summatory_b(wavelength_nm: float, phi: float) -> float:
         count = count + b[j] * phi ** (2*(j + 1) - 1)
     return count
 
-def ln_moon_disk_reflectance(absolute_MPA_degrees: float, wavelength_nm: float, moon_data: 'Moon_Data') -> float:
+def ln_moon_disk_reflectance(absolute_MPA_degrees: float, wavelength_nm: float, moon_data: 'MoonData') -> float:
     """The calculation of the ln of the reflectance of the Moon's disk, following Eq.2 in Roman et al., 2020
 
     Parameters
@@ -105,7 +105,7 @@ def ln_moon_disk_reflectance(absolute_MPA_degrees: float, wavelength_nm: float, 
         Absolute Moon phase angle (in degrees)
     wavelength_nm : float
         Wavelength in nanometers from which one wants to obtain the MDR.
-    moon_data : 'Moon_Data'
+    moon_data : 'MoonData'
         Moon data needed to calculate Moon's irradiance
 
     Returns
@@ -163,7 +163,7 @@ def getExtraterrestrialSolarIrradiance(wavelength_nm: float) -> float:
     """
     return esi.getESI(wavelength_nm)
 
-def getELI(wavelength_nm: float, absolute_MPA_degrees: float, moon_data: 'Moon_Data') -> float:
+def getELI(wavelength_nm: float, absolute_MPA_degrees: float, moon_data: 'MoonData') -> float:
     """Calculation of Extraterrestrial Lunar Irradiance following Eq 3 in Roman et al., 2020
 
     Parameters
@@ -172,7 +172,7 @@ def getELI(wavelength_nm: float, absolute_MPA_degrees: float, moon_data: 'Moon_D
         Wavelength (in nanometers) of which the extraterrestrial lunar irradiance will be calculated
     absolute_MPA_degrees : float
         Absolute Moon phase angle (in degrees)
-    moon_data : 'Moon_Data'
+    moon_data : 'MoonData'
         Moon data needed to calculate Moon's irradiance
 
     Returns

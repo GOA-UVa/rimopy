@@ -11,7 +11,7 @@ from argparse import ArgumentError
 from typing import List
 from scipy.interpolate import interp1d
 
-class Correction_params:
+class CorrectionParams:
     """
     DataModel that contains the estimated coefficients of the RCF for a wavelength.
 
@@ -93,7 +93,7 @@ def _getAllCs() -> List[float]:
     """
     return list(map(lambda x : x[2], _getAllCorrectionParams()))
 
-def _getInterpolatedCorrectionParams(wavelength_nm: float, kind='cubic') -> 'Correction_params':
+def _getInterpolatedCorrectionParams(wavelength_nm: float, kind='cubic') -> 'CorrectionParams':
     """Estimate the RCF params with interpolation
 
     Parameters
@@ -112,7 +112,7 @@ def _getInterpolatedCorrectionParams(wavelength_nm: float, kind='cubic') -> 'Cor
 
     Returns
     ------- 
-    'Correction_params'
+    'CorrectionParams'
         Estimated correction params
     """
     x = _getCorrectedWavelengths()
@@ -134,9 +134,9 @@ def _getInterpolatedCorrectionParams(wavelength_nm: float, kind='cubic') -> 'Cor
     yc = _getAllCs()
     fc = interp1d(x, yc, kind)
     c = fc(wavelength_nm).item()
-    return Correction_params(a, b, c)
+    return CorrectionParams(a, b, c)
 
-def getCorrectionParams(wavelength_nm: float) -> 'Correction_params':
+def getCorrectionParams(wavelength_nm: float) -> 'CorrectionParams':
     """Gets the RCF correction parameters for a specific wavelength in nanometers
 
     Parameters
@@ -146,12 +146,12 @@ def getCorrectionParams(wavelength_nm: float) -> 'Correction_params':
 
     Returns
     ------- 
-    'Correction_params'
+    'CorrectionParams'
         Estimated correction params
     """
     wvs = _getCorrectedWavelengths()
     if wavelength_nm in wvs:
         index = wvs.index(wavelength_nm)
         corr_params = _getAllCorrectionParams()
-        return Correction_params(corr_params[index][0], corr_params[index][1], corr_params[index][2])
+        return CorrectionParams(corr_params[index][0], corr_params[index][1], corr_params[index][2])
     return _getInterpolatedCorrectionParams(wavelength_nm)
