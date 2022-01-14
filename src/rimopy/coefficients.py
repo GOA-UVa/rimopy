@@ -16,6 +16,7 @@ It exports the foollowing functions:
     * getCoefficientsP - returns the 'p' coefficients
 """
 from typing import List
+from scipy.interpolate import interp1d
 
 def getWavelengths() -> List[float]:
     """Gets all wavelengths present in the model, in nanometers
@@ -63,50 +64,80 @@ def getAllCoefficientsD() -> List[List[float]]:
         [0.35558, -0.03247, -0.00503], [0.37935, -0.09562, 0.00970], [0.33450, -0.02546, -0.00484], [0.33024, -0.03131, 0.00222],
         [0.36590, -0.08945, 0.00678] ]
 
-def getCoefficientsA(wavelength_index: int) -> List[float]:
+def getCoefficientsA(wavelength_nm: float) -> List[float]:
     """Gets all 'a' coefficients for a concrete wavelength
 
     Parameters
     ----------
-    wavelength_index : int
-        Index of the wavelength from which one wants to obtain the coefficients. The index is the position of the wavelength on getWavelengths() returned list
+    wavelength_nm : float
+        Wavelength in nanometers from which one wants to obtain the coefficients.
 
     Returns
     ------- 
     list of float
         A list containing the 'a' coefficients for the wavelength
     """
-    return getAllCoefficientsA()[wavelength_index]
+    y = getAllCoefficientsA()
+    wvs = getWavelengths()
+    if wavelength_nm in wvs:
+        return y[wvs.index(wavelength_nm)]
+    if wavelength_nm < wvs[0]:
+        return y[0]
+    if wavelength_nm > wvs[-1]:
+        return y[-1]
+    f = interp1d(wvs, y, 'cubic')
+    y2 = f(wavelength_nm).item()
+    return y2
 
-def getCoefficientsB(wavelength_index: int) -> List[float]:
+def getCoefficientsB(wavelength_nm: float) -> List[float]:
     """Gets all 'b' coefficients for a concrete wavelength
 
     Parameters
     ----------
-    wavelength_index : int
-        Index of the wavelength from which one wants to obtain the coefficients. The index is the position of the wavelength on getWavelengths() returned list
+    wavelength_nm : float
+        Wavelength in nanometers from which one wants to obtain the coefficients.
 
     Returns
     ------- 
     list of float
         A list containing the 'b' coefficients for the wavelength
     """
-    return getAllCoefficientsB()[wavelength_index]
+    y = getAllCoefficientsB()
+    wvs = getWavelengths()
+    if wavelength_nm in wvs:
+        return y[wvs.index(wavelength_nm)]
+    if wavelength_nm < wvs[0]:
+        return y[0]
+    if wavelength_nm > wvs[-1]:
+        return y[-1]
+    f = interp1d(wvs, y, 'cubic')
+    y2 = f(wavelength_nm).item()
+    return y2
 
-def getCoefficientsD(wavelength_index: int) -> List[float]:
+def getCoefficientsD(wavelength_nm: float) -> List[float]:
     """Gets all 'd' coefficients for a concrete wavelength
 
     Parameters
     ----------
-    wavelength_index : int
-        Index of the wavelength from which one wants to obtain the coefficients. The index is the position of the wavelength on getWavelengths() returned list
+    wavelength_nm : float
+        Wavelength in nanometers from which one wants to obtain the coefficients.
 
     Returns
     ------- 
     list of float
         A list containing the 'd' coefficients for the wavelength
     """
-    return getAllCoefficientsD()[wavelength_index]
+    y = getAllCoefficientsD()
+    wvs = getWavelengths()
+    if wavelength_nm in wvs:
+        return y[wvs.index(wavelength_nm)]
+    if wavelength_nm < wvs[0]:
+        return y[0]
+    if wavelength_nm > wvs[-1]:
+        return y[-1]
+    f = interp1d(wvs, y, 'cubic')
+    y2 = f(wavelength_nm).item()
+    return y2
 
 def getCoefficientsC() -> List[float]:
     """Gets all 'c' coefficients

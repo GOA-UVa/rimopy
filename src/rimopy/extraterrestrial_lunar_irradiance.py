@@ -5,9 +5,9 @@ This module is important
 
 import math
 from typing import List
-import coefficients as coeffs
-import correction_factor as corr_f
-import esi
+from . import coefficients as coeffs
+from . import correction_factor as corr_f
+from . import esi
 
 class Moon_Data:
     """
@@ -49,13 +49,13 @@ class Moon_Data:
         self.lat_obs = lat_obs
         self.long_obs = long_obs
 
-def summatory_a(k: int, gr: float) -> float:
+def summatory_a(wavelength_nm: float, gr: float) -> float:
     """The first summatory of Eq. 2 in Roman et al., 2020
 
     Parameters
     ----------
-    k : int
-        Index of the wavelength from which the moon's disk reflectance is being calculated
+    wavelength_nm : float
+        Wavelength in nanometers from which the moon's disk reflectance is being calculated
     gr : float
         Absolute value of MPA in radians
 
@@ -65,18 +65,18 @@ def summatory_a(k: int, gr: float) -> float:
         Result of the computation of the first summatory
     """
     count: float = 0.0
-    a: List[List[float]] = coeffs.getCoefficientsA(k)
+    a: List[List[float]] = coeffs.getCoefficientsA(wavelength_nm)
     for i in range (len(a)):
         count = count + a[i] * gr ** i 
     return count
 
-def summatory_b(k: int, phi: float) -> float:
+def summatory_b(wavelength_nm: float, phi: float) -> float:
     """The second summatory of Eq. 2 in Roman et al., 2020, without the erratum
 
     Parameters
     ----------
-    k : int
-        Index of the wavelength from which the moon's disk reflectance is being calculated
+    wavelength_nm : float
+        Wavelength from which the moon's disk reflectance is being calculated
     phi : float
         Selenographic longitude of the Sun (in radians)
 
@@ -86,20 +86,20 @@ def summatory_b(k: int, phi: float) -> float:
         Result of the computation of the second summatory
     """
     count: float = 0.0
-    b: List[List[float]] = coeffs.getCoefficientsB(k)
+    b: List[List[float]] = coeffs.getCoefficientsB(wavelength_nm)
     for j in range (len(b)):
         count = count + b[j] * phi ** (2*(j + 1) - 1)
     return count
 
-def ln_moon_disk_reflectance(absolute_MPA_degrees: float, wavelength_index: int, moon_data: 'Moon_Data') -> float:
+def ln_moon_disk_reflectance(absolute_MPA_degrees: float, wavelength_nm: float, moon_data: 'Moon_Data') -> float:
     """The calculation of the ln of the reflectance of the Moon's disk, following Eq.2 in Roman et al., 2020
 
     Parameters
     ----------
     absolute_MPA_degrees : float
         Absolute Moon phase angle (in degrees)
-    wavelength_index : int
-        Index of the wavelength from which one wants to obtain the MDR. The index is the position of the wavelength on coefficients.getWavelengths() returned list
+    wavelength_nm : float
+        Wavelength in nanometers from which one wants to obtain the MDR.
     moon_data : 'Moon_Data'
         Moon data needed to calculate Moon's irradiance
 
@@ -108,17 +108,16 @@ def ln_moon_disk_reflectance(absolute_MPA_degrees: float, wavelength_index: int,
     float
         The ln of the reflectance of the Moon's disk for the inputed data
     """
-    k = wavelength_index
     gd = absolute_MPA_degrees
     gr = math.radians(gd)
     phi = moon_data.long_sun_radians
     c: List[float] = coeffs.getCoefficientsC()
-    d: List[float] = coeffs.getCoefficientsD(k)
+    d: List[float] = coeffs.getCoefficientsD(wavelength_nm)
     p: List[float] = coeffs.getCoefficientsP()
     l_theta = moon_data.lat_obs
     l_phi = moon_data.long_obs
-    sum_a = summatory_a(k, gr)
-    sum_b = summatory_b(k, phi)
+    sum_a = summatory_a(wavelength_nm, gr)
+    sum_b = summatory_b(wavelength_nm, phi)
     d1 = d[0] * math.exp( - gd / p[0])
     d2 = d[1] * math.exp( - gd / p[1])
     d3 = d[2] * math.cos( (gd - p[2]) / p[3])
@@ -176,8 +175,7 @@ def getIrradianceForWavelength(wavelength_nm: float, absolute_MPA_degrees: float
     float
         The extraterrestrial lunar irradiance calculated
     """
-    wavelength_index = coeffs.getWavelengths().index(wavelength_nm)
-    ln_moon_reflectance = ln_moon_disk_reflectance(absolute_MPA_degrees, wavelength_index, moon_data)
+    ln_moon_reflectance = ln_moon_disk_reflectance(absolute_MPA_degrees, wavelength_nm, moon_data)
     mr_correction_factor = getCorrectionFactor(wavelength_nm, absolute_MPA_degrees)
     solid_angle_moon: float = 6.4177 * 10 ** -5
 
