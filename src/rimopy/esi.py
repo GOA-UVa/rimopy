@@ -9,7 +9,9 @@ It exports the foollowing functions:
 """
 
 import csv
+from io import StringIO
 from typing import Any, Tuple, Dict
+import pkgutil
 
 def _getWehrliData() -> Dict[float, Tuple[float, float]]:
 	"""Returns all wehrli data
@@ -18,7 +20,9 @@ def _getWehrliData() -> Dict[float, Tuple[float, float]]:
 	-------
 	A dict that has the wavelengths as keys (float), and as values it has tuples of the (W/sm/nm, W/sm) values.
 	"""
-	file = open('assets/wehrli.csv')
+	wehrli_bytes = pkgutil.get_data(__name__, 'data/wehrli.csv')
+	wehrli_string = wehrli_bytes.decode()
+	file = StringIO(wehrli_string)
 	csvreader = csv.reader(file)
 	next(csvreader) # Discard the header
 	data = {}
