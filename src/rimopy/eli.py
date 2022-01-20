@@ -3,58 +3,24 @@
 This module is the main module, as it allowes the user to calculate the Extraterrestrial Lunar Irradiance
 at a concrete wavelength, at an absolute Moon phase angle, and giving selenographic parameters.
 
-It exports the foollowing functions:
+It exports the following functions:
 
-    * getELI - returns the expected extraterrestrial lunar irradiation of a concrete wavelength
+    * getELIBypass - returns the expected extraterrestrial lunar irradiation of a wavelength for any
+        observer/solar selenographic coordinates
+    * getELI - returns the expected extraterrestrial lunar irradiation of a wavelength in any
+        geographic coordinates.
 """
 
 import math
 from typing import List
+
+from . import spice_iface
 from . import coefficients as coeffs
 from . import correction_factor as corr_f
 from . import esi
+from .MoonData import MoonData
 
-class MoonData:
-    """
-    Moon data needed to calculate Moon's irradiance, probably obtained from NASA's SPICE Toolbox
-
-    Attributes
-    ----------
-    distance_sun_moon : float
-        Distance between the Sun and the Moon (in astronomical units)
-    distance_observer_moon : float
-        Distance between the Observer and the Moon (in kilometers)
-    long_sun_radians : float
-        Selenographic longitude of the Sun (in radians)
-    lat_obs : float
-        Selenographic latitude of the observer (in degrees)
-    long_obs : float
-        Selenographic longitude of the observer (in degrees)
-    """
-    __slots__ = ['distance_sun_moon', 'distance_observer_moon', 'long_sun_radians', 'lat_obs', 'long_obs']
-
-    def __init__(self, distance_sun_moon: float, distance_observer_moon: float, long_sun_radians: float, lat_obs: float, long_obs: float):
-        """
-        Parameters
-        ----------
-        distance_sun_moon : float
-            Distance between the Sun and the Moon (in astronomical units)
-        distance_observer_moon : float
-            Distance between the Observer and the Moon (in kilometers)
-        long_sun_radians : float
-            Selenographic longitude of the Sun (in radians)
-        lat_obs : float
-            Selenographic latitude of the observer (in degrees)
-        long_obs : float
-            Selenographic longitude of the observer (in degrees)
-        """
-        self.distance_sun_moon = distance_sun_moon
-        self.distance_observer_moon = distance_observer_moon
-        self.long_sun_radians = long_sun_radians
-        self.lat_obs = lat_obs
-        self.long_obs = long_obs
-
-def summatory_a(wavelength_nm: float, gr: float) -> float:
+def _summatory_a(wavelength_nm: float, gr: float) -> float:
     """The first summatory of Eq. 2 in Roman et al., 2020
 
     Parameters
@@ -75,7 +41,7 @@ def summatory_a(wavelength_nm: float, gr: float) -> float:
         count = count + a[i] * gr ** i 
     return count
 
-def summatory_b(wavelength_nm: float, phi: float) -> float:
+def _summatory_b(wavelength_nm: float, phi: float) -> float:
     """The second summatory of Eq. 2 in Roman et al., 2020, without the erratum
 
     Parameters
@@ -96,7 +62,7 @@ def summatory_b(wavelength_nm: float, phi: float) -> float:
         count = count + b[j] * phi ** (2*(j + 1) - 1)
     return count
 
-def ln_moon_disk_reflectance(absolute_MPA_degrees: float, wavelength_nm: float, moon_data: 'MoonData') -> float:
+def _ln_moon_disk_reflectance(absolute_MPA_degrees: float, wavelength_nm: float, moon_data: 'MoonData') -> float:
     """The calculation of the ln of the reflectance of the Moon's disk, following Eq.2 in Roman et al., 2020
 
     Parameters
@@ -121,15 +87,15 @@ def ln_moon_disk_reflectance(absolute_MPA_degrees: float, wavelength_nm: float, 
     p: List[float] = coeffs.getCoefficientsP()
     l_theta = moon_data.lat_obs
     l_phi = moon_data.long_obs
-    sum_a = summatory_a(wavelength_nm, gr)
-    sum_b = summatory_b(wavelength_nm, phi)
+    sum_a = _summatory_a(wavelength_nm, gr)
+    sum_b = _summatory_b(wavelength_nm, phi)
     d1 = d[0] * math.exp( - gd / p[0])
     d2 = d[1] * math.exp( - gd / p[1])
     d3 = d[2] * math.cos( (gd - p[2]) / p[3])
     result = sum_a + sum_b + c[0] * l_phi + c[1] * l_theta + c[2] * phi * l_phi + c[3] * phi * l_theta + d1 + d2 + d3
     return result
 
-def getCorrectionFactor(wavelength_nm: float, mpa: float) -> float:
+def _getCorrectionFactor(wavelength_nm: float, mpa: float) -> float:
     """Calculation of RIMO correction factor (RCF) following Eq 9 in Roman et al., 2020
 
     Parameters
@@ -148,7 +114,7 @@ def getCorrectionFactor(wavelength_nm: float, mpa: float) -> float:
     rcf = params.a + params.b *mpa + params.c * mpa ** 2
     return rcf
 
-def getExtraterrestrialSolarIrradiance(wavelength_nm: float) -> float:
+def _getESI(wavelength_nm: float) -> float:
     """Gets the expected extraterrestrial solar irradiance at a concrete wavelength
     
     Parameters
@@ -163,15 +129,17 @@ def getExtraterrestrialSolarIrradiance(wavelength_nm: float) -> float:
     """
     return esi.getESI(wavelength_nm)
 
-def getELI(wavelength_nm: float, absolute_MPA_degrees: float, moon_data: 'MoonData') -> float:
+def getELIBypass(wavelength_nm: float, moon_data: 'MoonData') -> float:
     """Calculation of Extraterrestrial Lunar Irradiance following Eq 3 in Roman et al., 2020
+
+    Allow users to simulate lunar observation for any observer/solar selenographic
+    latitude and longitude (thus bypassing the need for their computation from the
+    position/time of the observer).
 
     Parameters
     ----------
     wavelength_nm : float
         Wavelength (in nanometers) of which the extraterrestrial lunar irradiance will be calculated
-    absolute_MPA_degrees : float
-        Absolute Moon phase angle (in degrees)
     moon_data : 'MoonData'
         Moon data needed to calculate Moon's irradiance
 
@@ -180,16 +148,43 @@ def getELI(wavelength_nm: float, absolute_MPA_degrees: float, moon_data: 'MoonDa
     float
         The extraterrestrial lunar irradiance calculated
     """
-    ln_moon_reflectance = ln_moon_disk_reflectance(absolute_MPA_degrees, wavelength_nm, moon_data)
-    mr_correction_factor = getCorrectionFactor(wavelength_nm, absolute_MPA_degrees)
+    ln_moon_reflectance = _ln_moon_disk_reflectance(moon_data.absolute_MPA_degrees, wavelength_nm, moon_data)
+    mr_correction_factor = _getCorrectionFactor(wavelength_nm, moon_data.absolute_MPA_degrees)
     solid_angle_moon: float = 6.4177 * 10 ** -5
 
     a_l = math.exp(ln_moon_reflectance) * mr_correction_factor
     omega = solid_angle_moon
-    esk = getExtraterrestrialSolarIrradiance(wavelength_nm)
+    esk = _getESI(wavelength_nm)
     dsm = moon_data.distance_sun_moon
     dom = moon_data.distance_observer_moon
     distance_earth_moon_km: int = 384400
 
     em = ((a_l * omega * esk) / math.pi) * ((1 / dsm) ** 2) * (distance_earth_moon_km / dom) ** 2
     return em
+
+def getELI(wavelength_nm: float, lat: float, long: float, utc_time: str, kernels_path: str) -> float:
+    """Calculation of Extraterrestrial Lunar Irradiance from geographic coordinates
+
+    Allow users to simulate lunar observations for any observer position around the Earth
+    and at any time.
+
+    Parameters
+    ----------
+    wavelength_nm : float
+        Wavelength (in nanometers) of which the extraterrestrial lunar irradiance will be calculated.
+    lat : float
+        Geographic latitude (in degrees) of the location.
+    long : float
+        Geographic longitude (in degrees) of the location.
+    utc_time : str
+        Time at which the ELI will be calculated, in a valid UTC DateTime format.
+    kernels_path : str
+        Folder where the needed SPICE kernels and metakernels are stored.
+
+    Returns
+    -------
+    float
+        The extraterrestrial lunar irradiance calculated
+    """
+    moon_data = spice_iface.getMoonData(lat, long, utc_time, kernels_path)
+    return getELIBypass(wavelength_nm, moon_data)
