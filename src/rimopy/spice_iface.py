@@ -1,6 +1,10 @@
 """SPICE iface
 
 Interface with NASA's SPICE toolbox
+
+It exports the following functions:
+    
+    * getMoonData - Calculates needed MoonData from SPICE toolbox
 """
 
 import spiceypy as spice
