@@ -26,7 +26,7 @@ class _EarthLocation():
         Array of geometric states of body relative to center
     """
     __slots__ = ['point_id', 'ets', 'states']
-    def __init__(self, point_id: int, lat: float, lon: float, ets: np.ndarray, earth_radius: float, delta_t: float, polynomial_degree: int):
+    def __init__(self, point_id: int, lat: float, lon: float, ets: np.ndarray, earth_radius: float, delta_t: float, min_states_polynomial: int):
         """
         Parameters
         ----------
@@ -42,12 +42,12 @@ class _EarthLocation():
             Earth radius in floats
         delta_t : float
             TDB seconds between states
-        polynomial_degree : int
-            Degree of the lagrange polynomials that will be used to interpolate the states
+        min_states_polynomial : int
+            Minimum number states that are required to define a Lagrange polynomial of the degree it's going to be defined
         """
         self.point_id = point_id
         pos_iau_earth = spice.latrec( earth_radius, lat, lon)
-        states = np.zeros( ( len( ets ), polynomial_degree ) )
+        states = np.zeros( ( len( ets ), min_states_polynomial ) )
         for n in range( len( ets ) ):
             states[ n, :3 ] = np.dot(
                 spice.pxform( 'IAU_EARTH', 'J2000', ets[ n ] ),
@@ -141,7 +141,7 @@ def _createEarthPointKernel(utc_time: str, kernels_path: str, lat: int, long: in
     metakernel_path = os.path.join(kernels_path, "createkernel_meta_kernel.txt")
     spice.furnsh(metakernel_path)
 
-    polynomial_degree = 5
+    polynomial_degree = 5 # Degree of the lagrange polynomials that will be used to interpolate the states
     earth_radius = 6371 # Earth mean radius
     delta_t = 1000 # TDB seconds between states
     et0 = spice.str2et(utc_time)
@@ -149,7 +149,7 @@ def _createEarthPointKernel(utc_time: str, kernels_path: str, lat: int, long: in
     etf = et0 + delta_t * min_states_polynomial
     ets = np.arange(et0, etf, delta_t)
 
-    obs = _EarthLocation(id_code, lat, long, ets, earth_radius, delta_t, polynomial_degree)
+    obs = _EarthLocation(id_code, lat, long, ets, earth_radius, delta_t, min_states_polynomial)
 
     custom_kernel_path = os.path.join(kernels_path, CUSTOM_KERNEL_NAME)
     handle = spice.spkopn(custom_kernel_path, 'SPK_file', 0 )
