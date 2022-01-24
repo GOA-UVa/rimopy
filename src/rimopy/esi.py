@@ -12,6 +12,7 @@ import csv
 from io import StringIO
 from typing import Any, Tuple, Dict
 import pkgutil
+from scipy.interpolate import interp1d
 
 def _getWehrliData() -> Dict[float, Tuple[float, float]]:
 	"""Returns all wehrli data
@@ -62,7 +63,13 @@ def getESI(wavelength_nm: float) -> float:
         The expected extraterrestrial solar irradiance in W/sm
 	"""
 	wehrli_data = _getWehrliData()
-	if wavelength_nm in wehrli_data.keys():
+	wehrli_x = list(wehrli_data.keys())
+	if wavelength_nm in wehrli_x:
 		return wehrli_data[wavelength_nm][1]
-	closest_wavelength = _getClosestKey(wehrli_data, wavelength_nm)
-	return wehrli_data[closest_wavelength][1]
+	if wavelength_nm < wehrli_x[0]:
+		return wehrli_data[0][1]
+	if wavelength_nm > wehrli_x[-1]:
+		return wehrli_data[-1][1]
+	wehrli_y = list(map(lambda x : x[1], wehrli_data.values()))
+	f = interp1d(wehrli_x, wehrli_y, 'cubic') # This works because, supposedly, python dicts preserve insertion order since 3.7
+	return f(wavelength_nm).item()
