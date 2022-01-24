@@ -50,9 +50,9 @@ def getESI(wavelength_nm: float) -> float:
 	if wavelength_nm in wehrli_x:
 		return wehrli_data[wavelength_nm][1]
 	if wavelength_nm < wehrli_x[0]:
-		return wehrli_data[0][1]
+		return wehrli_data[wehrli_x[0]][1]
 	if wavelength_nm > wehrli_x[-1]:
-		return wehrli_data[-1][1]
+		return wehrli_data[wehrli_x[-1]][1]
 	wehrli_y = list(map(lambda x : x[1], wehrli_data.values()))
 	f = interp1d(wehrli_x, wehrli_y, 'cubic') # This works because, supposedly, python dicts preserve insertion order since 3.7
 	return f(wavelength_nm).item()
