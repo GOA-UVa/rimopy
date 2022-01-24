@@ -24,7 +24,7 @@ retrieval and comparison with a star photometer.
 At the moment it is only available at the test.pypi repository.
 
 ```sh
-pip install -i https://test.pypi.org/simple/ rimopy-javgat==0.0.10
+pip install -i https://test.pypi.org/simple/ rimopy-javgat==0.0.14
 ```
 
 ### Kernels
