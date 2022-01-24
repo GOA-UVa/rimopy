@@ -12,7 +12,7 @@ It exports the following functions:
 """
 
 import math
-from typing import List
+from typing import List, Union
 
 from . import spice_iface
 from . import coefficients as coeffs
@@ -129,12 +129,11 @@ def _getESI(wavelength_nm: float) -> float:
     """
     return esi.getESI(wavelength_nm)
 
-def getELIBypass(wavelength_nm: float, moon_data: 'MoonData') -> float:
+def _calculateELI(wavelength_nm: float, moon_data: 'MoonData') -> float:
     """Calculation of Extraterrestrial Lunar Irradiance following Eq 3 in Roman et al., 2020
 
-    Allow users to simulate lunar observation for any observer/solar selenographic
-    latitude and longitude (thus bypassing the need for their computation from the
-    position/time of the observer).
+    Simulates a lunar observation for a wavelength for any observer/solar selenographic
+    latitude and longitude.
 
     Parameters
     ----------
@@ -162,7 +161,33 @@ def getELIBypass(wavelength_nm: float, moon_data: 'MoonData') -> float:
     em = ((a_l * omega * esk) / math.pi) * ((1 / dsm) ** 2) * (distance_earth_moon_km / dom) ** 2
     return em
 
-def getELI(wavelength_nm: float, lat: float, long: float, utc_time: str, kernels_path: str) -> float:
+def getELIBypass(wavelength_nm: Union[float, List[float]], moon_data: 'MoonData') -> Union[float, List[float]]:
+    """Calculation of Extraterrestrial Lunar Irradiance following Eq 3 in Roman et al., 2020
+
+    Allow users to simulate lunar observation for any observer/solar selenographic
+    latitude and longitude (thus bypassing the need for their computation from the
+    position/time of the observer).
+
+    Parameters
+    ----------
+    wavelength_nm : float | list of float
+        Wavelength/s (in nanometers) of which the extraterrestrial lunar irradiance will be calculated.
+    moon_data : 'MoonData'
+        Moon data needed to calculate Moon's irradiance
+
+    Returns
+    -------
+    float | list of float
+        The extraterrestrial lunar irradiance/s calculated. It will be a list if parameter "wavelength_nm" was a list.
+    """
+    if isinstance(wavelength_nm, list):
+        elis = []
+        for w in wavelength_nm:
+            elis.append(_calculateELI(w, moon_data))
+        return elis
+    return _calculateELI(wavelength_nm, moon_data)
+
+def getELI(wavelength_nm: Union[float, List[float]], lat: float, long: float, utc_time: str, kernels_path: str) -> Union[float, List[float]]:
     """Calculation of Extraterrestrial Lunar Irradiance from geographic coordinates
 
     Allow users to simulate lunar observations for any observer position around the Earth
@@ -170,8 +195,8 @@ def getELI(wavelength_nm: float, lat: float, long: float, utc_time: str, kernels
 
     Parameters
     ----------
-    wavelength_nm : float
-        Wavelength (in nanometers) of which the extraterrestrial lunar irradiance will be calculated.
+    wavelength_nm : float | list of float
+        Wavelength/s (in nanometers) of which the extraterrestrial lunar irradiance will be calculated.
     lat : float
         Geographic latitude (in degrees) of the location.
     long : float
@@ -183,8 +208,8 @@ def getELI(wavelength_nm: float, lat: float, long: float, utc_time: str, kernels
 
     Returns
     -------
-    float
-        The extraterrestrial lunar irradiance calculated
+    float | list of float
+        The extraterrestrial lunar irradiance/s calculated. It will be a list if parameter "wavelength_nm" was a list.
     """
     moon_data = spice_iface.getMoonData(lat, long, utc_time, kernels_path)
     return getELIBypass(wavelength_nm, moon_data)
