@@ -32,23 +32,6 @@ def _getWehrliData() -> Dict[float, Tuple[float, float]]:
 	file.close()
 	return data
 
-def _getClosestKey(d: Dict[float, Any], search_key: float) -> float:
-	"""Finds the closest key of the dictionary
-
-	Parameters
-	----------
-	d : dict of float and anything
-		The dictionary from which we will find the closest key
-	search_key : float
-		The key of which we will find the closest one in the dictionary
-
-	Returns
-	-------
-	float
-		The closest key in the dictionary 
-	"""
-	return min(d.keys(), key = lambda key: abs(key-search_key))
-
 def getESI(wavelength_nm: float) -> float:
 	"""Gets the expected extraterrestrial solar irradiance at a concrete wavelength
     
