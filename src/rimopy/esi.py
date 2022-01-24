@@ -10,7 +10,7 @@ It exports the foollowing functions:
 
 import csv
 from io import StringIO
-from typing import Any, Tuple, Dict
+from typing import Tuple, Dict
 import pkgutil
 from scipy.interpolate import interp1d
 
