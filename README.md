@@ -27,6 +27,29 @@ At the moment it is only available at the test.pypi repository.
 pip install -i https://test.pypi.org/simple/ rimopy-javgat==0.0.10
 ```
 
+### Kernels
+
+In order to use the package, a directory with all the kernels must be downloaded.
+
+That directory must contain the same elements as **/tests/kernels**, and the execution must
+be allowed to read and write from that directory.
+
+## Structure
+
+The package is divided in multiple modules, each dealing with different calculations and
+functionalities:
+
+- eli: Main module, which calculates the Extraterrestrial Lunar Irradiance for a given data.
+- esi: Calculates the Extraterrestrial Solar Irradiance using data from Wehrli 1985. This data is modified
+beforehand with **/utils/wehrli_gauss**
+- coefficients: Contains the coefficient data from the ROLO model.
+- correction_factor: Calculates the correction factor as stated in RIMO papers.
+- spice_iface: Encapsulates the access to functionalities from SPICE Toolbox.
+- MoonData: Contains MoonData class, which represents some of the needed data
+for the calculation of extraterrestrial lunar irradiance.
+
+![ModuleStructure UML Diagram](docs/ModuleStructure.png)
+
 ## Build
 
 ```sh
