@@ -6,9 +6,13 @@ at a concrete wavelength, at an absolute Moon phase angle, and giving selenograp
 It exports the following functions:
 
     * getELIBypass - returns the expected extraterrestrial lunar irradiation of a wavelength for any
-        observer/solar selenographic coordinates
+        observer/solar selenographic coordinates, in Wm⁻².
     * getELI - returns the expected extraterrestrial lunar irradiation of a wavelength in any
-        geographic coordinates.
+        geographic coordinates, in Wm⁻².
+    * getELIBypassPerNm - returns the expected extraterrestrial lunar irradiation of a wavelength for any
+        observer/solar selenographic coordinates, in Wm⁻²/nm.
+    * getELIPerNm - returns the expected extraterrestrial lunar irradiation of a wavelength in any
+        geographic coordinates, in Wm⁻²/nm.
 """
 
 import math
@@ -116,6 +120,7 @@ def _getCorrectionFactor(wavelength_nm: float, mpa: float) -> float:
 
 def _getESI(wavelength_nm: float) -> float:
     """Gets the expected extraterrestrial solar irradiance at a concrete wavelength
+    Returns the data in Wm⁻²
     
     Parameters
     ----------
@@ -129,7 +134,23 @@ def _getESI(wavelength_nm: float) -> float:
     """
     return esi.getESI(wavelength_nm)
 
-def _calculateELI(wavelength_nm: float, moon_data: 'MoonData') -> float:
+def _getESIPerNm(wavelength_nm: float) -> float:
+    """Gets the expected extraterrestrial solar irradiance at a concrete wavelength
+    Returns the data in Wm⁻²/nm
+    
+    Parameters
+    ----------
+    wavelength_nm : float
+        Wavelength (in nanometers) of which the extraterrestrial solar irradiance will be obtained
+    
+    Returns
+    -------
+    float
+        The expected extraterrestrial solar irradiance in W/sm
+    """
+    return esi.getESIPerNm(wavelength_nm)
+
+def _calculateELI(wavelength_nm: float, moon_data: 'MoonData', perNm: bool = False) -> float:
     """Calculation of Extraterrestrial Lunar Irradiance following Eq 3 in Roman et al., 2020
 
     Simulates a lunar observation for a wavelength for any observer/solar selenographic
@@ -141,6 +162,8 @@ def _calculateELI(wavelength_nm: float, moon_data: 'MoonData') -> float:
         Wavelength (in nanometers) of which the extraterrestrial lunar irradiance will be calculated
     moon_data : 'MoonData'
         Moon data needed to calculate Moon's irradiance
+    perNm : bool
+        True if the user wants the ELI in Wm⁻²/nm, otherwise it will be in Wm⁻². Default is False.
 
     Returns
     -------
@@ -149,11 +172,14 @@ def _calculateELI(wavelength_nm: float, moon_data: 'MoonData') -> float:
     """
     ln_moon_reflectance = _ln_moon_disk_reflectance(moon_data.absolute_MPA_degrees, wavelength_nm, moon_data)
     mr_correction_factor = _getCorrectionFactor(wavelength_nm, moon_data.absolute_MPA_degrees)
-    solid_angle_moon: float = 6.4177 * 10 ** -5
+    solid_angle_moon: float = 6.4177e-05
 
     a_l = math.exp(ln_moon_reflectance) * mr_correction_factor
     omega = solid_angle_moon
-    esk = _getESI(wavelength_nm)
+    if perNm:
+        esk = _getESIPerNm(wavelength_nm)
+    else:
+        esk = _getESI(wavelength_nm)
     dsm = moon_data.distance_sun_moon
     dom = moon_data.distance_observer_moon
     distance_earth_moon_km: int = 384400
@@ -167,6 +193,8 @@ def getELIBypass(wavelength_nm: Union[float, List[float]], moon_data: 'MoonData'
     Allow users to simulate lunar observation for any observer/solar selenographic
     latitude and longitude (thus bypassing the need for their computation from the
     position/time of the observer).
+
+    Returns the data in Wm⁻²
 
     Parameters
     ----------
@@ -193,6 +221,8 @@ def getELI(wavelength_nm: Union[float, List[float]], lat: float, long: float, ut
     Allow users to simulate lunar observations for any observer position around the Earth
     and at any time.
 
+    Returns the data in Wm⁻²
+
     Parameters
     ----------
     wavelength_nm : float | list of float
@@ -204,7 +234,7 @@ def getELI(wavelength_nm: Union[float, List[float]], lat: float, long: float, ut
     utc_time : str
         Time at which the ELI will be calculated, in a valid UTC DateTime format.
     kernels_path : str
-        Folder where the needed SPICE kernels and metakernels are stored.
+        Folder where the needed SPICE kernels are stored.
 
     Returns
     -------
@@ -213,3 +243,62 @@ def getELI(wavelength_nm: Union[float, List[float]], lat: float, long: float, ut
     """
     moon_data = spice_iface.getMoonData(lat, long, utc_time, kernels_path)
     return getELIBypass(wavelength_nm, moon_data)
+
+def getELIBypassPerNm(wavelength_nm: Union[float, List[float]], moon_data: 'MoonData') -> Union[float, List[float]]:
+    """Calculation of Extraterrestrial Lunar Irradiance following Eq 3 in Roman et al., 2020
+
+    Allow users to simulate lunar observation for any observer/solar selenographic
+    latitude and longitude (thus bypassing the need for their computation from the
+    position/time of the observer).
+
+    Returns the data in Wm⁻²/nm
+
+    Parameters
+    ----------
+    wavelength_nm : float | list of float
+        Wavelength/s (in nanometers) of which the extraterrestrial lunar irradiance will be calculated.
+    moon_data : 'MoonData'
+        Moon data needed to calculate Moon's irradiance
+
+    Returns
+    -------
+    float | list of float
+        The extraterrestrial lunar irradiance/s calculated. It will be a list if parameter "wavelength_nm" was a list.
+    """
+    if isinstance(wavelength_nm, list):
+        elis = []
+        for w in wavelength_nm:
+            elis.append(_calculateELI(w, moon_data))
+        return elis
+    return _calculateELI(wavelength_nm, moon_data, True)
+
+def getELIPerNm(wavelength_nm: Union[float, List[float]], lat: float, long: float, utc_time: str, kernels_path: str) -> Union[float, List[float]]:
+    """Calculation of Extraterrestrial Lunar Irradiance from geographic coordinates
+
+    Allow users to simulate lunar observations for any observer position around the Earth
+    and at any time.
+
+    Returns the data in Wm⁻²/nm
+
+    Parameters
+    ----------
+    wavelength_nm : float | list of float
+        Wavelength/s (in nanometers) of which the extraterrestrial lunar irradiance will be calculated.
+    lat : float
+        Geographic latitude (in degrees) of the location.
+    long : float
+        Geographic longitude (in degrees) of the location.
+    utc_time : str
+        Time at which the ELI will be calculated, in a valid UTC DateTime format.
+    kernels_path : str
+        Folder where the needed SPICE kernels are stored.
+
+    Returns
+    -------
+    float | list of float
+        The extraterrestrial lunar irradiance/s calculated. It will be a list if parameter "wavelength_nm" was a list.
+    """
+    moon_data = spice_iface.getMoonData(lat, long, utc_time, kernels_path)
+    return getELIBypassPerNm(wavelength_nm, moon_data)
+
+    

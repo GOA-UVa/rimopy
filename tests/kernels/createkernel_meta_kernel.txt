@@ -1,5 +1,0 @@
-\begindata
-KERNELS_TO_LOAD=(
-'kernels/pck00010.tpc',
-'kernels/naif0012.tls')
-\begintext
