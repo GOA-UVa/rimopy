@@ -7,6 +7,7 @@ It exports the following functions:
     * getMoonData - Calculates needed MoonData from SPICE toolbox
 """
 
+from operator import eq
 import spiceypy as spice
 import os
 from .MoonData import MoonData
@@ -30,7 +31,7 @@ class _EarthLocation():
         Array of geometric states of body relative to center
     """
     __slots__ = ['point_id', 'ets', 'states']
-    def __init__(self, point_id: int, lat: float, lon: float, ets: np.ndarray, earth_radius: float, delta_t: float, min_states_polynomial: int):
+    def __init__(self, point_id: int, lat: float, lon: float, ets: np.ndarray, delta_t: float, min_states_polynomial: int):
         """
         Parameters
         ----------
@@ -42,15 +43,17 @@ class _EarthLocation():
             Geographic longitude of the observer point
         ets : np.ndarray
             Array of TDB seconds from J2000 (et dates) of which the data will be taken
-        earth_radius : float
-            Earth radius in floats
         delta_t : float
             TDB seconds between states
         min_states_polynomial : int
             Minimum number states that are required to define a Lagrange polynomial of the degree it's going to be defined
         """
         self.point_id = point_id
-        pos_iau_earth = spice.latrec( earth_radius, lat, lon)
+        eq_rad = 6378 # Earth equatorial radius
+        pol_rad = 6357 # Earth polar radius
+        default_altitude = 0
+        flattening = (eq_rad - pol_rad)/eq_rad
+        pos_iau_earth = spice.pgrrec( 'EARTH', math.radians(lon), math.radians(lat), default_altitude, eq_rad, flattening)
         states = np.zeros( ( len( ets ), min_states_polynomial ) )
         for n in range( len( ets ) ):
             states[ n, :3 ] = np.dot(
@@ -77,7 +80,7 @@ def _getMoonDataID(utc_time: str, kernels_path: str, id: int) -> MoonData:
     utc_time : str
         Time at which the ELI will be calculated, in a valid UTC DateTime format
     kernels_path : str
-        Path where the SPICE kernels and metakernels are stored
+        Path where the SPICE kernels are stored
     id : int
         Observer's body ID
 
@@ -86,8 +89,10 @@ def _getMoonDataID(utc_time: str, kernels_path: str, id: int) -> MoonData:
     'MoonData'
         Moon data obtained from SPICE toolbox
     """
-    metakernel_path = os.path.join(kernels_path, "moondata_meta_kernel.txt")
-    spice.furnsh(metakernel_path)
+    kernels = ["moon_pa_de421_1900-2050.bpc", "moon_080317.tf", "moon_assoc_me.tf", "pck00010.tpc", "naif0012.tls", "de440.bsp", "custom.bsp"]
+    for kernel in kernels:
+        k_path = os.path.join(kernels_path, kernel)
+        spice.furnsh(k_path)
 
     spice.boddef("Observer", id)
 
@@ -126,7 +131,7 @@ def _getMoonDataID(utc_time: str, kernels_path: str, id: int) -> MoonData:
 
     return md
 
-def _createEarthPointKernel(utc_time: str, kernels_path: str, lat: int, long: int, id_code: int) -> None:
+def _createEarthPointKernel(utc_time: str, kernels_path: str, lat: int, lon: int, id_code: int) -> None:
     """Creates a SPK custom kernel file containing the data of a point on Earth's surface
 
     Parameters
@@ -134,26 +139,27 @@ def _createEarthPointKernel(utc_time: str, kernels_path: str, lat: int, long: in
     utc_time : str
         Time at which the ELI will be calculated, in a valid UTC DateTime format
     kernels_path : str
-        Path where the SPICE kernels and metakernels are stored
+        Path where the SPICE kernels are stored
     lat : float
         Geographic latitude (in degrees) of the location.
-    long : float
+    lon : float
         Geographic longitude (in degrees) of the location.
     id_code : int
         ID code that will be associated with the point on Earth's surface
     """
-    metakernel_path = os.path.join(kernels_path, "createkernel_meta_kernel.txt")
-    spice.furnsh(metakernel_path)
+    pck_kernel_path = os.path.join(kernels_path, "pck00010.tpc")
+    naif_kernel_path = os.path.join(kernels_path, "naif0012.tls")
+    spice.furnsh(pck_kernel_path)
+    spice.furnsh(naif_kernel_path)
 
     polynomial_degree = 5 # Degree of the lagrange polynomials that will be used to interpolate the states
-    earth_radius = 6371 # Earth mean radius
     delta_t = 1000 # TDB seconds between states
     et0 = spice.str2et(utc_time)
     min_states_polynomial = polynomial_degree + 1 # Min # states that are required to define a polynomial of that degree
     etf = et0 + delta_t * min_states_polynomial
     ets = np.arange(et0, etf, delta_t)
 
-    obs = _EarthLocation(id_code, lat, long, ets, earth_radius, delta_t, min_states_polynomial)
+    obs = _EarthLocation(id_code, lat, lon, ets, delta_t, min_states_polynomial)
 
     custom_kernel_path = os.path.join(kernels_path, CUSTOM_KERNEL_NAME)
     handle = spice.spkopn(custom_kernel_path, 'SPK_file', 0 )
@@ -173,7 +179,7 @@ def _removeCustomKernelFile(kernels_path: str) -> None:
     Parameters
     ----------
     kernels_path : str
-        Path where the SPICE kernels and metakernels are stored
+        Path where the SPICE kernels are stored
     """
     custom_kernel_path = os.path.join(kernels_path, CUSTOM_KERNEL_NAME)
     if os.path.exists(custom_kernel_path):
@@ -194,7 +200,7 @@ def getMoonData(lat: float, long: float, utc_time: str, kernels_path: str) -> Mo
     utc_time : str
         Time at which the ELI will be calculated, in a valid UTC DateTime format
     kernels_path : str
-        Path where the SPICE kernels and metakernels are stored
+        Path where the SPICE kernels are stored
 
     Returns
     -------
