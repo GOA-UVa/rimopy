@@ -215,7 +215,7 @@ def getELIBypass(wavelength_nm: Union[float, List[float]], moon_data: 'MoonData'
         return elis
     return _calculateELI(wavelength_nm, moon_data)
 
-def getELI(wavelength_nm: Union[float, List[float]], lat: float, long: float, utc_time: str, kernels_path: str) -> Union[float, List[float]]:
+def getELI(wavelength_nm: Union[float, List[float]], lat: float, long: float, utc_time: str, kernels_path: str, altitude: float = 0) -> Union[float, List[float]]:
     """Calculation of Extraterrestrial Lunar Irradiance from geographic coordinates
 
     Allow users to simulate lunar observations for any observer position around the Earth
@@ -235,13 +235,15 @@ def getELI(wavelength_nm: Union[float, List[float]], lat: float, long: float, ut
         Time at which the ELI will be calculated, in a valid UTC DateTime format.
     kernels_path : str
         Folder where the needed SPICE kernels are stored.
+    altitude : float
+        Altitude over the sea level in meters. Default = 0.
 
     Returns
     -------
     float | list of float
         The extraterrestrial lunar irradiance/s calculated. It will be a list if parameter "wavelength_nm" was a list.
     """
-    moon_data = spice_iface.getMoonData(lat, long, utc_time, kernels_path)
+    moon_data = spice_iface.getMoonData(lat, long, altitude, utc_time, kernels_path)
     return getELIBypass(wavelength_nm, moon_data)
 
 def getELIBypassPerNm(wavelength_nm: Union[float, List[float]], moon_data: 'MoonData') -> Union[float, List[float]]:
@@ -268,11 +270,11 @@ def getELIBypassPerNm(wavelength_nm: Union[float, List[float]], moon_data: 'Moon
     if isinstance(wavelength_nm, list):
         elis = []
         for w in wavelength_nm:
-            elis.append(_calculateELI(w, moon_data))
+            elis.append(_calculateELI(w, moon_data, True))
         return elis
     return _calculateELI(wavelength_nm, moon_data, True)
 
-def getELIPerNm(wavelength_nm: Union[float, List[float]], lat: float, long: float, utc_time: str, kernels_path: str) -> Union[float, List[float]]:
+def getELIPerNm(wavelength_nm: Union[float, List[float]], lat: float, long: float, utc_time: str, kernels_path: str, altitude: float = 0) -> Union[float, List[float]]:
     """Calculation of Extraterrestrial Lunar Irradiance from geographic coordinates
 
     Allow users to simulate lunar observations for any observer position around the Earth
@@ -292,13 +294,15 @@ def getELIPerNm(wavelength_nm: Union[float, List[float]], lat: float, long: floa
         Time at which the ELI will be calculated, in a valid UTC DateTime format.
     kernels_path : str
         Folder where the needed SPICE kernels are stored.
+    altitude : float
+        Altitude over the sea level in meters. Default = 0.
 
     Returns
     -------
     float | list of float
         The extraterrestrial lunar irradiance/s calculated. It will be a list if parameter "wavelength_nm" was a list.
     """
-    moon_data = spice_iface.getMoonData(lat, long, utc_time, kernels_path)
+    moon_data = spice_iface.getMoonData(lat, long, altitude, utc_time, kernels_path)
     return getELIBypassPerNm(wavelength_nm, moon_data)
 
     

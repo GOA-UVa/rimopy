@@ -15,8 +15,39 @@ It exports the foollowing functions:
     * getCoefficientsC - returns the 'c' coefficients
     * getCoefficientsP - returns the 'p' coefficients
 """
-from typing import List
+from typing import List, Dict
 from scipy.interpolate import interp1d
+import csv
+import pkgutil
+from io import StringIO
+
+class CoefficientsWln():
+    def __init__(self, cf: List[float]):
+            self.a = [cf[0], cf[1], cf[2], cf[3]]
+            self.b = [cf[4], cf[5], cf[6]]
+            self.d = [cf[7], cf[8], cf[9]]
+        
+
+def _getCoefficientsData() -> Dict[float, 'CoefficientsWln']:
+    """Returns all variable coefficients (a, b and d) for all wavelengths
+
+    Returns
+    -------
+    A dict that has the wavelengths as keys (float), and as values the CoefficientsWln associated to the wavelength.
+    """
+    coeff_bytes = pkgutil.get_data(__name__, 'data/coefficients.csv')
+    coeff_string = coeff_bytes.decode()
+    file = StringIO(coeff_string)
+    csvreader = csv.reader(file)
+    next(csvreader) # Discard the header
+    data = {}
+    for row in csvreader:
+        coeffs = []
+        for i in range(1, 11):
+            coeffs.append(float(row[i]))
+        data[float(row[0])] = CoefficientsWln(coeffs)
+    file.close()
+    return data
 
 def getWavelengths() -> List[float]:
     """Gets all wavelengths present in the model, in nanometers
@@ -26,7 +57,8 @@ def getWavelengths() -> List[float]:
     list of float
         A list of floats that are the wavelengths in nanometers, in order
     """
-    return [350.0, 355.1, 405.0, 412.3, 414.4, 441.6, 465.8, 475.0, 486.9]
+    coeffs = _getCoefficientsData()
+    return list(coeffs.keys())
 
 def getAllCoefficientsA() -> List[List[float]]:
     """Gets all 'a' coefficients
@@ -36,9 +68,8 @@ def getAllCoefficientsA() -> List[List[float]]:
     list of list of float
         A list containing multiple list of floats. Each sublist is the list of 'a' coefficients for a wavelength
     """
-    return [ [-2.67511, -1.78539, 0.50612, -0.25578], [-2.71924, -1.74298, 0.44523, -0.23315], [-2.35754, -1.72134, 0.40337, -0.21105],
-        [-2.34185, -1.74337, 0.42156, -0.21512], [-2.43367, -1.72184, 0.43600, -0.22675], [-2.31964, -1.72114, 0.37286, -0.19304],
-        [-2.35085, -1.66538, 0.41802, -0.22541], [-2.28999, -1.63180, 0.36193, -0.20381], [-2.23351, -1.68573, 0.37632, -0.19877 ] ]
+    coeffs = _getCoefficientsData()
+    return [elem.a for elem in coeffs.values()]
 
 def getAllCoefficientsB() -> List[List[float]]:
     """Gets all 'b' coefficients
@@ -48,9 +79,8 @@ def getAllCoefficientsB() -> List[List[float]]:
     list of list of float
         A list containing multiple list of floats. Each sublist is the list of 'b' coefficients for a wavelength
     """
-    return [ [0.03744, 0.00981, -0.00322], [0.03492, 0.01142, -0.00383], [0.03505, 0.01043, -0.00341], [0.03141, 0.01364, -0.00472],
-        [0.03474, 0.01188, -0.00422 ], [0.03736, 0.01545, -0.00559], [0.04274, 0.01127, -0.00439], [0.04007, 0.01216, -0.00437],
-        [0.03881, 0.01566, -0.00555] ]
+    coeffs = _getCoefficientsData()
+    return [elem.b for elem in coeffs.values()]
 
 def getAllCoefficientsD() -> List[List[float]]:
     """Gets all 'd' coefficients
@@ -60,9 +90,8 @@ def getAllCoefficientsD() -> List[List[float]]:
     list of list of float
         A list containing multiple list of floats. Each sublist is the list of 'd' coefficients for a wavelength
     """
-    return [ [0.34185, 0.01441, -0.01602], [0.33875, 0.01612, -0.00996], [0.35235, -0.03818, -0.00006], [0.36591, -0.05902, 0.00080],
-        [0.35558, -0.03247, -0.00503], [0.37935, -0.09562, 0.00970], [0.33450, -0.02546, -0.00484], [0.33024, -0.03131, 0.00222],
-        [0.36590, -0.08945, 0.00678] ]
+    coeffs = _getCoefficientsData()
+    return [elem.d for elem in coeffs.values()]
 
 def getCoefficientsA(wavelength_nm: float) -> List[float]:
     """Gets all 'a' coefficients for a concrete wavelength

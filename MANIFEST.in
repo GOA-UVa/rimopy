@@ -1,1 +1,2 @@
 include src/rimopy/data/wehrli.csv
+include src/rimopy/data/coefficients.csv

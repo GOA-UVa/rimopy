@@ -31,7 +31,7 @@ class _EarthLocation():
         Array of geometric states of body relative to center
     """
     __slots__ = ['point_id', 'ets', 'states']
-    def __init__(self, point_id: int, lat: float, lon: float, ets: np.ndarray, delta_t: float, min_states_polynomial: int):
+    def __init__(self, point_id: int, lat: float, lon: float, altitude: float, ets: np.ndarray, delta_t: float, min_states_polynomial: int):
         """
         Parameters
         ----------
@@ -41,6 +41,8 @@ class _EarthLocation():
             Geographic latitude of the observer point
         lon : float
             Geographic longitude of the observer point
+        altitude : float
+            Altitude over the sea level in meters.
         ets : np.ndarray
             Array of TDB seconds from J2000 (et dates) of which the data will be taken
         delta_t : float
@@ -51,9 +53,9 @@ class _EarthLocation():
         self.point_id = point_id
         eq_rad = 6378 # Earth equatorial radius
         pol_rad = 6357 # Earth polar radius
-        default_altitude = 0
+        alt_km = altitude/1000
         flattening = (eq_rad - pol_rad)/eq_rad
-        pos_iau_earth = spice.pgrrec( 'EARTH', math.radians(lon), math.radians(lat), default_altitude, eq_rad, flattening)
+        pos_iau_earth = spice.pgrrec( 'EARTH', math.radians(lon), math.radians(lat), alt_km, eq_rad, flattening)
         states = np.zeros( ( len( ets ), min_states_polynomial ) )
         for n in range( len( ets ) ):
             states[ n, :3 ] = np.dot(
@@ -143,7 +145,7 @@ def _getMoonDataID(utc_time: str, kernels_path: str, id: int) -> MoonData:
 
     return md
 
-def _createEarthPointKernel(utc_time: str, kernels_path: str, lat: int, lon: int, id_code: int) -> None:
+def _createEarthPointKernel(utc_time: str, kernels_path: str, lat: int, lon: int, altitude: float, id_code: int) -> None:
     """Creates a SPK custom kernel file containing the data of a point on Earth's surface
 
     Parameters
@@ -156,6 +158,8 @@ def _createEarthPointKernel(utc_time: str, kernels_path: str, lat: int, lon: int
         Geographic latitude (in degrees) of the location.
     lon : float
         Geographic longitude (in degrees) of the location.
+    altitude : float
+        Altitude over the sea level in meters.
     id_code : int
         ID code that will be associated with the point on Earth's surface
     """
@@ -171,7 +175,7 @@ def _createEarthPointKernel(utc_time: str, kernels_path: str, lat: int, lon: int
     etf = et0 + delta_t * min_states_polynomial
     ets = np.arange(et0, etf, delta_t)
 
-    obs = _EarthLocation(id_code, lat, lon, ets, delta_t, min_states_polynomial)
+    obs = _EarthLocation(id_code, lat, lon, altitude, ets, delta_t, min_states_polynomial)
 
     custom_kernel_path = os.path.join(kernels_path, CUSTOM_KERNEL_NAME)
     handle = spice.spkopn(custom_kernel_path, 'SPK_file', 0 )
@@ -197,7 +201,7 @@ def _removeCustomKernelFile(kernels_path: str) -> None:
     if os.path.exists(custom_kernel_path):
         os.remove(custom_kernel_path)
 
-def getMoonData(lat: float, long: float, utc_time: str, kernels_path: str) -> MoonData:
+def getMoonData(lat: float, long: float, altitude: float , utc_time: str, kernels_path: str) -> MoonData:
     """Calculation of needed Moon data from SPICE toolbox
 
     Moon phase angle, selenographic coordinates and distance from observer point to moon.
@@ -209,11 +213,12 @@ def getMoonData(lat: float, long: float, utc_time: str, kernels_path: str) -> Mo
         Geographic latitude (in degrees) of the location.
     long : float
         Geographic longitude (in degrees) of the location.
+    altitude : float
+        Altitude over the sea level in meters.
     utc_time : str
         Time at which the ELI will be calculated, in a valid UTC DateTime format
     kernels_path : str
         Path where the SPICE kernels are stored
-
     Returns
     -------
     'MoonData'
@@ -221,6 +226,6 @@ def getMoonData(lat: float, long: float, utc_time: str, kernels_path: str) -> Mo
     """
     id_code = 301100
     _removeCustomKernelFile(kernels_path)
-    _createEarthPointKernel(utc_time, kernels_path, lat, long, id_code)
+    _createEarthPointKernel(utc_time, kernels_path, lat, long, altitude, id_code)
     return _getMoonDataID(utc_time, kernels_path, id_code)
     
