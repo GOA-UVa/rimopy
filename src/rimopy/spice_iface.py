@@ -31,7 +31,7 @@ class _EarthLocation():
         Array of geometric states of body relative to center
     """
     __slots__ = ['point_id', 'ets', 'states']
-    def __init__(self, point_id: int, lat: float, lon: float, altitude: float, ets: np.ndarray, delta_t: float, min_states_polynomial: int):
+    def __init__(self, point_id: int, lat: float, lon: float, altitude: float, ets: np.ndarray, delta_t: float, min_states_polynomial: int, frame: str):
         """
         Parameters
         ----------
@@ -49,6 +49,8 @@ class _EarthLocation():
             TDB seconds between states
         min_states_polynomial : int
             Minimum number states that are required to define a Lagrange polynomial of the degree it's going to be defined
+        frame : str
+            Name of the frame which the location will be referencing.
         """
         self.point_id = point_id
         eq_rad = 6378 # Earth equatorial radius
@@ -59,14 +61,14 @@ class _EarthLocation():
         states = np.zeros( ( len( ets ), min_states_polynomial ) )
         for n in range( len( ets ) ):
             states[ n, :3 ] = np.dot(
-                spice.pxform( 'IAU_EARTH', 'J2000', ets[ n ] ),
+                spice.pxform( 'IAU_EARTH', frame, ets[ n ] ),
                 pos_iau_earth )
 
         for n in range( len( ets ) - 1 ):
             states[ n, 3: ] = ( states[ n + 1, :3 ] - states[ n, :3 ] ) / delta_t
 
         pos_np1 = np.dot(
-                spice.pxform( 'IAU_EARTH', 'J2000', ets[ -1 ] + delta_t ),
+                spice.pxform( 'IAU_EARTH', frame, ets[ -1 ] + delta_t ),
                 pos_iau_earth )
         states[ -1, 3: ] = ( pos_np1 - states[ -1, :3 ] ) / delta_t
         self.states = states
@@ -175,13 +177,13 @@ def _createEarthPointKernel(utc_time: str, kernels_path: str, lat: int, lon: int
     etf = et0 + delta_t * min_states_polynomial
     ets = np.arange(et0, etf, delta_t)
 
-    obs = _EarthLocation(id_code, lat, lon, altitude, ets, delta_t, min_states_polynomial)
+    frame = 'J2000'
+    obs = _EarthLocation(id_code, lat, lon, altitude, ets, delta_t, min_states_polynomial, frame)
 
     custom_kernel_path = os.path.join(kernels_path, CUSTOM_KERNEL_NAME)
     handle = spice.spkopn(custom_kernel_path, 'SPK_file', 0 )
     
     center = EARTH_ID_CODE
-    frame = 'J2000'
     spice.spkw09( handle, obs.point_id, center, frame,
         ets[ 0 ], ets[ -1 ], '0', polynomial_degree, len( ets ),
         obs.states.tolist(), ets.tolist() )
