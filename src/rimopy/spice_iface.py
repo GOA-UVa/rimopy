@@ -127,6 +127,18 @@ def _getMoonDataID(utc_time: str, kernels_path: str, id: int) -> MoonData:
 
     spice.kclear()
 
+    limit_lat = 90
+    if sel_lat > limit_lat:
+        sel_lat -= limit_lat*2
+    elif sel_lat < -limit_lat:
+        sel_lat += limit_lat*2
+
+    limit_lon = 180
+    if sel_lon > limit_lon:
+        sel_lon -= limit_lon*2
+    elif sel_lon < -limit_lon:
+        sel_lon += limit_lon*2
+
     md = MoonData(distance_sun_moon, distance_observer_moon, sel_lon_sun_rad, sel_lat, sel_lon, phase)
 
     return md

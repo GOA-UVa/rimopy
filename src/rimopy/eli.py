@@ -40,7 +40,7 @@ def _summatory_a(wavelength_nm: float, gr: float) -> float:
         Result of the computation of the first summatory
     """
     count: float = 0.0
-    a: List[List[float]] = coeffs.getCoefficientsA(wavelength_nm)
+    a: List[float] = coeffs.getCoefficientsA(wavelength_nm)
     for i in range (len(a)):
         count = count + a[i] * gr ** i 
     return count
@@ -61,7 +61,7 @@ def _summatory_b(wavelength_nm: float, phi: float) -> float:
         Result of the computation of the second summatory
     """
     count: float = 0.0
-    b: List[List[float]] = coeffs.getCoefficientsB(wavelength_nm)
+    b: List[float] = coeffs.getCoefficientsB(wavelength_nm)
     for j in range (len(b)):
         count = count + b[j] * phi ** (2*(j + 1) - 1)
     return count
