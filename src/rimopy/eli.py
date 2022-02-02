@@ -251,8 +251,8 @@ def getELI(wavelength_nm: Union[float, List[float]], lat: float, long: float, ut
     float | list of float
         The extraterrestrial lunar irradiance/s calculated. It will be a list if parameter "wavelength_nm" was a list.
     """
-    moon_data = spice_iface.getMoonData(lat, long, altitude, utc_time, kernels_path, applyCorrection)
-    return getELIBypass(wavelength_nm, moon_data)
+    moon_data = spice_iface.getMoonData(lat, long, altitude, utc_time, kernels_path)
+    return getELIBypass(wavelength_nm, moon_data, applyCorrection)
 
 def getELIBypassPerNm(wavelength_nm: Union[float, List[float]], moon_data: 'MoonData', applyCorrection: bool = True) -> Union[float, List[float]]:
     """Calculation of Extraterrestrial Lunar Irradiance following Eq 3 in Roman et al., 2020
