@@ -21,19 +21,36 @@ import csv
 import pkgutil
 from io import StringIO
 
-class CoefficientsWln():
+class _CoefficientsWln():
+    """
+    Coefficients data for a wavelength. It includes only the a, b and d coefficients.
+
+    Attributes
+    ----------
+    a : tuple of 4 floats, corresponding to coefficients a0, a1, a2, and a3
+    b : tuple of 3 floats, corresponding to coefficients b1, b2, and b3
+    d : tuple of 3floats, corresponding to coefficients d1, d2, and d3
+    """
+    __slots__ = ['a', 'b', 'd']
+
     def __init__(self, cf: List[float]):
-            self.a = [cf[0], cf[1], cf[2], cf[3]]
-            self.b = [cf[4], cf[5], cf[6]]
-            self.d = [cf[7], cf[8], cf[9]]
+        """
+        Parameters
+        ----------
+        cf : list of float
+            List of floats consisting of all coefficients. In order: a0, a1, a2, a3, b1, b2, b3, d1, d2 and d3.
+        """
+        self.a = (cf[0], cf[1], cf[2], cf[3])
+        self.b = (cf[4], cf[5], cf[6])
+        self.d = (cf[7], cf[8], cf[9])
         
 
-def _getCoefficientsData() -> Dict[float, 'CoefficientsWln']:
+def _getCoefficientsData() -> Dict[float, '_CoefficientsWln']:
     """Returns all variable coefficients (a, b and d) for all wavelengths
 
     Returns
     -------
-    A dict that has the wavelengths as keys (float), and as values the CoefficientsWln associated to the wavelength.
+    A dict that has the wavelengths as keys (float), and as values the _CoefficientsWln associated to the wavelength.
     """
     coeff_bytes = pkgutil.get_data(__name__, 'data/coefficients.csv')
     coeff_string = coeff_bytes.decode()
@@ -45,7 +62,7 @@ def _getCoefficientsData() -> Dict[float, 'CoefficientsWln']:
         coeffs = []
         for i in range(1, 11):
             coeffs.append(float(row[i]))
-        data[float(row[0])] = CoefficientsWln(coeffs)
+        data[float(row[0])] = _CoefficientsWln(coeffs)
     file.close()
     return data
 
