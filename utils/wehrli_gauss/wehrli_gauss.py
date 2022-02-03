@@ -13,6 +13,8 @@ import numpy as np
 import csv
 from typing import List
 
+_INTERPOLATION_TYPE = 'linear'
+
 def _interpolate_list(f: interp1d, minimum: float, maximum: float, step: float) -> List[float]:
     """Creates a list from an interpolation function, which elements will be from minimum
     to maximum, increasing step by step.
@@ -67,8 +69,8 @@ def _generate_new_list(data: List[List[float]]) -> List[List[float]]:
     list of list of float
         Interpolated and filtered list, following the same structure as the 'data' parameter.
     """
-    f1 = interp1d([elem[0] for elem in data], [elem[1] for elem in data], 'cubic')
-    f2 = interp1d([elem[0] for elem in data], [elem[2] for elem in data], 'cubic')
+    f1 = interp1d([elem[0] for elem in data], [elem[1] for elem in data], _INTERPOLATION_TYPE)
+    f2 = interp1d([elem[0] for elem in data], [elem[2] for elem in data], _INTERPOLATION_TYPE)
     minimum = 199.5
     maximum = 3000 #10075.0
     step = 2

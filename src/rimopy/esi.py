@@ -15,6 +15,8 @@ from typing import Tuple, Dict
 import pkgutil
 from scipy.interpolate import interp1d
 
+_INTERPOLATION_TYPE = 'linear'
+
 def _getWehrliData() -> Dict[float, Tuple[float, float]]:
     """Returns all wehrli data
 
@@ -56,7 +58,7 @@ def getESI(wavelength_nm: float) -> float:
     if wavelength_nm > wehrli_x[-1]:
         return wehrli_data[wehrli_x[-1]][1]
     wehrli_y = list(map(lambda x : x[1], wehrli_data.values()))
-    f = interp1d(wehrli_x, wehrli_y, 'cubic') # This works because, supposedly, python dicts preserve insertion order since 3.7
+    f = interp1d(wehrli_x, wehrli_y, _INTERPOLATION_TYPE) # This works because, supposedly, python dicts preserve insertion order since 3.7
     return f(wavelength_nm).item()
 
 def getESIPerNm(wavelength_nm: float) -> float:
@@ -82,5 +84,5 @@ def getESIPerNm(wavelength_nm: float) -> float:
     if wavelength_nm > wehrli_x[-1]:
         return wehrli_data[wehrli_x[-1]][1]
     wehrli_y = list(map(lambda x : x[0], wehrli_data.values()))
-    f = interp1d(wehrli_x, wehrli_y, 'cubic') # This works because, supposedly, python dicts preserve insertion order since 3.7
+    f = interp1d(wehrli_x, wehrli_y, _INTERPOLATION_TYPE) # This works because, supposedly, python dicts preserve insertion order since 3.7
     return f(wavelength_nm).item()

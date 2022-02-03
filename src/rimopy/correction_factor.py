@@ -93,7 +93,7 @@ def _getAllCs() -> List[float]:
     """
     return list(map(lambda x : x[2], _getAllCorrectionParams()))
 
-def _getInterpolatedCorrectionParams(wavelength_nm: float, kind='cubic') -> 'CorrectionParams':
+def _getInterpolatedCorrectionParams(wavelength_nm: float, kind='linear') -> 'CorrectionParams':
     """Estimate the RCF params with interpolation
 
     Parameters
@@ -103,7 +103,7 @@ def _getInterpolatedCorrectionParams(wavelength_nm: float, kind='cubic') -> 'Cor
     kind: str
         Kind of interpolation performed. Specifies the kind of interpolation as a string or as an integer
         specifying the order of the spline interpolator to use. The string has to be one of 'linear', 'nearest',
-        'nearest-up', 'zero', 'slinear', 'quadratic', 'cubic', 'previous', or 'next'. Default is 'cubic'.
+        'nearest-up', 'zero', 'slinear', 'quadratic', 'cubic', 'previous', or 'next'. Default is 'linear'.
 
     Raises
     ------
