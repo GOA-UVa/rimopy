@@ -52,25 +52,27 @@ class _EarthLocation():
         frame : str
             Name of the frame which the location will be referencing.
         """
+        num_coordinates = 3
+        n_state_attributes = 6
         self.point_id = point_id
         eq_rad = 6378 # Earth equatorial radius
         pol_rad = 6357 # Earth polar radius
         alt_km = altitude/1000
         flattening = (eq_rad - pol_rad)/eq_rad
         pos_iau_earth = spice.pgrrec( 'EARTH', math.radians(lon), math.radians(lat), alt_km, eq_rad, flattening)
-        states = np.zeros( ( len( ets ), min_states_polynomial ) )
+        states = np.zeros( ( len( ets ), n_state_attributes ) )
         for n in range( len( ets ) ):
-            states[ n, :3 ] = np.dot(
+            states[ n, :num_coordinates ] = np.dot(
                 spice.pxform( 'IAU_EARTH', frame, ets[ n ] ),
                 pos_iau_earth )
 
         for n in range( len( ets ) - 1 ):
-            states[ n, 3: ] = ( states[ n + 1, :3 ] - states[ n, :3 ] ) / delta_t
+            states[ n, num_coordinates: ] = ( states[ n + 1, :num_coordinates ] - states[ n, :num_coordinates ] ) / delta_t
 
         pos_np1 = np.dot(
                 spice.pxform( 'IAU_EARTH', frame, ets[ -1 ] + delta_t ),
                 pos_iau_earth )
-        states[ -1, 3: ] = ( pos_np1 - states[ -1, :3 ] ) / delta_t
+        states[ -1, num_coordinates: ] = ( pos_np1 - states[ -1, :num_coordinates ] ) / delta_t
         self.states = states
 
 def _getMoonDataID(utc_time: str, kernels_path: str, id: int) -> MoonData:
