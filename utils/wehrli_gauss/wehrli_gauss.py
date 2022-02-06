@@ -73,7 +73,7 @@ def _generate_new_list(data: List[List[float]]) -> List[List[float]]:
     f2 = interp1d([elem[0] for elem in data], [elem[2] for elem in data], _INTERPOLATION_TYPE)
     minimum = 199.5
     maximum = 3000 #10075.0
-    step = 2
+    step = 1
     l1 = _interpolate_list(f1, minimum, maximum, step)
     l2 = _interpolate_list(f2, minimum, maximum, step)
     l1 = _gaussian_filter_list(l1)
