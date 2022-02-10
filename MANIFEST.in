@@ -1,2 +1,3 @@
-include src/rimopy/data/wehrli.csv
+include src/rimopy/data/wehrli_filtered.csv
+include src/rimopy/data/wehrli_original.csv
 include src/rimopy/data/coefficients.csv

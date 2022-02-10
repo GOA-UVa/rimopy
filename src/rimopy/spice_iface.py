@@ -92,7 +92,7 @@ def _getMoonDataID(utc_time: str, kernels_path: str, id: int) -> MoonData:
 
     Returns
     -------
-    'MoonData'
+    MoonData
         Moon data obtained from SPICE toolbox
     """
     kernels = ["moon_pa_de421_1900-2050.bpc", "moon_080317.tf", "moon_assoc_me.tf", "pck00010.tpc", "naif0012.tls", "de440.bsp", "custom.bsp"]
@@ -205,7 +205,7 @@ def _removeCustomKernelFile(kernels_path: str) -> None:
     if os.path.exists(custom_kernel_path):
         os.remove(custom_kernel_path)
 
-def getMoonData(lat: float, long: float, altitude: float , utc_time: str, kernels_path: str) -> MoonData:
+def getMoonData(lat: float, lon: float, altitude: float , utc_time: str, kernels_path: str) -> MoonData:
     """Calculation of needed Moon data from SPICE toolbox
 
     Moon phase angle, selenographic coordinates and distance from observer point to moon.
@@ -215,7 +215,7 @@ def getMoonData(lat: float, long: float, altitude: float , utc_time: str, kernel
     ----------
     lat : float
         Geographic latitude (in degrees) of the location.
-    long : float
+    lon : float
         Geographic longitude (in degrees) of the location.
     altitude : float
         Altitude over the sea level in meters.
@@ -225,11 +225,11 @@ def getMoonData(lat: float, long: float, altitude: float , utc_time: str, kernel
         Path where the SPICE kernels are stored
     Returns
     -------
-    'MoonData'
+    MoonData
         Moon data obtained from SPICE toolbox
     """
     id_code = 301100
     _removeCustomKernelFile(kernels_path)
-    _createEarthPointKernel(utc_time, kernels_path, lat, long, altitude, id_code)
+    _createEarthPointKernel(utc_time, kernels_path, lat, lon, altitude, id_code)
     return _getMoonDataID(utc_time, kernels_path, id_code)
     

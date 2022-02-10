@@ -24,6 +24,40 @@ from . import correction_factor as corr_f
 from . import esi
 from .MoonData import MoonData
 
+class EarthData():
+    """
+    Data of the point on Earth surface of which the ELI will be calculated. 
+    
+    Attributes
+    ----------
+    lat : float
+        Geographic latitude (in degrees) of the location.
+    lon : float
+        Geographic longitude (in degrees) of the location.
+    utc_time : str
+        Time at which the ELI will be calculated, in a valid UTC DateTime format.
+    altitude : float
+        Altitude over the sea level in meters. Default = 0.
+    """
+    __slots__ = ['lat', 'lon', 'utc_time', 'altitude']
+    def __init__(self, lat: float, lon: float, utc_time: str, altitude: float = 0):
+        """
+        Parameters
+        ----------
+        lat : float
+            Geographic latitude (in degrees) of the location.
+        lon : float
+            Geographic longitude (in degrees) of the location.
+        utc_time : str
+            Time at which the ELI will be calculated, in a valid UTC DateTime format.
+        altitude : float
+            Altitude over the sea level in meters. Default = 0.
+        """
+        self.lat = lat
+        self.lon = lon
+        self.utc_time = utc_time
+        self.altitude = altitude
+
 def _summatory_a(wavelength_nm: float, gr: float) -> float:
     """The first summatory of Eq. 2 in Roman et al., 2020
 
@@ -66,7 +100,7 @@ def _summatory_b(wavelength_nm: float, phi: float) -> float:
         count = count + b[j] * phi ** (2*(j + 1) - 1)
     return count
 
-def _ln_moon_disk_reflectance(absolute_MPA_degrees: float, wavelength_nm: float, moon_data: 'MoonData') -> float:
+def _ln_moon_disk_reflectance(absolute_MPA_degrees: float, wavelength_nm: float, moon_data: MoonData) -> float:
     """The calculation of the ln of the reflectance of the Moon's disk, following Eq.2 in Roman et al., 2020
 
     Parameters
@@ -75,7 +109,7 @@ def _ln_moon_disk_reflectance(absolute_MPA_degrees: float, wavelength_nm: float,
         Absolute Moon phase angle (in degrees)
     wavelength_nm : float
         Wavelength in nanometers from which one wants to obtain the MDR.
-    moon_data : 'MoonData'
+    moon_data : MoonData
         Moon data needed to calculate Moon's irradiance
 
     Returns
@@ -118,12 +152,14 @@ def _getCorrectionFactor(wavelength_nm: float, mpa: float) -> float:
     rcf = params.a + params.b *mpa + params.c * mpa ** 2
     return rcf
 
-def _getESI(wavelength_nm: float) -> float:
+def _getESI(ESICalc: esi.ESICalculator, wavelength_nm: float) -> float:
     """Gets the expected extraterrestrial solar irradiance at a concrete wavelength
     Returns the data in Wm⁻²
     
     Parameters
     ----------
+    ESICalc : esi.ESICalculator
+        ESI Calculator that will be used in the calculation of the Extraterrestrial Solar Irradiance.
     wavelength_nm : float
         Wavelength (in nanometers) of which the extraterrestrial solar irradiance will be obtained
     
@@ -132,14 +168,16 @@ def _getESI(wavelength_nm: float) -> float:
     float
         The expected extraterrestrial solar irradiance in W/sm
     """
-    return esi.getESI(wavelength_nm)
+    return ESICalc.getESI(wavelength_nm)
 
-def _getESIPerNm(wavelength_nm: float) -> float:
+def _getESIPerNm(ESICalc: esi.ESICalculator, wavelength_nm: float) -> float:
     """Gets the expected extraterrestrial solar irradiance at a concrete wavelength
     Returns the data in Wm⁻²/nm
     
     Parameters
     ----------
+    ESICalc : esi.ESICalculator
+        ESI Calculator that will be used in the calculation of the Extraterrestrial Solar Irradiance.
     wavelength_nm : float
         Wavelength (in nanometers) of which the extraterrestrial solar irradiance will be obtained
     
@@ -148,9 +186,9 @@ def _getESIPerNm(wavelength_nm: float) -> float:
     float
         The expected extraterrestrial solar irradiance in W/sm
     """
-    return esi.getESIPerNm(wavelength_nm)
+    return ESICalc.getESIPerNm(wavelength_nm)
 
-def _calculateELI(wavelength_nm: float, moon_data: 'MoonData', applyCorrection: bool, perNm: bool = False) -> float:
+def _calculateELI(wavelength_nm: float, moon_data: MoonData, ESICalc: esi.ESICalculator, applyCorrection: bool, perNm: bool = False) -> float:
     """Calculation of Extraterrestrial Lunar Irradiance following Eq 3 in Roman et al., 2020
 
     Simulates a lunar observation for a wavelength for any observer/solar selenographic
@@ -160,8 +198,10 @@ def _calculateELI(wavelength_nm: float, moon_data: 'MoonData', applyCorrection: 
     ----------
     wavelength_nm : float
         Wavelength (in nanometers) of which the extraterrestrial lunar irradiance will be calculated
-    moon_data : 'MoonData'
+    moon_data : MoonData
         Moon data needed to calculate Moon's irradiance
+    ESICalc : esi.ESICalculator
+        ESI Calculator that will be used in the calculation of the Extraterrestrial Solar Irradiance.
     applyCorrection : bool
         If True the result will have been multiplied by the RCF (Rimo Correction Factor). Otherwise it won't.
     perNm : bool
@@ -181,9 +221,9 @@ def _calculateELI(wavelength_nm: float, moon_data: 'MoonData', applyCorrection: 
         a_l = a_l * mr_correction_factor
     omega = solid_angle_moon
     if perNm:
-        esk = _getESIPerNm(wavelength_nm)
+        esk = _getESIPerNm(ESICalc, wavelength_nm)
     else:
-        esk = _getESI(wavelength_nm)
+        esk = _getESI(ESICalc, wavelength_nm)
     dsm = moon_data.distance_sun_moon
     dom = moon_data.distance_observer_moon
     distance_earth_moon_km: int = 384400
@@ -191,7 +231,7 @@ def _calculateELI(wavelength_nm: float, moon_data: 'MoonData', applyCorrection: 
     em = ((a_l * omega * esk) / math.pi) * ((1 / dsm) ** 2) * (distance_earth_moon_km / dom) ** 2
     return em
 
-def getELIBypass(wavelength_nm: Union[float, List[float]], moon_data: 'MoonData', applyCorrection: bool = True) -> Union[float, List[float]]:
+def getELIBypass(wavelength_nm: Union[float, List[float]], moon_data: MoonData, ESICalc: esi.ESICalculator, applyCorrection: bool = True) -> Union[float, List[float]]:
     """Calculation of Extraterrestrial Lunar Irradiance following Eq 3 in Roman et al., 2020
 
     Allow users to simulate lunar observation for any observer/solar selenographic
@@ -204,8 +244,10 @@ def getELIBypass(wavelength_nm: Union[float, List[float]], moon_data: 'MoonData'
     ----------
     wavelength_nm : float | list of float
         Wavelength/s (in nanometers) of which the extraterrestrial lunar irradiance will be calculated.
-    moon_data : 'MoonData'
+    moon_data : MoonData
         Moon data needed to calculate Moon's irradiance
+    ESICalc : esi.ESICalculator
+        ESI Calculator that will be used in the calculation of the Extraterrestrial Solar Irradiance.
     applyCorrection : bool
         If True the result will have been multiplied by the RCF (Rimo Correction Factor). Otherwise it won't.
 
@@ -217,11 +259,11 @@ def getELIBypass(wavelength_nm: Union[float, List[float]], moon_data: 'MoonData'
     if isinstance(wavelength_nm, list):
         elis = []
         for w in wavelength_nm:
-            elis.append(_calculateELI(w, moon_data, applyCorrection))
+            elis.append(_calculateELI(w, moon_data, ESICalc, applyCorrection))
         return elis
-    return _calculateELI(wavelength_nm, moon_data, applyCorrection)
+    return _calculateELI(wavelength_nm, moon_data, ESICalc, applyCorrection)
 
-def getELI(wavelength_nm: Union[float, List[float]], lat: float, long: float, utc_time: str, kernels_path: str, altitude: float = 0, applyCorrection: bool = True) -> Union[float, List[float]]:
+def getELI(wavelength_nm: Union[float, List[float]], earth_data: EarthData, kernels_path: str, ESICalc: esi.ESICalculator, applyCorrection: bool = True) -> Union[float, List[float]]:
     """Calculation of Extraterrestrial Lunar Irradiance from geographic coordinates
 
     Allow users to simulate lunar observations for any observer position around the Earth
@@ -233,16 +275,12 @@ def getELI(wavelength_nm: Union[float, List[float]], lat: float, long: float, ut
     ----------
     wavelength_nm : float | list of float
         Wavelength/s (in nanometers) of which the extraterrestrial lunar irradiance will be calculated.
-    lat : float
-        Geographic latitude (in degrees) of the location.
-    long : float
-        Geographic longitude (in degrees) of the location.
-    utc_time : str
-        Time at which the ELI will be calculated, in a valid UTC DateTime format.
+    earth_data : EarthData
+        Data of the point on Earth surface of which the ELI will be calculated.
     kernels_path : str
         Folder where the needed SPICE kernels are stored.
-    altitude : float
-        Altitude over the sea level in meters. Default = 0.
+    ESICalc : esi.ESICalculator
+        ESI Calculator that will be used in the calculation of the Extraterrestrial Solar Irradiance.
     applyCorrection : bool
         If True the result will have been multiplied by the RCF (Rimo Correction Factor). Otherwise it won't.
 
@@ -251,10 +289,10 @@ def getELI(wavelength_nm: Union[float, List[float]], lat: float, long: float, ut
     float | list of float
         The extraterrestrial lunar irradiance/s calculated. It will be a list if parameter "wavelength_nm" was a list.
     """
-    moon_data = spice_iface.getMoonData(lat, long, altitude, utc_time, kernels_path)
-    return getELIBypass(wavelength_nm, moon_data, applyCorrection)
+    moon_data = spice_iface.getMoonData(earth_data.lat, earth_data.lon, earth_data.altitude, earth_data.utc_time, kernels_path)
+    return getELIBypass(wavelength_nm, moon_data, ESICalc, applyCorrection)
 
-def getELIBypassPerNm(wavelength_nm: Union[float, List[float]], moon_data: 'MoonData', applyCorrection: bool = True) -> Union[float, List[float]]:
+def getELIBypassPerNm(wavelength_nm: Union[float, List[float]], moon_data: MoonData, ESICalc: esi.ESICalculator, applyCorrection: bool = True) -> Union[float, List[float]]:
     """Calculation of Extraterrestrial Lunar Irradiance following Eq 3 in Roman et al., 2020
 
     Allow users to simulate lunar observation for any observer/solar selenographic
@@ -267,8 +305,10 @@ def getELIBypassPerNm(wavelength_nm: Union[float, List[float]], moon_data: 'Moon
     ----------
     wavelength_nm : float | list of float
         Wavelength/s (in nanometers) of which the extraterrestrial lunar irradiance will be calculated.
-    moon_data : 'MoonData'
+    moon_data : MoonData
         Moon data needed to calculate Moon's irradiance
+    ESICalc : esi.ESICalculator
+        ESI Calculator that will be used in the calculation of the Extraterrestrial Solar Irradiance.
     applyCorrection : bool
         If True the result will have been multiplied by the RCF (Rimo Correction Factor). Otherwise it won't.
 
@@ -280,11 +320,11 @@ def getELIBypassPerNm(wavelength_nm: Union[float, List[float]], moon_data: 'Moon
     if isinstance(wavelength_nm, list):
         elis = []
         for w in wavelength_nm:
-            elis.append(_calculateELI(w, moon_data, applyCorrection, True))
+            elis.append(_calculateELI(w, moon_data, ESICalc, applyCorrection, True))
         return elis
-    return _calculateELI(wavelength_nm, moon_data, applyCorrection, True)
+    return _calculateELI(wavelength_nm, moon_data, ESICalc, applyCorrection, True)
 
-def getELIPerNm(wavelength_nm: Union[float, List[float]], lat: float, long: float, utc_time: str, kernels_path: str, altitude: float = 0, applyCorrection: bool = True) -> Union[float, List[float]]:
+def getELIPerNm(wavelength_nm: Union[float, List[float]], earth_data: EarthData, kernels_path: str, ESICalc: esi.ESICalculator, applyCorrection: bool = True) -> Union[float, List[float]]:
     """Calculation of Extraterrestrial Lunar Irradiance from geographic coordinates
 
     Allow users to simulate lunar observations for any observer position around the Earth
@@ -296,16 +336,12 @@ def getELIPerNm(wavelength_nm: Union[float, List[float]], lat: float, long: floa
     ----------
     wavelength_nm : float | list of float
         Wavelength/s (in nanometers) of which the extraterrestrial lunar irradiance will be calculated.
-    lat : float
-        Geographic latitude (in degrees) of the location.
-    long : float
-        Geographic longitude (in degrees) of the location.
-    utc_time : str
-        Time at which the ELI will be calculated, in a valid UTC DateTime format.
+    earth_data : EarthData
+        Data of the point on Earth surface of which the ELI will be calculated. 
     kernels_path : str
         Folder where the needed SPICE kernels are stored.
-    altitude : float
-        Altitude over the sea level in meters. Default = 0.
+    ESICalc : esi.ESICalculator
+        ESI Calculator that will be used in the calculation of the Extraterrestrial Solar Irradiance.
     applyCorrection : bool
         If True the result will have been multiplied by the RCF (Rimo Correction Factor). Otherwise it won't.
 
@@ -314,7 +350,7 @@ def getELIPerNm(wavelength_nm: Union[float, List[float]], lat: float, long: floa
     float | list of float
         The extraterrestrial lunar irradiance/s calculated. It will be a list if parameter "wavelength_nm" was a list.
     """
-    moon_data = spice_iface.getMoonData(lat, long, altitude, utc_time, kernels_path)
-    return getELIBypassPerNm(wavelength_nm, moon_data, applyCorrection)
+    moon_data = spice_iface.getMoonData(earth_data.lat, earth_data.lon, earth_data.altitude, earth_data.utc_time, kernels_path)
+    return getELIBypassPerNm(wavelength_nm, moon_data, ESICalc, applyCorrection)
 
     
