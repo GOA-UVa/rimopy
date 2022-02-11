@@ -213,3 +213,13 @@ def getCoefficientsP() -> List[float]:
         A list containing all 'p' coefficients
     """
     return [4.06054, 12.8802, -30.5858, 16.7498]
+
+def getApolloCoefficients() -> List[float]:
+    """Coefficients used for the adjustment of the ROLO model using Apollo spectra.
+
+    Returns
+    -------
+    list of float
+        A list containing all Apollo coefficients
+    """
+    return [1.0301, 1.0970, 0.9325, 0.9466, 1.0225, 1.0157, 1.0470, 1.0084, 1.0100, 1.0148, 0.9843, 1.0134, 0.9329, 0.9849, 0.9994, 0.9957, 1.0059, 0.9618, 0.9561, 0.9796, 0.9568, 0.9873, 1.0575, 1.0108, 0.9743, 1.0386, 1.0338, 1.0577, 1.0650, 1.0815, 0.8945, 0.9689]

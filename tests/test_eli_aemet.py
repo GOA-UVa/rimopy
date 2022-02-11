@@ -13,21 +13,22 @@ JAN_FULL_MOON_00 = "2022-01-17 00:00:00"
 JAN_FULL_MOON_17 = "2022-01-17 17:00:00"
 FEB_NEW_MOON_00 = "2022-02-02 00:00:00"
 DEFAULT_PROP_ERROR = 0.10 # up to 5% of error is allowed from AEMET's RimoApp by default
-ed_Vall = eli.EarthData(VALL_LAT, VALL_LON, JAN_FULL_MOON_00, VALL_LAT)
+ed_Vall = eli.EarthPoint(VALL_LAT, VALL_LON, JAN_FULL_MOON_00, VALL_LAT)
 
 prop_error = DEFAULT_PROP_ERROR
 calc = esi.ESICalculator(esi.WehrliFile.SIMPLE_FILTER_WEHRLI, esi.ESIMethod.LINEAR_INTERPOLATION)
+eli_settings = eli.ELISettings(False, False, True)
 
 def testValladolidNoCorr(ts: 'TestSum', wavelength, expected, date):
     ed_Vall.utc_time = date
-    res = eli.getELIPerNm(wavelength, ed_Vall, KERNELS_PATH, calc, False)
+    res = eli.getELIPerNm(wavelength, ed_Vall, KERNELS_PATH, calc, eli_settings)
     ts.assertAlmostEqual(res, expected, delta=expected*prop_error)
 
 class TestSum(unittest.TestCase):
     
     def test_getELI_Valladolid(self):
-        ed_Vall_t = eli.EarthData(VALL_LAT, VALL_LON, "2022-01-17 02:30:00", VALL_LAT)
-        res = eli.getELI(400, ed_Vall_t, KERNELS_PATH, calc)
+        ed_Vall_t = eli.EarthPoint(VALL_LAT, VALL_LON, "2022-01-17 02:30:00", VALL_LAT)
+        res = eli.getELI(400, ed_Vall_t, KERNELS_PATH, calc, eli_settings)
         self.assertGreater(res, 0, "Should be greater than 0")
 
     def test_eli336_uncorrected_Valladolid_20220117_00(self):
