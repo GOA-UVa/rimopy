@@ -3,7 +3,13 @@
 This module contains the functionalities for obtaining the extraterrestrial solar irradiation
 of a concrete wavelength, based on Wehrli (1985).
 
-It exports the foollowing functions:
+It exports the following classes:
+    * WehrliFile - Enum that represents which wehrli data source will be used in the calculation of the ESI
+    * ESIMethod - Enum that represents which interpolation method will be used in the calculation of the ESI
+    * GaussianFilterParams - Parameters for the gaussian filter interpolation
+    * ESICalculator - Calculator of Extraterrestrial Solar Irradiance.
+
+It exports the following functions:
 
     * getESI - returns the expected extraterrestrial solar irradiation of a concrete wavelength in Wm⁻²
 	* getESIPerNm - returns the expected extraterrestrial solar irradiation of a concrete wavelength in Wm⁻²/nm

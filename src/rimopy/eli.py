@@ -3,6 +3,10 @@
 This module is the main module, as it allowes the user to calculate the Extraterrestrial Lunar Irradiance
 at a concrete wavelength, at an absolute Moon phase angle, and giving selenographic parameters.
 
+It exports the following classes:
+    * ELISettings - Settings that will modify the methodology of calculating the ELI
+    * EarthPoint - Data of the point on Earth surface of which the ELI will be calculated. 
+
 It exports the following functions:
 
     * getELIBypass - returns the expected extraterrestrial lunar irradiation of a wavelength for any
@@ -26,15 +30,33 @@ from . import esi
 from .MoonData import MoonData
 
 class ELISettings():
-    """ 
+    """
+    Settings that will modify the methodology of calculating the ELI
+
     Attributes
     ----------
     applyCorrection : bool
         If True the result will have been multiplied by the RCF (Rimo Correction Factor). Otherwise it won't.
     interpolateROLOCoefficients : bool
+        If True the reflectance will be calculated linearly interpolating the ROLO coefficients. Otherwise it will be calculated
+        interpolating the surrounding reflectances, calculated with empirical coefficients. 
     adjustApollo : bool
+        If True the ROLO model reflectance will be adjusted using Apollo spectra, in case it's calculated interpolating surrounding
+        reflectances.
     """
     def __init__(self, applyCorrection: bool = True, interpolateROLOCoefficients: bool = False, adjustApollo: bool = True):
+        """
+        Parameters
+        ----------
+        applyCorrection : bool
+            If True the result will have been multiplied by the RCF (Rimo Correction Factor). Otherwise it won't.
+        interpolateROLOCoefficients : bool
+            If True the reflectance will be calculated linearly interpolating the ROLO coefficients. Otherwise it will be calculated
+            interpolating the surrounding reflectances, calculated with empirical coefficients. 
+        adjustApollo : bool
+            If True the ROLO model reflectance will be adjusted using Apollo spectra, in case it's calculated interpolating surrounding
+            reflectances.
+        """
         self.applyCorrection = applyCorrection
         self.interpolateROLOCoefficients = interpolateROLOCoefficients
         self.adjustApollo = adjustApollo

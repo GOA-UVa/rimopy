@@ -14,6 +14,7 @@ It exports the foollowing functions:
     * getCoefficientsD - returns the 'd' coefficients for a specific wavelength index
     * getCoefficientsC - returns the 'c' coefficients
     * getCoefficientsP - returns the 'p' coefficients
+    * getApolloCoefficients - returns all Apollo adjusting coefficients
 """
 from typing import List, Dict
 from scipy.interpolate import interp1d
