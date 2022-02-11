@@ -109,7 +109,7 @@ class ESICalculator():
         Parameters of the gaussian filter method, in case that that is the chosen one.
     """
     __slots__ = ['wehrli_file', 'method', 'gfp']
-    def __init__(self, wehrli_file: WehrliFile=WehrliFile.SIMPLE_FILTER_WEHRLI, method: ESIMethod=ESIMethod.LINEAR_INTERPOLATION, gaussian_filter_params: GaussianFilterParams=None):
+    def __init__(self, wehrli_file: WehrliFile=WehrliFile.ORIGINAL_WEHRLI, method: ESIMethod=ESIMethod.GAUSSIAN_FILTER, gaussian_filter_params: GaussianFilterParams=None):
         """
         Parameters
         ----------
@@ -193,11 +193,11 @@ class ESICalculator():
         wehrli_data = self._getWehrliData()
         wehrli_x = list(wehrli_data.keys())
         if wavelength_nm in wehrli_x:
-            return wehrli_data[wavelength_nm][1]
+            return wehrli_data[wavelength_nm][0]
         if wavelength_nm < wehrli_x[0]:
-            return wehrli_data[wehrli_x[0]][1]
+            return wehrli_data[wehrli_x[0]][0]
         if wavelength_nm > wehrli_x[-1]:
-            return wehrli_data[wehrli_x[-1]][1]
+            return wehrli_data[wehrli_x[-1]][0]
         wehrli_y = list(map(lambda x : x[0], wehrli_data.values()))
         if self.method == ESIMethod.LINEAR_INTERPOLATION:
             return _linearInterpolation(wavelength_nm, wehrli_x, wehrli_y)

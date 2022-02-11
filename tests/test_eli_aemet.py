@@ -16,7 +16,7 @@ DEFAULT_PROP_ERROR = 0.05 # up to 5% of error is allowed from AEMET's RimoApp by
 ed_Vall = eli.EarthPoint(VALL_LAT, VALL_LON, JAN_FULL_MOON_00, VALL_LAT)
 
 prop_error = DEFAULT_PROP_ERROR
-calc = esi.ESICalculator(esi.WehrliFile.SIMPLE_FILTER_WEHRLI, esi.ESIMethod.LINEAR_INTERPOLATION)
+calc = esi.ESICalculator(esi.WehrliFile.ORIGINAL_WEHRLI, esi.ESIMethod.GAUSSIAN_FILTER)
 eli_settings = eli.ELISettings(False, False, True)
 
 def testValladolidNoCorr(ts: 'TestSum', wavelength, expected, date):
