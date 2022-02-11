@@ -8,11 +8,6 @@ It exports the following classes:
     * ESIMethod - Enum that represents which interpolation method will be used in the calculation of the ESI
     * GaussianFilterParams - Parameters for the gaussian filter interpolation
     * ESICalculator - Calculator of Extraterrestrial Solar Irradiance.
-
-It exports the following functions:
-
-    * getESI - returns the expected extraterrestrial solar irradiation of a concrete wavelength in Wm⁻²
-	* getESIPerNm - returns the expected extraterrestrial solar irradiation of a concrete wavelength in Wm⁻²/nm
 """
 
 import csv
@@ -23,11 +18,48 @@ import pkgutil
 from scipy.interpolate import interp1d
 import enum
 
-def _linearInterpolation(wavelength_nm: float, x: List[float], y: List[float]):
+def _linearInterpolation(wavelength_nm: float, x: List[float], y: List[float]) -> float:
+    """
+    Wrapper that linearly interpolates
+
+    Parameters
+    ----------
+    wavelength_nm : float
+        x value that is going to be interpolated
+    x : list of float
+        list of x values (keys)
+    y : list of float
+        list of y values
+
+    Returns
+    -------
+    float
+        Interpolated value.
+    """
     f = interp1d(x, y, 'linear') # This works because, supposedly, python dicts preserve insertion order since 3.7
     return f(wavelength_nm).item()
 
-def _gaussianFilteredNonEquidistant(center: float, all_x: List[float], all_y: List[float], radius=1, sigma=1):
+def _gaussianFilteredNonEquidistant(center: float, all_x: List[float], all_y: List[float], radius: float=1, sigma: float=1) -> float:
+    """
+    Gaussian filter for non equidistant data.
+
+    Parameters
+    ----------
+    center : float
+        Center of the gaussian distribution
+    all_x : list of float
+        All x values (keys) present on the gaussian distribution
+    all_y : list of float
+        All y values, in the same order as all_y
+    radius : float
+        Radius that will filter the accepted values. From all_x, each one that is in the interval [center-radius, center+radius]
+    sigma : float
+        Standard deviation of the Gaussian Filter.
+    Returns
+    -------
+    float
+        Gaussian-filtered value
+    """
     min_x = center - radius
     max_x = center + radius
     gauss_vals = []
@@ -174,7 +206,6 @@ class ESICalculator():
             if gauss_res == 0: # There was no wehrli data near enough from the given wavelength_nm
                 return _linearInterpolation(wavelength_nm, wehrli_x, wehrli_y)
             return gauss_res
-
 
     def getESIPerNm(self, wavelength_nm: float) -> float:
         """Gets the expected extraterrestrial solar irradiance at a concrete wavelength

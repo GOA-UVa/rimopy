@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Script that tests against some AEMET RimoApp cases.
 
 import unittest
 import sys
@@ -12,7 +13,7 @@ VALL_ALT = 700
 JAN_FULL_MOON_00 = "2022-01-17 00:00:00"
 JAN_FULL_MOON_17 = "2022-01-17 17:00:00"
 FEB_NEW_MOON_00 = "2022-02-02 00:00:00"
-DEFAULT_PROP_ERROR = 0.01 # up to 1% of error is allowed from AEMET's RimoApp by default
+DEFAULT_PROP_ERROR = 0.005 # up to 0.5% of error is allowed in this test set.
 ed_Vall = eli.EarthPoint(VALL_LAT, VALL_LON, JAN_FULL_MOON_00, VALL_LAT)
 
 prop_error = DEFAULT_PROP_ERROR
