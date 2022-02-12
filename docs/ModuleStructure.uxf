@@ -5,9 +5,9 @@
     <id>UMLGeneric</id>
     <coordinates>
       <x>464</x>
-      <y>376</y>
+      <y>384</y>
       <w>136</w>
-      <h>104</h>
+      <h>120</h>
     </coordinates>
     <panel_attributes>symbol=component
 **eli**
@@ -18,7 +18,7 @@ bg=cyan</panel_attributes>
     <id>UMLGeneric</id>
     <coordinates>
       <x>776</x>
-      <y>488</y>
+      <y>496</y>
       <w>288</w>
       <h>120</h>
     </coordinates>
@@ -31,7 +31,7 @@ bg=cyan</panel_attributes>
     <id>UMLGeneric</id>
     <coordinates>
       <x>776</x>
-      <y>392</y>
+      <y>400</y>
       <w>160</w>
       <h>40</h>
     </coordinates>
@@ -44,7 +44,7 @@ bg=cyan</panel_attributes>
     <id>UMLGeneric</id>
     <coordinates>
       <x>776</x>
-      <y>440</y>
+      <y>448</y>
       <w>128</w>
       <h>40</h>
     </coordinates>
@@ -57,7 +57,7 @@ bg=cyan</panel_attributes>
     <id>UMLGeneric</id>
     <coordinates>
       <x>776</x>
-      <y>344</y>
+      <y>352</y>
       <w>120</w>
       <h>40</h>
     </coordinates>
@@ -72,7 +72,7 @@ bg=cyan</panel_attributes>
       <x>720</x>
       <y>248</y>
       <w>112</w>
-      <h>64</h>
+      <h>72</h>
     </coordinates>
     <panel_attributes>symbol=component
 **MoonData**
@@ -86,9 +86,10 @@ bg=cyan</panel_attributes>
       <x>736</x>
       <y>280</y>
       <w>80</w>
-      <h>24</h>
+      <h>32</h>
     </coordinates>
-    <panel_attributes>**MoonData**
+    <panel_attributes>&lt;&lt;dataclass&gt;&gt;
+**MoonData**
 layer=1
 bg=yellow</panel_attributes>
     <additional_attributes/>
@@ -97,7 +98,7 @@ bg=yellow</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>720</x>
-      <y>496</y>
+      <y>504</y>
       <w>72</w>
       <h>24</h>
     </coordinates>
@@ -108,7 +109,7 @@ bg=yellow</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>632</x>
-      <y>344</y>
+      <y>352</y>
       <w>104</w>
       <h>80</h>
     </coordinates>
@@ -119,7 +120,7 @@ bg=yellow</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>720</x>
-      <y>400</y>
+      <y>408</y>
       <w>72</w>
       <h>24</h>
     </coordinates>
@@ -130,7 +131,7 @@ bg=yellow</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>720</x>
-      <y>448</y>
+      <y>456</y>
       <w>72</w>
       <h>24</h>
     </coordinates>
@@ -141,7 +142,7 @@ bg=yellow</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>720</x>
-      <y>352</y>
+      <y>360</y>
       <w>72</w>
       <h>24</h>
     </coordinates>
@@ -152,7 +153,7 @@ bg=yellow</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>592</x>
-      <y>392</y>
+      <y>400</y>
       <w>144</w>
       <h>56</h>
     </coordinates>
@@ -163,7 +164,7 @@ bg=yellow</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>632</x>
-      <y>424</y>
+      <y>432</y>
       <w>104</w>
       <h>56</h>
     </coordinates>
@@ -174,7 +175,7 @@ bg=yellow</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>632</x>
-      <y>448</y>
+      <y>456</y>
       <w>104</w>
       <h>80</h>
     </coordinates>
@@ -185,7 +186,7 @@ bg=yellow</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>552</x>
-      <y>280</y>
+      <y>288</y>
       <w>200</w>
       <h>112</h>
     </coordinates>
@@ -197,7 +198,7 @@ bg=yellow</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>808</x>
-      <y>280</y>
+      <y>288</y>
       <w>120</w>
       <h>80</h>
     </coordinates>
@@ -209,7 +210,7 @@ bg=yellow</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>416</x>
-      <y>416</y>
+      <y>424</y>
       <w>64</w>
       <h>24</h>
     </coordinates>
@@ -220,7 +221,7 @@ bg=yellow</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>800</x>
-      <y>520</y>
+      <y>528</y>
       <w>112</w>
       <h>24</h>
     </coordinates>
@@ -233,7 +234,7 @@ bg=yellow</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>944</x>
-      <y>520</y>
+      <y>528</y>
       <w>96</w>
       <h>32</h>
     </coordinates>
@@ -247,7 +248,7 @@ bg=yellow</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>944</x>
-      <y>560</y>
+      <y>568</y>
       <w>96</w>
       <h>32</h>
     </coordinates>
@@ -263,9 +264,10 @@ bg=yellow</panel_attributes>
       <x>800</x>
       <y>560</y>
       <w>112</w>
-      <h>32</h>
+      <h>48</h>
     </coordinates>
-    <panel_attributes>**GaussianFilter**
+    <panel_attributes>&lt;&lt;dataclass&gt;&gt;
+**GaussianFilter**
 **Params**
 layer=1
 bg=yellow</panel_attributes>
@@ -275,11 +277,12 @@ bg=yellow</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>488</x>
-      <y>408</y>
+      <y>416</y>
       <w>88</w>
-      <h>24</h>
+      <h>32</h>
     </coordinates>
-    <panel_attributes>**ELISettings**
+    <panel_attributes>&lt;&lt;dataclass&gt;&gt;
+**ELISettings**
 layer=1
 bg=yellow</panel_attributes>
     <additional_attributes/>
@@ -288,11 +291,12 @@ bg=yellow</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>488</x>
-      <y>440</y>
+      <y>456</y>
       <w>88</w>
-      <h>24</h>
+      <h>32</h>
     </coordinates>
-    <panel_attributes>**EarthPoint**
+    <panel_attributes>&lt;&lt;dataclass&gt;&gt;
+**EarthPoint**
 layer=1
 bg=yellow</panel_attributes>
     <additional_attributes/>
