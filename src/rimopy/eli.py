@@ -42,7 +42,7 @@ class ELISettings():
         interpolating the surrounding reflectances, calculated with empirical coefficients. 
     adjustApollo : bool
         If True the ROLO model reflectance will be adjusted using Apollo spectra, in case it's calculated interpolating surrounding
-        reflectances.
+        reflectances. The Apollo spectra is the spectra generated with the Moon samples from Apollo 16th mission.
     """
     def __init__(self, applyCorrection: bool = True, interpolateROLOCoefficients: bool = False, adjustApollo: bool = True):
         """

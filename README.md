@@ -38,8 +38,8 @@ The package is divided in multiple modules, each dealing with different calculat
 functionalities:
 
 - **eli**: Main module, which calculates the Extraterrestrial Lunar Irradiance for a given data.
-- **esi**: Calculates the Extraterrestrial Solar Irradiance using data from Wehrli 1985. This data is modified
-beforehand with **/utils/wehrli_gauss**
+- **esi**: Calculates the Extraterrestrial Solar Irradiance using data from Wehrli 1985. The methodology for calculating this data
+can be chosen by the user, creating an instance of ESICalculator selecting the methodology and data source they want.
 - **coefficients**: Contains the coefficient data from the ROLO model.
 - **correction_factor**: Calculates the correction factor as stated in RIMO papers.
 - **spice_iface**: Encapsulates the access to functionalities from SPICE Toolbox.
