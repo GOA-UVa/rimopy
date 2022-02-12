@@ -74,4 +74,4 @@ pip install ../dist/rimopy-<latest_version>-py3-none-any.whl
 
 ### Executing the tests
 
-At the moment only one test file exists, test_eli.py, but that will be different in the future.
+At the moment only one test file exists, test_eli_aemet.py, but that will be different in the future.
