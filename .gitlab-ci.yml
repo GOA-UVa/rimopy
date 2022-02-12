@@ -31,11 +31,11 @@ before_script:
 lint:
   script:
     - pip install pylint
-    - pylint src/rimopy/*.py
+    - pylint --fail-under=9 src/rimopy/*.py
 
 test:
   script:
-    - cd test
+    - cd tests
     - pip install pytest
     - pytest -v
 
