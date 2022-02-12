@@ -333,16 +333,16 @@ def _calculate_eli(wavelength_nm: float, moon_data: MoonData, esi_calc: esi.ESIC
     float
         The extraterrestrial lunar irradiance calculated
     """
-    if not eli_settings.interpolateROLOCoefficients:
+    if not eli_settings.interpolate_rolo_coefficients:
         a_l =_interpolated_moon_disk_reflectance(moon_data.absolute_mpa_degrees, wavelength_nm,
-            moon_data, eli_settings.adjustApollo)
+            moon_data, eli_settings.adjust_apollo)
     else:
         ln_moon_reflectance = _ln_moon_disk_reflectance(moon_data.absolute_mpa_degrees,
             wavelength_nm, moon_data)
         a_l = math.exp(ln_moon_reflectance)
 
     solid_angle_moon: float = 6.4177e-05
-    if eli_settings.applyCorrection:
+    if eli_settings.apply_correction:
         mr_correction_factor = _get_correction_factor(wavelength_nm, moon_data.absolute_mpa_degrees)
         a_l = a_l * mr_correction_factor
     omega = solid_angle_moon
