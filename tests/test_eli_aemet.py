@@ -20,7 +20,7 @@ prop_error = DEFAULT_PROP_ERROR
 calc = esi.ESICalculator(esi.WehrliFile.ORIGINAL_WEHRLI, esi.ESIMethod.GAUSSIAN_FILTER)
 eli_settings = eli.ELISettings(False, False, True)
 
-def testValladolidNoCorr(ts: 'TestSum', wavelength, expected, date):
+def _testValladolidNoCorr(ts: 'TestSum', wavelength, expected, date):
     ed_Vall.utc_time = date
     res = eli.getELIPerNm(wavelength, ed_Vall, KERNELS_PATH, calc, eli_settings)
     ts.assertAlmostEqual(res, expected, delta=expected*prop_error)
@@ -33,67 +33,67 @@ class TestSum(unittest.TestCase):
         self.assertGreater(res, 0, "Should be greater than 0")
 
     def test_eli336_uncorrected_Valladolid_20220117_00(self):
-        testValladolidNoCorr(self, 336, 9.1239e-07, JAN_FULL_MOON_00)
+        _testValladolidNoCorr(self, 336, 9.1239e-07, JAN_FULL_MOON_00)
 
     def test_eli380_uncorrected_Valladolid_20220117_00(self):
-        testValladolidNoCorr(self, 380, 1.3348e-06, JAN_FULL_MOON_00)
+        _testValladolidNoCorr(self, 380, 1.3348e-06, JAN_FULL_MOON_00)
 
     def test_eli440_uncorrected_Valladolid_20220117_00(self):
-        testValladolidNoCorr(self, 440, 2.4528e-06, JAN_FULL_MOON_00)
+        _testValladolidNoCorr(self, 440, 2.4528e-06, JAN_FULL_MOON_00)
 
     def test_eli500_uncorrected_Valladolid_20220117_00(self):
-        testValladolidNoCorr(self, 500, 2.9900e-06, JAN_FULL_MOON_00)
+        _testValladolidNoCorr(self, 500, 2.9900e-06, JAN_FULL_MOON_00)
 
     def test_eli862_uncorrected_Valladolid_20220117_00(self):
-        testValladolidNoCorr(self, 862, 2.2911e-06, JAN_FULL_MOON_00)
+        _testValladolidNoCorr(self, 862, 2.2911e-06, JAN_FULL_MOON_00)
 
     def test_eli1011_uncorrected_Valladolid_20220117_00(self):
-        testValladolidNoCorr(self, 1011, 1.8330e-06, JAN_FULL_MOON_00)
+        _testValladolidNoCorr(self, 1011, 1.8330e-06, JAN_FULL_MOON_00)
 
     def test_eli1662_uncorrected_Valladolid_20220117_00(self):
-        testValladolidNoCorr(self, 1662, 8.4489e-07, JAN_FULL_MOON_00)
+        _testValladolidNoCorr(self, 1662, 8.4489e-07, JAN_FULL_MOON_00)
 
     def test_eli338_uncorrected_Valladolid_20220117_17(self):
-        testValladolidNoCorr(self, 338, 1.2293e-06, JAN_FULL_MOON_17)
+        _testValladolidNoCorr(self, 338, 1.2293e-06, JAN_FULL_MOON_17)
 
     def test_eli385_uncorrected_Valladolid_20220117_17(self):
-        testValladolidNoCorr(self, 385, 1.5392e-06, JAN_FULL_MOON_17)
+        _testValladolidNoCorr(self, 385, 1.5392e-06, JAN_FULL_MOON_17)
 
     def test_eli481_uncorrected_Valladolid_20220117_17(self):
-        testValladolidNoCorr(self, 481, 4.0048e-06, JAN_FULL_MOON_17)
+        _testValladolidNoCorr(self, 481, 4.0048e-06, JAN_FULL_MOON_17)
 
     def test_eli540_uncorrected_Valladolid_20220117_17(self):
-        testValladolidNoCorr(self, 540, 3.8516e-06, JAN_FULL_MOON_17)
+        _testValladolidNoCorr(self, 540, 3.8516e-06, JAN_FULL_MOON_17)
 
     def test_eli879_uncorrected_Valladolid_20220117_17(self):
-        testValladolidNoCorr(self, 879, 2.7428e-06, JAN_FULL_MOON_17)
+        _testValladolidNoCorr(self, 879, 2.7428e-06, JAN_FULL_MOON_17)
 
     def test_eli1020_uncorrected_Valladolid_20220117_17(self):
-        testValladolidNoCorr(self, 1020, 2.2381e-06, JAN_FULL_MOON_17)
+        _testValladolidNoCorr(self, 1020, 2.2381e-06, JAN_FULL_MOON_17)
 
     def test_eli1654_uncorrected_Valladolid_20220117_17(self):
-        testValladolidNoCorr(self, 1654, 1.0285e-06, JAN_FULL_MOON_17)
+        _testValladolidNoCorr(self, 1654, 1.0285e-06, JAN_FULL_MOON_17)
 
     def test_eli336_uncorrected_Valladolid_20220202_00(self):
-        testValladolidNoCorr(self, 336, 5.4519e-10, FEB_NEW_MOON_00)
+        _testValladolidNoCorr(self, 336, 5.4519e-10, FEB_NEW_MOON_00)
 
     def test_eli380_uncorrected_Valladolid_20220202_00(self):
-        testValladolidNoCorr(self, 380, 1.0571e-09, FEB_NEW_MOON_00)
+        _testValladolidNoCorr(self, 380, 1.0571e-09, FEB_NEW_MOON_00)
 
     def test_eli440_uncorrected_Valladolid_20220202_00(self):
-        testValladolidNoCorr(self, 440, 1.8795e-09, FEB_NEW_MOON_00)
+        _testValladolidNoCorr(self, 440, 1.8795e-09, FEB_NEW_MOON_00)
 
     def test_eli500_uncorrected_Valladolid_20220202_00(self):
-        testValladolidNoCorr(self, 500, 2.7575e-09, FEB_NEW_MOON_00)
+        _testValladolidNoCorr(self, 500, 2.7575e-09, FEB_NEW_MOON_00)
 
     def test_eli862_uncorrected_Valladolid_20220202_00(self):
-        testValladolidNoCorr(self, 862, 2.1584e-09, FEB_NEW_MOON_00)
+        _testValladolidNoCorr(self, 862, 2.1584e-09, FEB_NEW_MOON_00)
 
     def test_eli1011_uncorrected_Valladolid_20220202_00(self):
-        testValladolidNoCorr(self, 1011, 7.5293e-10, FEB_NEW_MOON_00)
+        _testValladolidNoCorr(self, 1011, 7.5293e-10, FEB_NEW_MOON_00)
 
     def test_eli1662_uncorrected_Valladolid_20220202_00(self):
-        testValladolidNoCorr(self, 1662, 7.9724e-10, FEB_NEW_MOON_00)
+        _testValladolidNoCorr(self, 1662, 7.9724e-10, FEB_NEW_MOON_00)
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
