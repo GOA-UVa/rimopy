@@ -2,7 +2,11 @@
 
 This module contains the coefficients of the RIMO correction factor (RCF).
 
-It exports the foollowing functions:
+It exports the following classes:
+    * CorrectionParams - DataClass that contains the estimated coefficients of the
+        RCF for a wavelength.
+
+It exports the following functions:
 
     * get_correction_params - returns the RCF coefficients estimated for a wavelength
 """

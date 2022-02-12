@@ -18,7 +18,7 @@ bg=cyan</panel_attributes>
     <id>UMLGeneric</id>
     <coordinates>
       <x>776</x>
-      <y>496</y>
+      <y>528</y>
       <w>288</w>
       <h>120</h>
     </coordinates>
@@ -33,7 +33,7 @@ bg=cyan</panel_attributes>
       <x>776</x>
       <y>400</y>
       <w>160</w>
-      <h>40</h>
+      <h>72</h>
     </coordinates>
     <panel_attributes>symbol=component
 **correction_factor**
@@ -44,7 +44,7 @@ bg=cyan</panel_attributes>
     <id>UMLGeneric</id>
     <coordinates>
       <x>776</x>
-      <y>448</y>
+      <y>480</y>
       <w>128</w>
       <h>40</h>
     </coordinates>
@@ -75,7 +75,7 @@ bg=cyan</panel_attributes>
       <h>72</h>
     </coordinates>
     <panel_attributes>symbol=component
-**MoonData**
+**types**
 layer=-1
 bg=cyan</panel_attributes>
     <additional_attributes/>
@@ -98,7 +98,7 @@ bg=yellow</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>720</x>
-      <y>504</y>
+      <y>536</y>
       <w>72</w>
       <h>24</h>
     </coordinates>
@@ -131,7 +131,7 @@ bg=yellow</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>720</x>
-      <y>456</y>
+      <y>488</y>
       <w>72</w>
       <h>24</h>
     </coordinates>
@@ -166,10 +166,10 @@ bg=yellow</panel_attributes>
       <x>632</x>
       <y>432</y>
       <w>104</w>
-      <h>56</h>
+      <h>88</h>
     </coordinates>
     <panel_attributes>lt=-(</panel_attributes>
-    <additional_attributes>10.0;10.0;10.0;40.0;100.0;40.0</additional_attributes>
+    <additional_attributes>10.0;10.0;10.0;80.0;100.0;80.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
@@ -177,10 +177,10 @@ bg=yellow</panel_attributes>
       <x>632</x>
       <y>456</y>
       <w>104</w>
-      <h>80</h>
+      <h>112</h>
     </coordinates>
     <panel_attributes>lt=-(</panel_attributes>
-    <additional_attributes>10.0;10.0;10.0;70.0;100.0;70.0</additional_attributes>
+    <additional_attributes>10.0;10.0;10.0;110.0;100.0;110.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
@@ -221,7 +221,7 @@ bg=yellow</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>800</x>
-      <y>528</y>
+      <y>560</y>
       <w>112</w>
       <h>24</h>
     </coordinates>
@@ -234,7 +234,7 @@ bg=yellow</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>944</x>
-      <y>528</y>
+      <y>560</y>
       <w>96</w>
       <h>32</h>
     </coordinates>
@@ -248,7 +248,7 @@ bg=yellow</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>944</x>
-      <y>568</y>
+      <y>600</y>
       <w>96</w>
       <h>32</h>
     </coordinates>
@@ -262,7 +262,7 @@ bg=yellow</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>800</x>
-      <y>560</y>
+      <y>592</y>
       <w>112</w>
       <h>48</h>
     </coordinates>
@@ -297,6 +297,20 @@ bg=yellow</panel_attributes>
     </coordinates>
     <panel_attributes>&lt;&lt;dataclass&gt;&gt;
 **EarthPoint**
+layer=1
+bg=yellow</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>792</x>
+      <y>432</y>
+      <w>128</w>
+      <h>32</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;dataclass&gt;&gt;
+**CorrectionParams**
 layer=1
 bg=yellow</panel_attributes>
     <additional_attributes/>

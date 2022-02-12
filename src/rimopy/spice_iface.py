@@ -12,7 +12,7 @@ import os
 import math
 import numpy as np
 import spiceypy as spice
-from .MoonData import MoonData
+from .types import MoonData
 
 CUSTOM_KERNEL_NAME = "custom.bsp"
 EARTH_ID_CODE = 399

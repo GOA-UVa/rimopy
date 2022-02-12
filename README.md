@@ -43,7 +43,7 @@ can be chosen by the user, creating an instance of ESICalculator selecting the m
 - **coefficients**: Contains the coefficient data from the ROLO model.
 - **correction_factor**: Calculates the correction factor as stated in RIMO papers.
 - **spice_iface**: Encapsulates the access to functionalities from SPICE Toolbox.
-- **MoonData**: Contains MoonData class, which represents some of the needed data
+- **types**: Contains types, like MoonData class, which represents some of the needed data
 for the calculation of extraterrestrial lunar irradiance.
 
 ![ModuleStructure UML Diagram](docs/ModuleStructure.png)

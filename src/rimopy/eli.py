@@ -29,7 +29,7 @@ from . import spice_iface
 from . import coefficients as coeffs
 from . import correction_factor as corr_f
 from . import esi
-from .MoonData import MoonData
+from .types import MoonData
 
 @dataclass
 class ELISettings():

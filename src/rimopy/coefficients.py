@@ -3,7 +3,7 @@
 This module contains the coefficient and wavelength data from the ROLO model.
 Currently it only contains the first 9 wavelengths.
 
-It exports the foollowing functions:
+It exports the following functions:
 
     * get_wavelengths - returns all wavelengths present in the ROLO model
     * get_all_coefficients_a - returns all 'a' coefficients for all wavelengths
@@ -54,7 +54,6 @@ class _CoefficientsWln():
         self.a_coeffs = (coeffs[0], coeffs[1], coeffs[2], coeffs[3])
         self.b_coeffs = (coeffs[4], coeffs[5], coeffs[6])
         self.d_coeffs = (coeffs[7], coeffs[8], coeffs[9])
-
 
 def _get_coefficients_data() -> Dict[float, '_CoefficientsWln']:
     """Returns all variable coefficients (a, b and d) for all wavelengths
