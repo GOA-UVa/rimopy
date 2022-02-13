@@ -22,14 +22,14 @@ eli_settings = eli.ELISettings(False, False, True)
 
 def _testValladolidNoCorr(ts: 'TestSum', wavelength, expected, date):
     ed_Vall.utc_time = date
-    res = eli.getELIPerNm(wavelength, ed_Vall, KERNELS_PATH, calc, eli_settings)
+    res = eli.get_eli_per_nm(wavelength, ed_Vall, KERNELS_PATH, calc, eli_settings)
     ts.assertAlmostEqual(res, expected, delta=expected*prop_error)
 
 class TestSum(unittest.TestCase):
     
-    def test_getELI_Valladolid(self):
+    def test_get_eli_Valladolid(self):
         ed_Vall_t = eli.EarthPoint(VALL_LAT, VALL_LON, "2022-01-17 02:30:00", VALL_LAT)
-        res = eli.getELI(400, ed_Vall_t, KERNELS_PATH, calc, eli_settings)
+        res = eli.get_eli(400, ed_Vall_t, KERNELS_PATH, calc, eli_settings)
         self.assertGreater(res, 0, "Should be greater than 0")
 
     def test_eli336_uncorrected_Valladolid_20220117_00(self):

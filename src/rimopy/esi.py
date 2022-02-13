@@ -44,6 +44,72 @@ def _linear_interpolation(wavelength_nm: float, x_values: List[float],
     # This works because, supposedly, python dicts preserve insertion order since 3.7
     return f_interp(wavelength_nm).item()
 
+def _gaussian_filter_non_eq_filter_input(center: float, all_x: List[float], all_y: List[float],
+    radius: float, sigma: float) -> Tuple(List[float], List[float]):
+    """
+    Calculates the gaussian values from all_x that are in the range of
+    [center-radius, center+radius].
+
+    Parameters
+    ----------
+    center : float
+        Center of the gaussian distribution
+    all_x : list of float
+        All x values (keys) present on the gaussian distribution
+    all_y : list of float
+        All y values, in the same order as all_y
+    radius : float
+        Radius that will filter the accepted values. From all_x, each one that is in the
+            interval [center-radius, center+radius]
+    sigma : float
+        Standard deviation of the Gaussian Filter.
+
+    Returns
+    -------
+    list of float
+        Gaussian values of the elements from all_x in the range.
+    list of float
+        y values relative to the filtered values, in the same order.
+    """
+    min_x = center - radius
+    max_x = center + radius
+    gauss_vals = []
+    final_y = []
+    for i, x_val in enumerate(all_x):
+        if min_x <= x_val <= max_x:
+            gauss_param = x_val - center
+            val = (1/(sigma*math.sqrt(2*math.pi)))*(math.exp(-(gauss_param**2)/(2*sigma**2)))
+            gauss_vals.append(val)
+            final_y.append(all_y[i])
+    return gauss_vals, final_y
+
+def _gaussian_filter_non_eq_sum_percentages(gauss_vals: List[float],
+    final_y: List[float]) -> float:
+    """
+    Adjust the gaussian values for the non equidistant data, and calculates
+    the gaussian filtered value.
+
+    Parameters
+    ----------
+    gauss_vals : list of float
+        list of gaussian values used for the calculation of the final value.
+    final_y : list of float
+        list with the y values relative to the gaussian values.
+
+    Returns
+    -------
+    float
+        Gaussian-filtered value
+    """
+    gauss_sum = sum(gauss_vals)
+    val_sum = 0
+    for i, final_y_val in enumerate(final_y):
+        if gauss_sum == 0:
+            perc = 0
+        else: perc = gauss_vals[i]/gauss_sum
+        val_sum += perc * final_y_val
+    return val_sum
+
 def _gaussian_filter_non_equidistant(center: float, all_x: List[float], all_y: List[float],
     radius: float=1, sigma: float=1) -> float:
     """
@@ -62,30 +128,15 @@ def _gaussian_filter_non_equidistant(center: float, all_x: List[float], all_y: L
             interval [center-radius, center+radius]
     sigma : float
         Standard deviation of the Gaussian Filter.
+
     Returns
     -------
     float
         Gaussian-filtered value
     """
-    min_x = center - radius
-    max_x = center + radius
-    gauss_vals = []
-    final_y = []
-    gauss_sum = 0
-    for i, x_val in enumerate(all_x):
-        if min_x <= x_val <= max_x:
-            gauss_param = x_val - center
-            val = (1/(sigma*math.sqrt(2*math.pi)))*(math.exp(-(gauss_param**2)/(2*sigma**2)))
-            gauss_vals.append(val)
-            gauss_sum += val
-            final_y.append(all_y[i])
-    val_sum = 0
-    for i, final_y_val in enumerate(final_y):
-        if gauss_sum == 0:
-            perc = 0
-        else: perc = gauss_vals[i]/gauss_sum
-        val_sum += perc * final_y_val
-    return val_sum
+    gauss_vals, final_y = _gaussian_filter_non_eq_filter_input(center, all_x, all_y,
+        radius, sigma)
+    return _gaussian_filter_non_eq_sum_percentages(gauss_vals, final_y)
 
 class WehrliFile(enum.Enum):
     """
@@ -192,7 +243,7 @@ class ESICalculator():
         file.close()
         return data
 
-    def getESI(self, wavelength_nm: float) -> float:
+    def get_esi(self, wavelength_nm: float) -> float:
         """Gets the expected extraterrestrial solar irradiance at a concrete wavelength
         Returns the data in Wm⁻²
 
@@ -225,7 +276,7 @@ class ESICalculator():
             return _linear_interpolation(wavelength_nm, wehrli_x, wehrli_y)
         return gauss_res
 
-    def getESIPerNm(self, wavelength_nm: float) -> float:
+    def get_esi_per_nm(self, wavelength_nm: float) -> float:
         """Gets the expected extraterrestrial solar irradiance at a concrete wavelength
         Returns the data in Wm⁻²/nm
 

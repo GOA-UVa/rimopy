@@ -10,14 +10,14 @@ It exports the following classes:
 
 It exports the following functions:
 
-    * getELIBypass - returns the expected extraterrestrial lunar irradiation of a wavelength for
+    * get_eli_bypass - returns the expected extraterrestrial lunar irradiation of a wavelength for
         any observer/solar selenographic coordinates, in Wm⁻².
-    * getELI - returns the expected extraterrestrial lunar irradiation of a wavelength in any
+    * get_eli - returns the expected extraterrestrial lunar irradiation of a wavelength in any
         geographic coordinates, in Wm⁻².
-    * getELIBypassPerNm - returns the expected extraterrestrial lunar irradiation of a wavelength
-        for any observer/solar selenographic coordinates, in Wm⁻²/nm.
-    * getELIPerNm - returns the expected extraterrestrial lunar irradiation of a wavelength in any
-        geographic coordinates, in Wm⁻²/nm.
+    * get_eli_bypass_per_nm - returns the expected extraterrestrial lunar irradiation of a
+        wavelength for any observer/solar selenographic coordinates, in Wm⁻²/nm.
+    * get_eli_per_nm - returns the expected extraterrestrial lunar irradiation of a wavelength in
+        any geographic coordinates, in Wm⁻²/nm.
 """
 
 from dataclasses import dataclass
@@ -106,14 +106,14 @@ class EarthPoint():
         self.utc_time = utc_time
         self.altitude = altitude
 
-def _summatory_a(wavelength_nm: float, gr: float) -> float:
+def _summatory_a(wavelength_nm: float, gr_value: float) -> float:
     """The first summatory of Eq. 2 in Roman et al., 2020
 
     Parameters
     ----------
     wavelength_nm : float
         Wavelength in nanometers from which the moon's disk reflectance is being calculated
-    gr : float
+    gr_value : float
         Absolute value of MPA in radians
 
     Returns
@@ -122,9 +122,9 @@ def _summatory_a(wavelength_nm: float, gr: float) -> float:
         Result of the computation of the first summatory
     """
     count: float = 0.0
-    a: List[float] = coeffs.get_coefficients_a(wavelength_nm)
-    for i, a_value in enumerate(a):
-        count = count + a_value * gr ** i
+    a_coeffs: List[float] = coeffs.get_coefficients_a(wavelength_nm)
+    for i, a_value in enumerate(a_coeffs):
+        count = count + a_value * gr_value ** i
     return count
 
 def _summatory_b(wavelength_nm: float, phi: float) -> float:
@@ -143,8 +143,8 @@ def _summatory_b(wavelength_nm: float, phi: float) -> float:
         Result of the computation of the second summatory
     """
     count: float = 0.0
-    b: List[float] = coeffs.get_coefficients_b(wavelength_nm)
-    for j, b_value in enumerate(b):
+    b_coeffs: List[float] = coeffs.get_coefficients_b(wavelength_nm)
+    for j, b_value in enumerate(b_coeffs):
         count = count + b_value * phi ** (2*(j + 1) - 1)
     return count
 
@@ -170,21 +170,21 @@ def _ln_moon_disk_reflectance(absolute_mpa_degrees: float, wavelength_nm: float,
     float
         The ln of the reflectance of the Moon's disk for the inputed data
     """
-    gd = absolute_mpa_degrees
-    gr = math.radians(gd)
+    gd_value = absolute_mpa_degrees
+    gr_value = math.radians(gd_value)
     phi = moon_data.long_sun_radians
-    c: List[float] = coeffs.get_coefficients_c()
-    d: List[float] = coeffs.get_coefficients_d(wavelength_nm)
-    p: List[float] = coeffs.get_coefficients_p()
+    c_coeffs: List[float] = coeffs.get_coefficients_c()
+    d_coeffs: List[float] = coeffs.get_coefficients_d(wavelength_nm)
+    p_coeffs: List[float] = coeffs.get_coefficients_p()
     l_theta = moon_data.lat_obs
     l_phi = moon_data.long_obs
-    sum_a = _summatory_a(wavelength_nm, gr)
+    sum_a = _summatory_a(wavelength_nm, gr_value)
     sum_b = _summatory_b(wavelength_nm, phi)
-    d1 = d[0] * math.exp( - gd / p[0])
-    d2 = d[1] * math.exp( - gd / p[1])
-    d3 = d[2] * math.cos( (gd - p[2]) / p[3])
-    result = sum_a + sum_b + c[0] * l_phi + c[1] * l_theta + c[2] * phi * l_phi + c[3] * phi * \
-        l_theta + d1 + d2 + d3
+    d1_value = d_coeffs[0] * math.exp( - gd_value / p_coeffs[0])
+    d2_value = d_coeffs[1] * math.exp( - gd_value / p_coeffs[1])
+    d3_value = d_coeffs[2] * math.cos( (gd_value - p_coeffs[2]) / p_coeffs[3])
+    result = sum_a + sum_b + c_coeffs[0] * l_phi + c_coeffs[1] * l_theta + c_coeffs[2] * phi * \
+        l_phi + c_coeffs[3] * phi * l_theta + d1_value + d2_value + d3_value
     return result
 
 def _interpolated_moon_disk_reflectance(absolute_mpa_degrees: float, wavelength_nm: float,
@@ -235,16 +235,16 @@ def _interpolated_moon_disk_reflectance(absolute_mpa_degrees: float, wavelength_
             near_left = wvlen
         elif  wavelength_nm < wvlen < near_right:
             near_right = wvlen
-    x = [near_left, near_right]
-    left_index = wvlens.index(x[0])
-    right_index = wvlens.index(x[1])
-    y = []
-    y.append(math.exp(_ln_moon_disk_reflectance(absolute_mpa_degrees, x[0], moon_data)) *
-        apollo_coeffs[left_index])
-    y.append(math.exp(_ln_moon_disk_reflectance(absolute_mpa_degrees, x[1], moon_data)) *
-        apollo_coeffs[right_index])
-    f = interp1d(x, y, 'linear', fill_value="extrapolate")
-    return f(wavelength_nm).item()
+    x_values = [near_left, near_right]
+    left_index = wvlens.index(x_values[0])
+    right_index = wvlens.index(x_values[1])
+    y_values = []
+    y_values.append(math.exp(_ln_moon_disk_reflectance(absolute_mpa_degrees, x_values[0],
+        moon_data)) * apollo_coeffs[left_index])
+    y_values.append(math.exp(_ln_moon_disk_reflectance(absolute_mpa_degrees, x_values[1],
+        moon_data)) * apollo_coeffs[right_index])
+    f_interp = interp1d(x_values, y_values, 'linear', fill_value="extrapolate")
+    return f_interp(wavelength_nm).item()
 
 def _get_correction_factor(wavelength_nm: float, mpa: float) -> float:
     """Calculation of RIMO correction factor (RCF) following Eq 9 in Roman et al., 2020
@@ -284,7 +284,7 @@ def _get_esi(esi_calc: esi.ESICalculator, wavelength_nm: float) -> float:
     float
         The expected extraterrestrial solar irradiance in W/sm
     """
-    return esi_calc.getESI(wavelength_nm)
+    return esi_calc.get_esi(wavelength_nm)
 
 def _get_esi_per_nm(esi_calc: esi.ESICalculator, wavelength_nm: float) -> float:
     """Gets the expected extraterrestrial solar irradiance at a concrete wavelength
@@ -304,10 +304,10 @@ def _get_esi_per_nm(esi_calc: esi.ESICalculator, wavelength_nm: float) -> float:
     float
         The expected extraterrestrial solar irradiance in W/sm
         """
-    return esi_calc.getESIPerNm(wavelength_nm)
+    return esi_calc.get_esi_per_nm(wavelength_nm)
 
 def _calculate_eli(wavelength_nm: float, moon_data: MoonData, esi_calc: esi.ESICalculator,
-    eli_settings: ELISettings, perNm: bool = False) -> float:
+    eli_settings: ELISettings, per_nm: bool = False) -> float:
     """Calculation of Extraterrestrial Lunar Irradiance following Eq 3 in Roman et al., 2020
 
     Simulates a lunar observation for a wavelength for any observer/solar selenographic
@@ -325,7 +325,7 @@ def _calculate_eli(wavelength_nm: float, moon_data: MoonData, esi_calc: esi.ESIC
         Irradiance.
     eli_settings : ELISettings
         Configuration of the ELI calculation method.
-    perNm : bool
+    per_nm : bool
         True if the user wants the ELI in Wm⁻²/nm, otherwise it will be in Wm⁻². Default is False.
 
     Returns
@@ -346,7 +346,7 @@ def _calculate_eli(wavelength_nm: float, moon_data: MoonData, esi_calc: esi.ESIC
         mr_correction_factor = _get_correction_factor(wavelength_nm, moon_data.absolute_mpa_degrees)
         a_l = a_l * mr_correction_factor
     omega = solid_angle_moon
-    if perNm:
+    if per_nm:
         esk = _get_esi_per_nm(esi_calc, wavelength_nm)
     else:
         esk = _get_esi(esi_calc, wavelength_nm)
@@ -354,10 +354,11 @@ def _calculate_eli(wavelength_nm: float, moon_data: MoonData, esi_calc: esi.ESIC
     dom = moon_data.distance_observer_moon
     distance_earth_moon_km: int = 384400
 
-    em = ((a_l * omega * esk) / math.pi) * ((1 / dsm) ** 2) * (distance_earth_moon_km / dom) ** 2
-    return em
+    lunar_irr = ((a_l * omega * esk) / math.pi) * ((1 / dsm) ** 2) * \
+        (distance_earth_moon_km / dom) ** 2
+    return lunar_irr
 
-def getELIBypass(wavelength_nm: Union[float, List[float]], moon_data: MoonData,
+def get_eli_bypass(wavelength_nm: Union[float, List[float]], moon_data: MoonData,
     esi_calc: esi.ESICalculator, eli_settings: ELISettings) -> Union[float, List[float]]:
     """Calculation of Extraterrestrial Lunar Irradiance following Eq 3 in Roman et al., 2020
 
@@ -388,12 +389,12 @@ def getELIBypass(wavelength_nm: Union[float, List[float]], moon_data: MoonData,
     """
     if isinstance(wavelength_nm, list):
         elis = []
-        for w in wavelength_nm:
-            elis.append(_calculate_eli(w, moon_data, esi_calc, eli_settings))
+        for wlen in wavelength_nm:
+            elis.append(_calculate_eli(wlen, moon_data, esi_calc, eli_settings))
         return elis
     return _calculate_eli(wavelength_nm, moon_data, esi_calc, eli_settings)
 
-def getELI(wavelength_nm: Union[float, List[float]], earth_data: EarthPoint, kernels_path: str,
+def get_eli(wavelength_nm: Union[float, List[float]], earth_data: EarthPoint, kernels_path: str,
     esi_calc: esi.ESICalculator, eli_settings: ELISettings) -> Union[float, List[float]]:
     """Calculation of Extraterrestrial Lunar Irradiance from geographic coordinates
 
@@ -425,9 +426,9 @@ def getELI(wavelength_nm: Union[float, List[float]], earth_data: EarthPoint, ker
     """
     moon_data = spice_iface.get_moon_data(earth_data.lat, earth_data.lon, earth_data.altitude,
         earth_data.utc_time, kernels_path)
-    return getELIBypass(wavelength_nm, moon_data, esi_calc, eli_settings)
+    return get_eli_bypass(wavelength_nm, moon_data, esi_calc, eli_settings)
 
-def getELIBypassPerNm(wavelength_nm: Union[float, List[float]], moon_data: MoonData,
+def get_eli_bypass_per_nm(wavelength_nm: Union[float, List[float]], moon_data: MoonData,
     esi_calc: esi.ESICalculator, eli_settings: ELISettings) -> Union[float, List[float]]:
     """Calculation of Extraterrestrial Lunar Irradiance following Eq 3 in Roman et al., 2020
 
@@ -458,12 +459,12 @@ def getELIBypassPerNm(wavelength_nm: Union[float, List[float]], moon_data: MoonD
     """
     if isinstance(wavelength_nm, list):
         elis = []
-        for w in wavelength_nm:
-            elis.append(_calculate_eli(w, moon_data, esi_calc, eli_settings, True))
+        for wlen in wavelength_nm:
+            elis.append(_calculate_eli(wlen, moon_data, esi_calc, eli_settings, True))
         return elis
     return _calculate_eli(wavelength_nm, moon_data, esi_calc, eli_settings, True)
 
-def getELIPerNm(wavelength_nm: Union[float, List[float]], earth_data: EarthPoint,
+def get_eli_per_nm(wavelength_nm: Union[float, List[float]], earth_data: EarthPoint,
     kernels_path: str, esi_calc: esi.ESICalculator,
     eli_settings: ELISettings) -> Union[float, List[float]]:
     """Calculation of Extraterrestrial Lunar Irradiance from geographic coordinates
@@ -496,5 +497,5 @@ def getELIPerNm(wavelength_nm: Union[float, List[float]], earth_data: EarthPoint
     """
     moon_data = spice_iface.get_moon_data(earth_data.lat, earth_data.lon, earth_data.altitude,
         earth_data.utc_time, kernels_path)
-    return getELIBypassPerNm(wavelength_nm, moon_data, esi_calc, eli_settings)
+    return get_eli_bypass_per_nm(wavelength_nm, moon_data, esi_calc, eli_settings)
     

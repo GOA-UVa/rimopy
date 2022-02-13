@@ -17,6 +17,49 @@ from .types import MoonData
 CUSTOM_KERNEL_NAME = "custom.bsp"
 EARTH_ID_CODE = 399
 
+def _calculate_states(ets: np.ndarray, pos_iau_earth: np.ndarray, delta_t: float,
+    frame: str) -> np.ndarray[np.float64]:
+    """
+    Returns a ndarray containing the states of a point referencing the target frame.
+
+    The states array is a time-ordered array of geometric states (x, y, z, dx/dt, dy/dt, dz/dt,
+    in kilometers and kilometers per second) of body relative to center, specified relative
+    to frame. Useful for spice function "spkw09_c", for example.
+
+    Parameters
+    ----------
+    ets : np.ndarray
+        Array of TDB seconds from J2000 (et dates) of which the data will be taken
+    pos_iau_earth : np.ndarray
+        Rectangular coordinates of the point, referencing IAU_EARTH frame.
+    delta_t : float
+        TDB seconds between states
+    frame : str
+        Name of the frame which the location will be referencing.
+
+    Returns
+    -------
+    ndarray of float
+        ndarray containing the states calculated
+    """
+    num_coordinates = 3
+    n_state_attributes = 6
+    states = np.zeros( ( len( ets ), n_state_attributes ) )
+    for i, et_value in enumerate( ets ):
+        states[ i, :num_coordinates ] = np.dot(
+            spice.pxform( 'IAU_EARTH', frame, et_value ),
+            pos_iau_earth )
+
+    for i in range( len( ets ) - 1 ):
+        states[ i, num_coordinates: ] = ( states[ i + 1, :num_coordinates ] -
+            states[ i, :num_coordinates ] ) / delta_t
+
+    pos_np1 = np.dot(
+            spice.pxform( 'IAU_EARTH', frame, ets[ -1 ] + delta_t ),
+            pos_iau_earth )
+    states[ -1, num_coordinates: ] = ( pos_np1 - states[ -1, :num_coordinates ] ) / delta_t
+    return states
+
 @dataclass
 class _EarthLocation():
     """
@@ -26,12 +69,10 @@ class _EarthLocation():
     ----------
     point_id : int
         ID code that will be associated with the point on Earth's surface
-    ets : np.ndarray
-        Array of TDB seconds from J2000 (et dates) of which the data will be taken
     states : np.ndarray of float64
         Array of geometric states of body relative to center
     """
-    __slots__ = ['point_id', 'ets', 'states']
+    __slots__ = ['point_id', 'states']
     def __init__(self, point_id: int, lat: float, lon: float, altitude: float, ets: np.ndarray,
         delta_t: float, frame: str):
         """
@@ -52,8 +93,6 @@ class _EarthLocation():
         frame : str
             Name of the frame which the location will be referencing.
         """
-        num_coordinates = 3
-        n_state_attributes = 6
         self.point_id = point_id
         eq_rad = 6378 # Earth equatorial radius
         pol_rad = 6357 # Earth polar radius
@@ -61,21 +100,7 @@ class _EarthLocation():
         flattening = (eq_rad - pol_rad)/eq_rad
         pos_iau_earth = spice.pgrrec( 'EARTH', math.radians(lon), math.radians(lat), alt_km,
             eq_rad, flattening)
-        states = np.zeros( ( len( ets ), n_state_attributes ) )
-        for i, et_value in enumerate( ets ):
-            states[ i, :num_coordinates ] = np.dot(
-                spice.pxform( 'IAU_EARTH', frame, et_value ),
-                pos_iau_earth )
-
-        for i in range( len( ets ) - 1 ):
-            states[ i, num_coordinates: ] = ( states[ i + 1, :num_coordinates ] -
-                states[ i, :num_coordinates ] ) / delta_t
-
-        pos_np1 = np.dot(
-                spice.pxform( 'IAU_EARTH', frame, ets[ -1 ] + delta_t ),
-                pos_iau_earth )
-        states[ -1, num_coordinates: ] = ( pos_np1 - states[ -1, :num_coordinates ] ) / delta_t
-        self.states = states
+        self.states = _calculate_states(ets, pos_iau_earth, delta_t, frame)
 
 def _get_moon_data_id(utc_time: str, kernels_path: str, observer_id: int) -> MoonData:
     """Calculation of needed Moon data from SPICE toolbox
@@ -107,9 +132,9 @@ def _get_moon_data_id(utc_time: str, kernels_path: str, observer_id: int) -> Moo
 
     et_date = spice.str2et(utc_time)
 
-    re = 1738.1 # Moon Equatorial Radius
-    rp = 1736 # Moon polar radius
-    f = (re-rp)/re
+    m_eq_rad = 1738.1 # Moon Equatorial Radius
+    m_pol_rad = 1736 # Moon polar radius
+    flattening = (m_eq_rad-m_pol_rad)/m_eq_rad
 
     # Calculate moon phase angle
     spoint, _, _ = spice.subpnt("NEAR POINT/ELLIPSOID", "MOON", et_date, 'MOON_ME',
@@ -119,14 +144,14 @@ def _get_moon_data_id(utc_time: str, kernels_path: str, observer_id: int) -> Moo
     phase = math.degrees(phase)
 
     # Calculate selenographic coordinates of the observer
-    sel_lon, sel_lat, _ = spice.recpgr("MOON", spoint, re, f)
+    sel_lon, sel_lat, _ = spice.recpgr("MOON", spoint, m_eq_rad, flattening)
     sel_lon = math.degrees(sel_lon)
     sel_lat = math.degrees(sel_lat)
 
     # Calculate selenographic longitude of sun
     sun_spoint, _, _ = spice.subpnt("NEAR POINT/ELLIPSOID", "MOON", et_date, 'IAU_MOON',
         "NONE", "SUN")
-    sel_lon_sun_rad, _, _ = spice.recpgr("MOON", sun_spoint, re, f)
+    sel_lon_sun_rad, _, _ = spice.recpgr("MOON", sun_spoint, m_eq_rad, flattening)
 
     # Calculate the distance between observer and moon (KM)
     obs_pos, _ = spice.spkpos("MOON", et_date, "MOON_ME", "NONE", "Observer")
@@ -151,10 +176,10 @@ def _get_moon_data_id(utc_time: str, kernels_path: str, observer_id: int) -> Moo
     elif sel_lon < -limit_lon:
         sel_lon += limit_lon*2
 
-    md = MoonData(distance_sun_moon, distance_observer_moon, sel_lon_sun_rad, sel_lat,
+    moon_data = MoonData(distance_sun_moon, distance_observer_moon, sel_lon_sun_rad, sel_lat,
         sel_lon,phase)
 
-    return md
+    return moon_data
 
 def _create_earth_point_kernel(utc_time: str, kernels_path: str, lat: int, lon: int,
     altitude: float, id_code: int) -> None:
