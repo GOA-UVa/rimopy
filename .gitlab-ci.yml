@@ -52,4 +52,8 @@ test:
   script:
     - cd tests
     - pip install pytest
-    - pytest -v
+    - pytest -v --junitxml=../report.xml
+  artifacts:
+    when: always
+    reports:
+      junit: report.xml
