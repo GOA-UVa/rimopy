@@ -37,6 +37,7 @@ test:
   script:
     - cd tests
     - pip install pytest
+    - pip freeze
     - pytest -v
 
 run:
