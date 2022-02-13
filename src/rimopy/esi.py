@@ -45,7 +45,7 @@ def _linear_interpolation(wavelength_nm: float, x_values: List[float],
     return f_interp(wavelength_nm).item()
 
 def _gaussian_filter_non_eq_filter_input(center: float, all_x: List[float], all_y: List[float],
-    radius: float, sigma: float) -> Tuple(List[float], List[float]):
+    radius: float, sigma: float) -> Tuple[List[float], List[float]]:
     """
     Calculates the gaussian values from all_x that are in the range of
     [center-radius, center+radius].

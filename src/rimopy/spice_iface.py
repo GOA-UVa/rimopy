@@ -18,7 +18,7 @@ CUSTOM_KERNEL_NAME = "custom.bsp"
 EARTH_ID_CODE = 399
 
 def _calculate_states(ets: np.ndarray, pos_iau_earth: np.ndarray, delta_t: float,
-    frame: str) -> np.ndarray[np.float64]:
+    frame: str) -> np.ndarray:
     """
     Returns a ndarray containing the states of a point referencing the target frame.
 
