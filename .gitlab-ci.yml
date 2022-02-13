@@ -22,11 +22,24 @@ cache:
     - .cache/pip
     - venv/
 
+stages:
+  - build
+  - lint
+  - test
+
 before_script:
   - python --version  # For debugging
   - pip install virtualenv
   - virtualenv venv
   - source venv/bin/activate
+
+build:
+  script:
+    - python setup.py bdist_wheel
+    - pip install --force-reinstall dist/*
+  artifacts:
+    paths:
+      - dist/*.whl
 
 lint:
   script:
@@ -37,15 +50,4 @@ test:
   script:
     - cd tests
     - pip install pytest
-    - pip freeze
     - pytest -v
-
-run:
-  script:
-    - python setup.py bdist_wheel
-    # an alternative approach is to install and run:
-    - pip install --force-reinstall dist/*
-    # run the command here
-  artifacts:
-    paths:
-      - dist/*.whl
