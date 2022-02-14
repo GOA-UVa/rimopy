@@ -14,7 +14,7 @@ JAN_FULL_MOON_00 = "2022-01-17 00:00:00"
 JAN_FULL_MOON_17 = "2022-01-17 17:00:00"
 FEB_NEW_MOON_00 = "2022-02-02 00:00:00"
 DEFAULT_PROP_ERROR = 0.005 # up to 0.5% of error is allowed in this test set.
-ed_Vall = eli.EarthPoint(VALL_LAT, VALL_LON, JAN_FULL_MOON_00, VALL_LAT)
+ed_Vall = eli.EarthPoint(VALL_LAT, VALL_LON, JAN_FULL_MOON_00, VALL_ALT)
 
 prop_error = DEFAULT_PROP_ERROR
 calc = esi.ESICalculator(esi.WehrliFile.ORIGINAL_WEHRLI, esi.ESIMethod.GAUSSIAN_FILTER)
