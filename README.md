@@ -5,7 +5,8 @@
 Rimopy is a package consisting of an implementation of the ROLO model, following RIMO's
 implementation, made in python.
 
-The ROLO model comes from the RObotic Lunar Observatory, Kieffer and Stone, 2005.
+The ROLO model comes from the RObotic Lunar Observatory, from the paper:
+- Kieffer and Stone, 2005: The spectral irradiance of the Moon.
 
 The RIMO implementation is from multiple papers:
 - Barreto et al., 2019: Evaluation of night-time aerosols measurements and lunar irradiance
