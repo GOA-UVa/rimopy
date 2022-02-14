@@ -263,7 +263,7 @@ def _get_correction_factor(wavelength_nm: float, mpa: float) -> float:
         The calculated RCF
     """
     params = corr_f.get_correction_params(wavelength_nm)
-    rcf = params.a + params.b *mpa + params.c * mpa ** 2
+    rcf = params.a_coeff + params.b_coeff *mpa + params.c_coeff * mpa ** 2
     return rcf
 
 def _get_esi(esi_calc: esi.ESICalculator, wavelength_nm: float) -> float:
@@ -359,7 +359,8 @@ def _calculate_eli(wavelength_nm: float, moon_data: MoonData, esi_calc: esi.ESIC
     return lunar_irr
 
 def get_eli_bypass(wavelength_nm: Union[float, List[float]], moon_data: MoonData,
-    esi_calc: esi.ESICalculator, eli_settings: ELISettings) -> Union[float, List[float]]:
+    esi_calc: esi.ESICalculator = esi.ESICalculator(),
+    eli_settings: ELISettings = ELISettings()) -> Union[float, List[float]]:
     """Calculation of Extraterrestrial Lunar Irradiance following Eq 3 in Roman et al., 2020
 
     Allow users to simulate lunar observation for any observer/solar selenographic
@@ -395,7 +396,8 @@ def get_eli_bypass(wavelength_nm: Union[float, List[float]], moon_data: MoonData
     return _calculate_eli(wavelength_nm, moon_data, esi_calc, eli_settings)
 
 def get_eli(wavelength_nm: Union[float, List[float]], earth_data: EarthPoint, kernels_path: str,
-    esi_calc: esi.ESICalculator, eli_settings: ELISettings) -> Union[float, List[float]]:
+    esi_calc: esi.ESICalculator = esi.ESICalculator(),
+    eli_settings: ELISettings = ELISettings()) -> Union[float, List[float]]:
     """Calculation of Extraterrestrial Lunar Irradiance from geographic coordinates
 
     Allow users to simulate lunar observations for any observer position around the Earth
@@ -429,7 +431,8 @@ def get_eli(wavelength_nm: Union[float, List[float]], earth_data: EarthPoint, ke
     return get_eli_bypass(wavelength_nm, moon_data, esi_calc, eli_settings)
 
 def get_eli_bypass_per_nm(wavelength_nm: Union[float, List[float]], moon_data: MoonData,
-    esi_calc: esi.ESICalculator, eli_settings: ELISettings) -> Union[float, List[float]]:
+    esi_calc: esi.ESICalculator = esi.ESICalculator(),
+    eli_settings: ELISettings = ELISettings()) -> Union[float, List[float]]:
     """Calculation of Extraterrestrial Lunar Irradiance following Eq 3 in Roman et al., 2020
 
     Allow users to simulate lunar observation for any observer/solar selenographic
@@ -465,8 +468,8 @@ def get_eli_bypass_per_nm(wavelength_nm: Union[float, List[float]], moon_data: M
     return _calculate_eli(wavelength_nm, moon_data, esi_calc, eli_settings, True)
 
 def get_eli_per_nm(wavelength_nm: Union[float, List[float]], earth_data: EarthPoint,
-    kernels_path: str, esi_calc: esi.ESICalculator,
-    eli_settings: ELISettings) -> Union[float, List[float]]:
+    kernels_path: str, esi_calc: esi.ESICalculator = esi.ESICalculator(),
+    eli_settings: ELISettings = ELISettings()) -> Union[float, List[float]]:
     """Calculation of Extraterrestrial Lunar Irradiance from geographic coordinates
 
     Allow users to simulate lunar observations for any observer position around the Earth
