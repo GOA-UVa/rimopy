@@ -32,6 +32,47 @@ In order to use the package, a directory with all the kernels must be downloaded
 That directory must contain the same elements as **/tests/kernels**, and the execution must
 be allowed to read and write from that directory.
 
+## Usage
+
+The main functions are eli.get_eli and eli.get_eli_per_nm. Both return the extraterrestrial
+lunar irradiance for a set of wavelengths or for only one, in nanometers. This irradiance is
+calculated at a concrete location on Earth's surface, and time instance.
+The first one returns the value in Wm⁻², and the second one in Wm⁻²/nm.
+
+In order to calculate the extraterrestrial lunar irradiance per nm for 500 nm at the city of
+Valladolid, the morning of the 2022-01-17, one would do something like the following code block:
+
+```python
+from rimopy import eli
+
+wavelength = 500
+full_moon_Valladolid = eli.EarthPoint(41.652251, -4.7245321, "2022-01-17 03:00:00", 700)
+kernels_path = "./kernels"
+result = eli.get_eli_per_nm(wavelength, full_moon_Valladolid, kernels_path)
+```
+
+In order to calculate the extraterrestrial lunar irradiance for a set of wavelengths at the
+same time and space conditions, the next code block would work:
+
+```python
+wavelengths = [500, 510, 520, 530, 540, 550]
+results = eli.get_eli(wavelengths, full_moon_Valladolid, kernels_path)
+```
+
+These calculations can be customized, defining the settings and the methods used for the calculation of
+the extraterrestrial solar irradiance. For example, if someone wanted to calculate the lunar irradiance
+without applying the RIMO correction factor, and with a different method for the solar irradiance interpolation,
+something like the following code block would work:
+
+```python
+from rimopy import esi
+
+wavelength = 500
+calc = esi.ESICalculator(esi.WehrliFile.ORIGINAL_WEHRLI, esi.ESIMethod.LINEAR_INTERPOLATION)
+eli_settings = eli.ELISettings(False, False, True)
+result = eli.get_eli_per_nm(wavelength, full_moon_Valladolid, kernels_path, calc, eli_settings)
+```
+
 ## Structure
 
 The package is divided in multiple modules, each dealing with different calculations and
