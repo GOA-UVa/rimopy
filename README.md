@@ -1,6 +1,6 @@
 # Rimopy
 
-![Version 0.0.26](https://img.shields.io/badge/version-0.0.26-informational)
+![Version 0.0.27](https://img.shields.io/badge/version-0.0.27-informational)
 
 Rimopy is a package consisting of an implementation of the ROLO model, following RIMO's
 implementation, made in python.
