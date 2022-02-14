@@ -103,6 +103,7 @@ python3 -m build
 A virtual environment should be created inside the 'tests' directory.
 
 ```sh
+cd tests
 python3 -m venv .venv
 source .venv/bin/activate
 ```
@@ -116,4 +117,15 @@ pip install ../dist/rimopy-<latest_version>-py3-none-any.whl
 
 ### Executing the tests
 
-At the moment only one test file exists, test_eli_aemet.py, but that will be different in the future.
+The tests shall be executed from the tests directory, either directly or using pytest.
+
+```sh
+# Directly
+./test_eli_aemet.py
+
+# Using pytest
+# pip install pytest
+pytest -v
+```
+At the moment there is only one test module, test_eli_aemet.py, which tests rimopy against output
+from AEMET's RimoApp.
