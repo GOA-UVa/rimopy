@@ -28,7 +28,7 @@ def _testValladolidNoCorr(ts: 'TestSum', wavelength, expected, date):
 class TestSum(unittest.TestCase):
     
     def test_get_eli_Valladolid(self):
-        ed_Vall_t = eli.EarthPoint(VALL_LAT, VALL_LON, "2022-01-17 02:30:00", VALL_LAT)
+        ed_Vall_t = eli.EarthPoint(VALL_LAT, VALL_LON, "2022-01-17 02:30:00", VALL_ALT)
         res = eli.get_eli(400, ed_Vall_t, KERNELS_PATH)
         self.assertGreater(res, 0, "Should be greater than 0")
 
