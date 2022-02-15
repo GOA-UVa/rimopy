@@ -13,6 +13,8 @@ import numpy as np
 import csv
 from typing import List
 
+_INTERPOLATION_TYPE = 'linear'
+
 def _interpolate_list(f: interp1d, minimum: float, maximum: float, step: float) -> List[float]:
     """Creates a list from an interpolation function, which elements will be from minimum
     to maximum, increasing step by step.
@@ -39,20 +41,22 @@ def _interpolate_list(f: interp1d, minimum: float, maximum: float, step: float) 
         l.append(f(i).item())
     return l
 
-def _gaussian_filter_list(l: List[float]) -> List[float]:
+def _gaussian_filter_list(l: List[float], sigma: np.ScalarType) -> List[float]:
     """Gaussian filters the list
 
     Parameters:
     -----------
     l : list of float
         List of float values that will be filtered.
+    sigma : scalar
+        standard deviation for Gaussian kernel
 
     Returns:
     --------
     list of float
         Filtered list of values.
     """
-    return ndimage.gaussian_filter1d(np.float_(l), 1)
+    return ndimage.gaussian_filter1d(np.float_(l), sigma)
 
 def _generate_new_list(data: List[List[float]]) -> List[List[float]]:
     """Generates the new interpolated and filtered list from the original list.
@@ -67,15 +71,16 @@ def _generate_new_list(data: List[List[float]]) -> List[List[float]]:
     list of list of float
         Interpolated and filtered list, following the same structure as the 'data' parameter.
     """
-    f1 = interp1d([elem[0] for elem in data], [elem[1] for elem in data], 'cubic')
-    f2 = interp1d([elem[0] for elem in data], [elem[2] for elem in data], 'cubic')
+    f1 = interp1d([elem[0] for elem in data], [elem[1] for elem in data], _INTERPOLATION_TYPE)
+    f2 = interp1d([elem[0] for elem in data], [elem[2] for elem in data], _INTERPOLATION_TYPE)
     minimum = 199.5
     maximum = 3000 #10075.0
-    step = 2
+    step = 1
     l1 = _interpolate_list(f1, minimum, maximum, step)
     l2 = _interpolate_list(f2, minimum, maximum, step)
-    l1 = _gaussian_filter_list(l1)
-    l2 = _gaussian_filter_list(l2)
+    sigma = 1
+    l1 = _gaussian_filter_list(l1, sigma)
+    l2 = _gaussian_filter_list(l2, sigma)
 
     new_data = []
     index = 0

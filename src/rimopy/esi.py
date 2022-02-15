@@ -3,56 +3,308 @@
 This module contains the functionalities for obtaining the extraterrestrial solar irradiation
 of a concrete wavelength, based on Wehrli (1985).
 
-It exports the foollowing functions:
-
-    * getESI - returns the expected extraterrestrial solar irradiation of a concrete wavelength
+It exports the following classes:
+    * WehrliFile - Enum that represents which wehrli data source will be used in the calculation
+        of the ESI
+    * ESIMethod - Enum that represents which interpolation method will be used in the calculation
+        of the ESI
+    * GaussianFilterParams - Dataclass that represents the parameters for the gaussian filter
+        interpolation
+    * ESICalculator - Calculator of Extraterrestrial Solar Irradiance.
 """
-
 import csv
+from dataclasses import dataclass
 from io import StringIO
-from typing import Tuple, Dict
+from typing import Tuple, Dict, List
+import math
 import pkgutil
+import enum
 from scipy.interpolate import interp1d
 
-def _getWehrliData() -> Dict[float, Tuple[float, float]]:
-	"""Returns all wehrli data
+def _linear_interpolation(wavelength_nm: float, x_values: List[float],
+    y_values: List[float]) -> float:
+    """
+    Wrapper that linearly interpolates
 
-	Returns
-	-------
-	A dict that has the wavelengths as keys (float), and as values it has tuples of the (W/sm/nm, W/sm) values.
-	"""
-	wehrli_bytes = pkgutil.get_data(__name__, 'data/wehrli.csv')
-	wehrli_string = wehrli_bytes.decode()
-	file = StringIO(wehrli_string)
-	csvreader = csv.reader(file)
-	next(csvreader) # Discard the header
-	data = {}
-	for row in csvreader:
-		data[float(row[0])] = (float(row[1]), float(row[2]))
-	file.close()
-	return data
-
-def getESI(wavelength_nm: float) -> float:
-	"""Gets the expected extraterrestrial solar irradiance at a concrete wavelength
-    
     Parameters
     ----------
     wavelength_nm : float
-        Wavelength (in nanometers) of which the extraterrestrial solar irradiance will be obtained
-    
+        x value that is going to be interpolated
+    x_values : list of float
+        list of x values (keys)
+    y_values : list of float
+        list of y values
+
     Returns
     -------
     float
-        The expected extraterrestrial solar irradiance in W/sm
-	"""
-	wehrli_data = _getWehrliData()
-	wehrli_x = list(wehrli_data.keys())
-	if wavelength_nm in wehrli_x:
-		return wehrli_data[wavelength_nm][1]
-	if wavelength_nm < wehrli_x[0]:
-		return wehrli_data[wehrli_x[0]][1]
-	if wavelength_nm > wehrli_x[-1]:
-		return wehrli_data[wehrli_x[-1]][1]
-	wehrli_y = list(map(lambda x : x[1], wehrli_data.values()))
-	f = interp1d(wehrli_x, wehrli_y, 'cubic') # This works because, supposedly, python dicts preserve insertion order since 3.7
-	return f(wavelength_nm).item()
+        Interpolated value.
+    """
+    f_interp = interp1d(x_values, y_values, 'linear')
+    # This works because, supposedly, python dicts preserve insertion order since 3.7
+    return f_interp(wavelength_nm).item()
+
+def _gaussian_filter_non_eq_filter_input(center: float, all_x: List[float], all_y: List[float],
+    radius: float, sigma: float) -> Tuple[List[float], List[float]]:
+    """
+    Calculates the gaussian values from all_x that are in the range of
+    [center-radius, center+radius].
+
+    Parameters
+    ----------
+    center : float
+        Center of the gaussian distribution
+    all_x : list of float
+        All x values (keys) present on the gaussian distribution
+    all_y : list of float
+        All y values, in the same order as all_y
+    radius : float
+        Radius that will filter the accepted values. From all_x, each one that is in the
+            interval [center-radius, center+radius]
+    sigma : float
+        Standard deviation of the Gaussian Filter.
+
+    Returns
+    -------
+    list of float
+        Gaussian values of the elements from all_x in the range.
+    list of float
+        y values relative to the filtered values, in the same order.
+    """
+    min_x = center - radius
+    max_x = center + radius
+    gauss_vals = []
+    final_y = []
+    for i, x_val in enumerate(all_x):
+        if min_x <= x_val <= max_x:
+            gauss_param = x_val - center
+            val = (1/(sigma*math.sqrt(2*math.pi)))*(math.exp(-(gauss_param**2)/(2*sigma**2)))
+            gauss_vals.append(val)
+            final_y.append(all_y[i])
+    return gauss_vals, final_y
+
+def _gaussian_filter_non_eq_sum_percentages(gauss_vals: List[float],
+    final_y: List[float]) -> float:
+    """
+    Adjust the gaussian values for the non equidistant data, and calculates
+    the gaussian filtered value.
+
+    Parameters
+    ----------
+    gauss_vals : list of float
+        list of gaussian values used for the calculation of the final value.
+    final_y : list of float
+        list with the y values relative to the gaussian values.
+
+    Returns
+    -------
+    float
+        Gaussian-filtered value
+    """
+    gauss_sum = sum(gauss_vals)
+    val_sum = 0
+    for i, final_y_val in enumerate(final_y):
+        if gauss_sum == 0:
+            perc = 0
+        else: perc = gauss_vals[i]/gauss_sum
+        val_sum += perc * final_y_val
+    return val_sum
+
+def _gaussian_filter_non_equidistant(center: float, all_x: List[float], all_y: List[float],
+    radius: float=1, sigma: float=1) -> float:
+    """
+    Gaussian filter for non equidistant data.
+
+    Parameters
+    ----------
+    center : float
+        Center of the gaussian distribution
+    all_x : list of float
+        All x values (keys) present on the gaussian distribution
+    all_y : list of float
+        All y values, in the same order as all_y
+    radius : float
+        Radius that will filter the accepted values. From all_x, each one that is in the
+            interval [center-radius, center+radius]
+    sigma : float
+        Standard deviation of the Gaussian Filter.
+
+    Returns
+    -------
+    float
+        Gaussian-filtered value
+    """
+    gauss_vals, final_y = _gaussian_filter_non_eq_filter_input(center, all_x, all_y,
+        radius, sigma)
+    return _gaussian_filter_non_eq_sum_percentages(gauss_vals, final_y)
+
+class WehrliFile(enum.Enum):
+    """
+    Wehrli data location that will be used in the calculation of the ESI.
+
+    Values
+    ------
+    ORIGINAL_WEHRLI : Original wehrli data.
+    SIMPLE_FILTER_WEHRLI : Wehrli data passed through a gaussian filter and linear interpolation.
+        (See utils/wehrli_gauss).
+    """
+    ORIGINAL_WEHRLI = 'data/wehrli_original.csv'
+    SIMPLE_FILTER_WEHRLI = 'data/wehrli_filtered.csv'
+
+class ESIMethod(enum.Enum):
+    """
+    Interpolation method that will be used in the calculation of the ESI.
+
+    Values
+    ------
+    LINEAR_INTERPOLATION : The method will be linear interpolation.
+    GAUSSIAN_FILTER : The method will be a gaussian filter.
+    """
+    LINEAR_INTERPOLATION = 1
+    GAUSSIAN_FILTER = 2
+
+@dataclass
+class GaussianFilterParams():
+    """
+    Parameters for the gaussian filter interpolation
+
+    Attributes
+    ----------
+    radius : float
+        Radius of the width of the Gaussian filter.
+    sigma : float
+        Standard deviation for the Gaussian filter.
+    """
+    def __init__(self, radius: float = 1, sigma: float = 1):
+        """
+        Parameters
+        ----------
+        radius : float
+            Radius of the width of the Gaussian filter.
+        sigma : float
+            Standard deviation for the Gaussian filter.
+        """
+        self.radius = radius
+        self.sigma = sigma
+
+class ESICalculator():
+    """
+    Calculator of Extraterrestrial Solar Irradiance.
+    Based on Wehrli data and some sort of interpolation.
+
+    Attributes
+    ----------
+    wehrli_file : WehrliFile
+        Wehrli data source that will be used in the calculation of the ESI. It could be the original
+        data or some filtered data.
+    method : ESIMethod
+        Interpolation method that will be used in the calculation of the ESI.
+    gfp : GaussianFilterParams
+        Parameters of the gaussian filter method, in case that that is the chosen one.
+    """
+    __slots__ = ['wehrli_file', 'method', 'gfp']
+    def __init__(self, wehrli_file: WehrliFile=WehrliFile.ORIGINAL_WEHRLI,
+        method: ESIMethod=ESIMethod.GAUSSIAN_FILTER,
+        gaussian_filter_params: GaussianFilterParams=None):
+        """
+        Parameters
+        ----------
+        wehrli_file : WehrliFile
+            Wehrli data source that will be used in the calculation of the ESI. It could be the
+            original data or some filtered data.
+        method : ESIMethod
+            Interpolation method that will be used in the calculation of the ESI.
+        gfp : GaussianFilterParams
+            Parameters of the gaussian filter method, in case that that is the chosen one.
+            Default = None.
+        """
+        self.wehrli_file = wehrli_file
+        self.method = method
+        if gaussian_filter_params is None:
+            self.gfp = GaussianFilterParams()
+        else: self.gfp = gaussian_filter_params
+
+    def _get_wehrli_data(self) -> Dict[float, Tuple[float, float]]:
+        """Returns all wehrli data
+
+        Returns
+        -------
+        A dict that has the wavelengths as keys (float), and as values it has tuples of the
+        (Wm⁻²/nm, Wm⁻²/sm) values.
+        """
+        wehrli_bytes = pkgutil.get_data(__name__, self.wehrli_file.value)
+        wehrli_string = wehrli_bytes.decode()
+        file = StringIO(wehrli_string)
+        csvreader = csv.reader(file)
+        next(csvreader) # Discard the header
+        data = {}
+        for row in csvreader:
+            data[float(row[0])] = (float(row[1]), float(row[2]))
+        file.close()
+        return data
+
+    def get_esi(self, wavelength_nm: float) -> float:
+        """Gets the expected extraterrestrial solar irradiance at a concrete wavelength
+        Returns the data in Wm⁻²
+
+        Parameters
+        ----------
+        wavelength_nm : float
+            Wavelength (in nanometers) of which the extraterrestrial solar irradiance will be
+            obtained
+
+        Returns
+        -------
+        float
+            The expected extraterrestrial solar irradiance in Wm⁻²
+        """
+        wehrli_data = self._get_wehrli_data()
+        wehrli_x = list(wehrli_data.keys())
+        if wavelength_nm in wehrli_x:
+            return wehrli_data[wavelength_nm][1]
+        if wavelength_nm < wehrli_x[0]:
+            return wehrli_data[wehrli_x[0]][1]
+        if wavelength_nm > wehrli_x[-1]:
+            return wehrli_data[wehrli_x[-1]][1]
+        wehrli_y = list(map(lambda x : x[1], wehrli_data.values()))
+        if self.method == ESIMethod.LINEAR_INTERPOLATION:
+            return _linear_interpolation(wavelength_nm, wehrli_x, wehrli_y)
+        # ESIMethod.GAUSSIAN_FILTER
+        gauss_res =  _gaussian_filter_non_equidistant(wavelength_nm, wehrli_x, wehrli_y,
+            self.gfp.radius, self.gfp.sigma)
+        if gauss_res == 0: # There was no wehrli data near enough from the given wavelength_nm
+            return _linear_interpolation(wavelength_nm, wehrli_x, wehrli_y)
+        return gauss_res
+
+    def get_esi_per_nm(self, wavelength_nm: float) -> float:
+        """Gets the expected extraterrestrial solar irradiance at a concrete wavelength
+        Returns the data in Wm⁻²/nm
+
+        Parameters
+        ----------
+        wavelength_nm : float
+            Wavelength (in nanometers) of which the extraterrestrial solar irradiance will be
+            obtained
+
+        Returns
+        -------
+        float
+            The expected extraterrestrial solar irradiance in Wm⁻²/nm
+        """
+        wehrli_data = self._get_wehrli_data()
+        wehrli_x = list(wehrli_data.keys())
+        if wavelength_nm in wehrli_x:
+            return wehrli_data[wavelength_nm][0]
+        if wavelength_nm < wehrli_x[0]:
+            return wehrli_data[wehrli_x[0]][0]
+        if wavelength_nm > wehrli_x[-1]:
+            return wehrli_data[wehrli_x[-1]][0]
+        wehrli_y = list(map(lambda x : x[0], wehrli_data.values()))
+        if self.method == ESIMethod.LINEAR_INTERPOLATION:
+            return _linear_interpolation(wavelength_nm, wehrli_x, wehrli_y)
+        # ESIMethod.GAUSSIAN_FILTER
+        gauss_res = _gaussian_filter_non_equidistant(wavelength_nm, wehrli_x, wehrli_y,
+            self.gfp.radius, self.gfp.sigma)
+        if gauss_res == 0: # There was no wehrli data near enough from the given wavelength_nm
+            return _linear_interpolation(wavelength_nm, wehrli_x, wehrli_y)
+        return gauss_res

@@ -3,22 +3,81 @@
 This module contains the coefficient and wavelength data from the ROLO model.
 Currently it only contains the first 9 wavelengths.
 
-It exports the foollowing functions:
+It exports the following functions:
 
-    * getWavelengths - returns all wavelengths present in the ROLO model
-    * getAllCoefficientsA - returns all 'a' coefficients for all wavelengths
-    * getAllCoefficientsB - returns all 'b' coefficients for all wavelengths
-    * getAllCoefficientsD - returns all 'd' coefficients for all wavelengths
-    * getCoefficientsA - returns the 'a' coefficients for a specific wavelength index
-    * getCoefficientsB - returns the 'b' coefficients for a specific wavelength index
-    * getCoefficientsD - returns the 'd' coefficients for a specific wavelength index
-    * getCoefficientsC - returns the 'c' coefficients
-    * getCoefficientsP - returns the 'p' coefficients
+    * get_wavelengths - returns all wavelengths present in the ROLO model
+    * get_all_coefficients_a - returns all 'a' coefficients for all wavelengths
+    * get_all_coefficients_b - returns all 'b' coefficients for all wavelengths
+    * get_all_coefficients_d - returns all 'd' coefficients for all wavelengths
+    * get_coefficients_a - returns the 'a' coefficients for a specific wavelength index
+    * get_coefficients_b - returns the 'b' coefficients for a specific wavelength index
+    * get_coefficients_d - returns the 'd' coefficients for a specific wavelength index
+    * get_coefficients_c - returns the 'c' coefficients
+    * get_coefficients_p - returns the 'p' coefficients
+    * get_apollo_coefficients - returns all Apollo adjusting coefficients
 """
-from typing import List
+from dataclasses import dataclass
+from typing import List, Dict
+import csv
+import pkgutil
+from io import StringIO
 from scipy.interpolate import interp1d
 
-def getWavelengths() -> List[float]:
+_INTERPOLATION_TYPE = 'linear'
+
+@dataclass
+class _CoefficientsWln():
+    """
+    Coefficients data for a wavelength. It includes only the a, b and d coefficients.
+
+    Attributes
+    ----------
+    a_coeffs : tuple of 4 floats, corresponding to coefficients a0, a1, a2, and a3
+    b_coeffs : tuple of 3 floats, corresponding to coefficients b1, b2, and b3
+    d_coeffs : tuple of 3floats, corresponding to coefficients d1, d2, and d3
+    """
+    __slots__ = ['a_coeffs', 'b_coeffs', 'd_coeffs']
+
+    def __init__(self, coeffs: List[float]):
+        """
+        Parameters
+        ----------
+        coeffs : list of float
+            List of floats consisting of all coefficients. In order: a0, a1, a2, a3, b1, b2, b3,
+            d1, d2 and d3.
+
+        Returns
+        -------
+        _CoefficientsWln
+            Instance of _Coefficients with the correct data
+        """
+        self.a_coeffs = (coeffs[0], coeffs[1], coeffs[2], coeffs[3])
+        self.b_coeffs = (coeffs[4], coeffs[5], coeffs[6])
+        self.d_coeffs = (coeffs[7], coeffs[8], coeffs[9])
+
+def _get_coefficients_data() -> Dict[float, '_CoefficientsWln']:
+    """Returns all variable coefficients (a, b and d) for all wavelengths
+
+    Returns
+    -------
+    A dict that has the wavelengths as keys (float), and as values the _CoefficientsWln associated
+    to the wavelength.
+    """
+    coeff_bytes = pkgutil.get_data(__name__, 'data/coefficients.csv')
+    coeff_string = coeff_bytes.decode()
+    file = StringIO(coeff_string)
+    csvreader = csv.reader(file)
+    next(csvreader) # Discard the header
+    data = {}
+    for row in csvreader:
+        coeffs = []
+        for i in range(1, 11):
+            coeffs.append(float(row[i]))
+        data[float(row[0])] = _CoefficientsWln(coeffs)
+    file.close()
+    return data
+
+def get_wavelengths() -> List[float]:
     """Gets all wavelengths present in the model, in nanometers
 
     Returns
@@ -26,45 +85,46 @@ def getWavelengths() -> List[float]:
     list of float
         A list of floats that are the wavelengths in nanometers, in order
     """
-    return [350.0, 355.1, 405.0, 412.3, 414.4, 441.6, 465.8, 475.0, 486.9]
+    coeffs = _get_coefficients_data()
+    return list(coeffs.keys())
 
-def getAllCoefficientsA() -> List[List[float]]:
+def get_all_coefficients_a() -> List[List[float]]:
     """Gets all 'a' coefficients
 
     Returns
-    ------- 
+    -------
     list of list of float
-        A list containing multiple list of floats. Each sublist is the list of 'a' coefficients for a wavelength
+        A list containing multiple list of floats. Each sublist is the list of 'a' coefficients
+        for a wavelength
     """
-    return [ [-2.67511, -1.78539, 0.50612, -0.25578], [-2.71924, -1.74298, 0.44523, -0.23315], [-2.35754, -1.72134, 0.40337, -0.21105],
-        [-2.34185, -1.74337, 0.42156, -0.21512], [-2.43367, -1.72184, 0.43600, -0.22675], [-2.31964, -1.72114, 0.37286, -0.19304],
-        [-2.35085, -1.66538, 0.41802, -0.22541], [-2.28999, -1.63180, 0.36193, -0.20381], [-2.23351, -1.68573, 0.37632, -0.19877 ] ]
+    coeffs = _get_coefficients_data()
+    return [elem.a_coeffs for elem in coeffs.values()]
 
-def getAllCoefficientsB() -> List[List[float]]:
+def get_all_coefficients_b() -> List[List[float]]:
     """Gets all 'b' coefficients
 
     Returns
-    ------- 
+    -------
     list of list of float
-        A list containing multiple list of floats. Each sublist is the list of 'b' coefficients for a wavelength
+        A list containing multiple list of floats. Each sublist is the list of 'b' coefficients
+        for a wavelength
     """
-    return [ [0.03744, 0.00981, -0.00322], [0.03492, 0.01142, -0.00383], [0.03505, 0.01043, -0.00341], [0.03141, 0.01364, -0.00472],
-        [0.03474, 0.01188, -0.00422 ], [0.03736, 0.01545, -0.00559], [0.04274, 0.01127, -0.00439], [0.04007, 0.01216, -0.00437],
-        [0.03881, 0.01566, -0.00555] ]
+    coeffs = _get_coefficients_data()
+    return [elem.b_coeffs for elem in coeffs.values()]
 
-def getAllCoefficientsD() -> List[List[float]]:
+def get_all_coefficients_d() -> List[List[float]]:
     """Gets all 'd' coefficients
 
     Returns
-    ------- 
+    -------
     list of list of float
-        A list containing multiple list of floats. Each sublist is the list of 'd' coefficients for a wavelength
+        A list containing multiple list of floats. Each sublist is the list of 'd' coefficients
+        for a wavelength
     """
-    return [ [0.34185, 0.01441, -0.01602], [0.33875, 0.01612, -0.00996], [0.35235, -0.03818, -0.00006], [0.36591, -0.05902, 0.00080],
-        [0.35558, -0.03247, -0.00503], [0.37935, -0.09562, 0.00970], [0.33450, -0.02546, -0.00484], [0.33024, -0.03131, 0.00222],
-        [0.36590, -0.08945, 0.00678] ]
+    coeffs = _get_coefficients_data()
+    return [elem.d_coeffs for elem in coeffs.values()]
 
-def getCoefficientsA(wavelength_nm: float) -> List[float]:
+def get_coefficients_a(wavelength_nm: float) -> List[float]:
     """Gets all 'a' coefficients for a concrete wavelength
 
     Parameters
@@ -73,26 +133,27 @@ def getCoefficientsA(wavelength_nm: float) -> List[float]:
         Wavelength in nanometers from which one wants to obtain the coefficients.
 
     Returns
-    ------- 
+    -------
     list of float
         A list containing the 'a' coefficients for the wavelength
     """
-    y = getAllCoefficientsA()
-    wvs = getWavelengths()
+    a_coeffs = get_all_coefficients_a()
+    wvs = get_wavelengths()
     if wavelength_nm in wvs:
-        return y[wvs.index(wavelength_nm)]
+        return a_coeffs[wvs.index(wavelength_nm)]
     if wavelength_nm < wvs[0]:
-        return y[0]
+        return a_coeffs[0]
     if wavelength_nm > wvs[-1]:
-        return y[-1]
-    f0 = interp1d(wvs, [elem[0] for elem in y], 'cubic')
-    f1 = interp1d(wvs, [elem[1] for elem in y], 'cubic')
-    f2 = interp1d(wvs, [elem[2] for elem in y], 'cubic')
-    f3 = interp1d(wvs, [elem[3] for elem in y], 'cubic')
-    y2 = [f0(wavelength_nm).item(), f1(wavelength_nm).item(), f2(wavelength_nm).item(), f3(wavelength_nm).item()]
-    return y2
+        return a_coeffs[-1]
+    f_interp_0 = interp1d(wvs, [elem[0] for elem in a_coeffs], _INTERPOLATION_TYPE)
+    f_interp_1 = interp1d(wvs, [elem[1] for elem in a_coeffs], _INTERPOLATION_TYPE)
+    f_interp_2 = interp1d(wvs, [elem[2] for elem in a_coeffs], _INTERPOLATION_TYPE)
+    f_interp_3 = interp1d(wvs, [elem[3] for elem in a_coeffs], _INTERPOLATION_TYPE)
+    a_coeffs_concrete = [f_interp_0(wavelength_nm).item(), f_interp_1(wavelength_nm).item(),
+        f_interp_2(wavelength_nm).item(), f_interp_3(wavelength_nm).item()]
+    return a_coeffs_concrete
 
-def getCoefficientsB(wavelength_nm: float) -> List[float]:
+def get_coefficients_b(wavelength_nm: float) -> List[float]:
     """Gets all 'b' coefficients for a concrete wavelength
 
     Parameters
@@ -101,25 +162,26 @@ def getCoefficientsB(wavelength_nm: float) -> List[float]:
         Wavelength in nanometers from which one wants to obtain the coefficients.
 
     Returns
-    ------- 
+    -------
     list of float
         A list containing the 'b' coefficients for the wavelength
     """
-    y = getAllCoefficientsB()
-    wvs = getWavelengths()
+    b_coeffs = get_all_coefficients_b()
+    wvs = get_wavelengths()
     if wavelength_nm in wvs:
-        return y[wvs.index(wavelength_nm)]
+        return b_coeffs[wvs.index(wavelength_nm)]
     if wavelength_nm < wvs[0]:
-        return y[0]
+        return b_coeffs[0]
     if wavelength_nm > wvs[-1]:
-        return y[-1]
-    f0 = interp1d(wvs, [elem[0] for elem in y], 'cubic')
-    f1 = interp1d(wvs, [elem[1] for elem in y], 'cubic')
-    f2 = interp1d(wvs, [elem[2] for elem in y], 'cubic')
-    y2 = [f0(wavelength_nm).item(), f1(wavelength_nm).item(), f2(wavelength_nm).item()]
-    return y2
+        return b_coeffs[-1]
+    f_interp_0 = interp1d(wvs, [elem[0] for elem in b_coeffs], _INTERPOLATION_TYPE)
+    f_interp_1 = interp1d(wvs, [elem[1] for elem in b_coeffs], _INTERPOLATION_TYPE)
+    f_interp_2 = interp1d(wvs, [elem[2] for elem in b_coeffs], _INTERPOLATION_TYPE)
+    b_coeffs_concrete = [f_interp_0(wavelength_nm).item(), f_interp_1(wavelength_nm).item(),
+        f_interp_2(wavelength_nm).item()]
+    return b_coeffs_concrete
 
-def getCoefficientsD(wavelength_nm: float) -> List[float]:
+def get_coefficients_d(wavelength_nm: float) -> List[float]:
     """Gets all 'd' coefficients for a concrete wavelength
 
     Parameters
@@ -128,40 +190,53 @@ def getCoefficientsD(wavelength_nm: float) -> List[float]:
         Wavelength in nanometers from which one wants to obtain the coefficients.
 
     Returns
-    ------- 
+    -------
     list of float
         A list containing the 'd' coefficients for the wavelength
     """
-    y = getAllCoefficientsD()
-    wvs = getWavelengths()
+    d_coeffs = get_all_coefficients_d()
+    wvs = get_wavelengths()
     if wavelength_nm in wvs:
-        return y[wvs.index(wavelength_nm)]
+        return d_coeffs[wvs.index(wavelength_nm)]
     if wavelength_nm < wvs[0]:
-        return y[0]
+        return d_coeffs[0]
     if wavelength_nm > wvs[-1]:
-        return y[-1]
-    f0 = interp1d(wvs, [elem[0] for elem in y], 'cubic')
-    f1 = interp1d(wvs, [elem[1] for elem in y], 'cubic')
-    f2 = interp1d(wvs, [elem[2] for elem in y], 'cubic')
-    y2 = [f0(wavelength_nm).item(), f1(wavelength_nm).item(), f2(wavelength_nm).item()]
-    return y2
+        return d_coeffs[-1]
+    f_interp_0 = interp1d(wvs, [elem[0] for elem in d_coeffs], _INTERPOLATION_TYPE)
+    f_interp_1 = interp1d(wvs, [elem[1] for elem in d_coeffs], _INTERPOLATION_TYPE)
+    f_interp_2 = interp1d(wvs, [elem[2] for elem in d_coeffs], _INTERPOLATION_TYPE)
+    d_coeffs_concrete = [f_interp_0(wavelength_nm).item(), f_interp_1(wavelength_nm).item(),
+        f_interp_2(wavelength_nm).item()]
+    return d_coeffs_concrete
 
-def getCoefficientsC() -> List[float]:
+def get_coefficients_c() -> List[float]:
     """Gets all 'c' coefficients
 
     Returns
-    ------- 
+    -------
     list of float
         A list containing all 'c' coefficients
     """
     return [0.00034115, -0.0013425, 0.00095906, 0.00066229]
 
-def getCoefficientsP() -> List[float]:
+def get_coefficients_p() -> List[float]:
     """Gets all 'p' coefficients
 
     Returns
-    ------- 
+    -------
     list of float
         A list containing all 'p' coefficients
     """
     return [4.06054, 12.8802, -30.5858, 16.7498]
+
+def get_apollo_coefficients() -> List[float]:
+    """Coefficients used for the adjustment of the ROLO model using Apollo spectra.
+
+    Returns
+    -------
+    list of float
+        A list containing all Apollo coefficients
+    """
+    return [1.0301, 1.0970, 0.9325, 0.9466, 1.0225, 1.0157, 1.0470, 1.0084, 1.0100, 1.0148,
+        0.9843, 1.0134, 0.9329, 0.9849, 0.9994, 0.9957, 1.0059, 0.9618, 0.9561, 0.9796, 0.9568,
+        0.9873, 1.0575, 1.0108, 0.9743, 1.0386, 1.0338, 1.0577, 1.0650, 1.0815, 0.8945, 0.9689]

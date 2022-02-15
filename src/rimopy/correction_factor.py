@@ -2,46 +2,52 @@
 
 This module contains the coefficients of the RIMO correction factor (RCF).
 
-It exports the foollowing functions:
+It exports the following classes:
+    * CorrectionParams - DataClass that contains the estimated coefficients of the
+        RCF for a wavelength.
 
-    * getCorrectionParams - returns the RCF coefficients estimated for a wavelength
+It exports the following functions:
+
+    * get_correction_params - returns the RCF coefficients estimated for a wavelength
 """
 
 from argparse import ArgumentError
+from dataclasses import dataclass
 from typing import List
 from scipy.interpolate import interp1d
 
+@dataclass
 class CorrectionParams:
     """
-    DataModel that contains the estimated coefficients of the RCF for a wavelength.
+    DataClass that contains the estimated coefficients of the RCF for a wavelength.
 
     Attributes
     ----------
-    a : float
+    a_coeff : float
         RCF coefficient 'a'
-    b : float
+    b_coeff : float
         RCF coefficient 'b'
-    c : float
+    c_coeff : float
         RCF coefficient 'c'
     """
-    __slots__ = ['a', 'b', 'c']
+    __slots__ = ['a_coeff', 'b_coeff', 'c_coeff']
 
-    def __init__(self, a: float, b: float, c: float):
+    def __init__(self, a_coeff: float, b_coeff: float, c_coeff: float):
         """
         Parameters
         ----------
-        a : float
+        a_coeff : float
             RCF coefficient 'a'
-        b : float
+        b_coeff : float
             RCF coefficient 'b'
-        c : float
+        c_coeff : float
             RCF coefficient 'c'
         """
-        self.a = a
-        self.b = b
-        self.c = c
+        self.a_coeff = a_coeff
+        self.b_coeff = b_coeff
+        self.c_coeff = c_coeff
 
-def _getCorrectedWavelengths() -> List[float]:
+def _get_corrected_wavelengths() -> List[float]:
     """Gets all wavelengths (in nanometers) presented in the RCF model
 
     Returns
@@ -51,49 +57,52 @@ def _getCorrectedWavelengths() -> List[float]:
     """
     return [340, 380, 440, 500, 675, 870, 935, 1020, 1640]
 
-def _getAllCorrectionParams() -> List[List[float]]:
+def _get_all_correction_params() -> List[List[float]]:
     """Gets all RCF coefficients
 
     Returns
-    ------- 
+    -------
     list of list of float
-        A list containing multiple list of floats. Each sublist is the list of coefficients for a wavelength
+        A list containing multiple list of floats. Each sublist is the list of coefficients
+        for a wavelength
     """
-    return [ [1.186, -2.35 * 10**-2, 1.92 * 10**-1 ], [1.082, -4.17 * 10**-3, 7.10 * 10**-2], [1.062, -5.35 * 10**-4, 1.14 * 10**-2],
-        [1.078, -8.93 * 10**-4, 1.11 * 10**-2], [1.092, -4.50 * 10**-4, 1.38 * 10**-2], [1.075, -2.05 * 10**-3, 1.37 * 10**-2],
-        [1.071, -2.41 * 10**-3, 1.36 * 10**-2], [1.035, 5.55 * 10**-3, 2.79 * 10**-2], [1.047, -1.25 * 10**-3, 2.26 * 10**-2] ]
+    return [ [1.186, -2.35 * 10**-2, 1.92 * 10**-1 ], [1.082, -4.17 * 10**-3, 7.10 * 10**-2],
+        [1.062, -5.35 * 10**-4, 1.14 * 10**-2], [1.078, -8.93 * 10**-4, 1.11 * 10**-2],
+        [1.092, -4.50 * 10**-4, 1.38 * 10**-2], [1.075, -2.05 * 10**-3, 1.37 * 10**-2],
+        [1.071, -2.41 * 10**-3, 1.36 * 10**-2], [1.035, 5.55 * 10**-3, 2.79 * 10**-2],
+        [1.047, -1.25 * 10**-3, 2.26 * 10**-2] ]
 
-def _getAllAs() -> List[float]:
+def _get_all_as() -> List[float]:
     """Gets all 'a' RCF coefficients
 
     Returns
-    ------- 
+    -------
     list of float
         A list containing all 'a' coefficients in wavelength order
     """
-    return list(map(lambda x : x[0], _getAllCorrectionParams()))
+    return list(map(lambda x : x[0], _get_all_correction_params()))
 
-def _getAllBs() -> List[float]:
+def _get_all_bs() -> List[float]:
     """Gets all 'b' RCF coefficients
 
     Returns
-    ------- 
+    -------
     list of float
         A list containing all 'b' coefficients in wavelength order
     """
-    return list(map(lambda x : x[1], _getAllCorrectionParams()))
+    return list(map(lambda x : x[1], _get_all_correction_params()))
 
-def _getAllCs() -> List[float]:
+def _get_all_cs() -> List[float]:
     """Gets all 'c' RCF coefficients
 
     Returns
-    ------- 
+    -------
     list of float
         A list containing all 'c' coefficients in wavelength order
     """
-    return list(map(lambda x : x[2], _getAllCorrectionParams()))
+    return list(map(lambda x : x[2], _get_all_correction_params()))
 
-def _getInterpolatedCorrectionParams(wavelength_nm: float, kind='cubic') -> 'CorrectionParams':
+def _get_interpolated_correction_params(wavelength_nm: float, kind='linear') -> 'CorrectionParams':
     """Estimate the RCF params with interpolation
 
     Parameters
@@ -101,9 +110,10 @@ def _getInterpolatedCorrectionParams(wavelength_nm: float, kind='cubic') -> 'Cor
     wavelength_nm : float
         Wavelength (in nanometers) of which one wants to interpolate the RCF params
     kind: str
-        Kind of interpolation performed. Specifies the kind of interpolation as a string or as an integer
-        specifying the order of the spline interpolator to use. The string has to be one of 'linear', 'nearest',
-        'nearest-up', 'zero', 'slinear', 'quadratic', 'cubic', 'previous', or 'next'. Default is 'cubic'.
+        Kind of interpolation performed. Specifies the kind of interpolation as a string or as an
+        integer specifying the order of the spline interpolator to use. The string has to be one
+        of 'linear', 'nearest', 'nearest-up', 'zero', 'slinear', 'quadratic', 'cubic', 'previous',
+        or 'next'. Default is 'linear'.
 
     Raises
     ------
@@ -111,32 +121,32 @@ def _getInterpolatedCorrectionParams(wavelength_nm: float, kind='cubic') -> 'Cor
         If the argument kind does not fit the requirements specified in the section Parameters.
 
     Returns
-    ------- 
+    -------
     'CorrectionParams'
         Estimated correction params
     """
-    x = _getCorrectedWavelengths()
-    if wavelength_nm < x[0]:
+    x_values = _get_corrected_wavelengths()
+    if wavelength_nm < x_values[0]:
         # Is this the best solution?
-        return getCorrectionParams(x[0])
-    if wavelength_nm > x[-1]:
+        return get_correction_params(x_values[0])
+    if wavelength_nm > x_values[-1]:
         # Is this the best solution?
-        return getCorrectionParams(x[-1])
+        return get_correction_params(x_values[-1])
     if kind not in ['linear', 'nearest', 'nearest-up', 'zero', 'slinear', 'quadratic',
         'cubic', 'previous', 'next'] and not isinstance(kind, int):
-        raise ArgumentError("%s is unsupported, use a valid argument", kind)
-    ya = _getAllAs()
-    fa = interp1d(x, ya, kind)
-    a = fa(wavelength_nm).item()
-    yb = _getAllBs()
-    fb = interp1d(x, yb, kind)
-    b = fb(wavelength_nm).item()
-    yc = _getAllCs()
-    fc = interp1d(x, yc, kind)
-    c = fc(wavelength_nm).item()
-    return CorrectionParams(a, b, c)
+        raise ArgumentError(None, kind + " is unsupported, use a valid argument")
+    all_as = _get_all_as()
+    f_interp_a = interp1d(x_values, all_as, kind)
+    a_coeff = f_interp_a(wavelength_nm).item()
+    all_bs = _get_all_bs()
+    f_interp_b = interp1d(x_values, all_bs, kind)
+    b_coeff = f_interp_b(wavelength_nm).item()
+    all_cs = _get_all_cs()
+    f_interp_c = interp1d(x_values, all_cs, kind)
+    c_coeff = f_interp_c(wavelength_nm).item()
+    return CorrectionParams(a_coeff, b_coeff, c_coeff)
 
-def getCorrectionParams(wavelength_nm: float) -> 'CorrectionParams':
+def get_correction_params(wavelength_nm: float) -> 'CorrectionParams':
     """Gets the RCF correction parameters for a specific wavelength in nanometers
 
     Parameters
@@ -145,13 +155,14 @@ def getCorrectionParams(wavelength_nm: float) -> 'CorrectionParams':
         Wavelength (in nanometers) of which one wants to estimate the RCF params
 
     Returns
-    ------- 
+    -------
     'CorrectionParams'
         Estimated correction params
     """
-    wvs = _getCorrectedWavelengths()
+    wvs = _get_corrected_wavelengths()
     if wavelength_nm in wvs:
         index = wvs.index(wavelength_nm)
-        corr_params = _getAllCorrectionParams()
-        return CorrectionParams(corr_params[index][0], corr_params[index][1], corr_params[index][2])
-    return _getInterpolatedCorrectionParams(wavelength_nm)
+        corr_params = _get_all_correction_params()
+        return CorrectionParams(corr_params[index][0], corr_params[index][1],
+            corr_params[index][2])
+    return _get_interpolated_correction_params(wavelength_nm)
