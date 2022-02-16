@@ -39,7 +39,8 @@ class ELISettings():
     Attributes
     ----------
     apply_correction : bool
-        If True the result will have been multiplied by the RCF (Rimo Correction Factor).
+        If True the result will have been multiplied by the RCF (Rimo Correction Factor),
+        which corrects the data for the photometers' calibration.
         Otherwise it won't.
     interpolate_rolo_coefficients : bool
         If True the reflectance will be calculated linearly interpolating the ROLO coefficients.
@@ -51,13 +52,14 @@ class ELISettings():
         generated with the Moon samples from Apollo 16th mission.
     """
     __slots__ = ['apply_correction', 'interpolate_rolo_coefficients', 'adjust_apollo']
-    def __init__(self, apply_correction: bool = True, interpolate_rolo_coefficients: bool = False,
+    def __init__(self, apply_correction: bool = False, interpolate_rolo_coefficients: bool = False,
         adjust_apollo: bool = True):
         """
         Parameters
         ----------
         apply_correction : bool
-            If True the result will have been multiplied by the RCF (Rimo Correction Factor).
+            If True the result will have been multiplied by the RCF (Rimo Correction Factor),
+            which corrects the data for the photometers' calibration.
             Otherwise it won't.
         interpolate_rolo_coefficients : bool
             If True the reflectance will be calculated linearly interpolating the ROLO

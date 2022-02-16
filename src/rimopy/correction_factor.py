@@ -2,6 +2,12 @@
 
 This module contains the coefficients of the RIMO correction factor (RCF).
 
+This value corrects the simulated extra terrestrial lunar irradiance in order
+to use it with photometers.
+
+See "Roman et al., 2020: Correction of a lunar-irradiance model for aerosol optical depth
+retrieval and comparison with a star photometer" for mor information.
+
 It exports the following classes:
     * CorrectionParams - DataClass that contains the estimated coefficients of the
         RCF for a wavelength.
