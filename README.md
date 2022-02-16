@@ -70,7 +70,7 @@ results = eli.get_eli(wavelengths, full_moon_Valladolid, kernels_path)
 
 These calculations can be customized, defining the settings and the methods used for the calculation of
 the extraterrestrial solar irradiance. For example, if someone wanted to calculate the lunar irradiance
-without applying the RIMO correction factor, and with a different method for the solar irradiance interpolation,
+applying the RIMO correction factor, and with a different method for the solar irradiance interpolation,
 something like the following code block would work:
 
 ```python
@@ -78,7 +78,7 @@ from rimopy import esi
 
 wavelength = 500
 calc = esi.ESICalculator(esi.WehrliFile.ORIGINAL_WEHRLI, esi.ESIMethod.LINEAR_INTERPOLATION)
-eli_settings = eli.ELISettings(False, False, True)
+eli_settings = eli.ELISettings(True, False, True)
 result = eli.get_eli_per_nm(wavelength, full_moon_Valladolid, kernels_path, calc, eli_settings)
 ```
 
