@@ -18,7 +18,7 @@ CUSTOM_KERNEL_NAME = "custom.bsp"
 EARTH_ID_CODE = 399
 
 def _calculate_states(ets: np.ndarray, pos_iau_earth: np.ndarray, delta_t: float,
-    frame: str) -> np.ndarray:
+                      frame: str) -> np.ndarray:
     """
     Returns a ndarray containing the states of a point referencing the target frame.
 
@@ -44,20 +44,20 @@ def _calculate_states(ets: np.ndarray, pos_iau_earth: np.ndarray, delta_t: float
     """
     num_coordinates = 3
     n_state_attributes = 6
-    states = np.zeros( ( len( ets ), n_state_attributes ) )
-    for i, et_value in enumerate( ets ):
-        states[ i, :num_coordinates ] = np.dot(
-            spice.pxform( 'IAU_EARTH', frame, et_value ),
-            pos_iau_earth )
+    states = np.zeros((len(ets), n_state_attributes))
+    for i, et_value in enumerate(ets):
+        states[i, :num_coordinates] = np.dot(
+            spice.pxform('IAU_EARTH', frame, et_value),
+            pos_iau_earth)
 
-    for i in range( len( ets ) - 1 ):
-        states[ i, num_coordinates: ] = ( states[ i + 1, :num_coordinates ] -
-            states[ i, :num_coordinates ] ) / delta_t
+    for i in range(len(ets) - 1):
+        states[i, num_coordinates:] = (states[i + 1, :num_coordinates] -
+                                       states[i, :num_coordinates]) / delta_t
 
     pos_np1 = np.dot(
-            spice.pxform( 'IAU_EARTH', frame, ets[ -1 ] + delta_t ),
-            pos_iau_earth )
-    states[ -1, num_coordinates: ] = ( pos_np1 - states[ -1, :num_coordinates ] ) / delta_t
+        spice.pxform('IAU_EARTH', frame, ets[-1] + delta_t),
+        pos_iau_earth)
+    states[-1, num_coordinates:] = (pos_np1 - states[-1, :num_coordinates]) / delta_t
     return states
 
 @dataclass
@@ -98,7 +98,7 @@ class _EarthLocation():
         pol_rad = 6357 # Earth polar radius
         alt_km = altitude/1000
         flattening = (eq_rad - pol_rad)/eq_rad
-        pos_iau_earth = spice.pgrrec( 'EARTH', math.radians(lon), math.radians(lat), alt_km,
+        pos_iau_earth = spice.pgrrec('EARTH', math.radians(lon), math.radians(lat), alt_km,
             eq_rad, flattening)
         self.states = _calculate_states(ets, pos_iau_earth, delta_t, frame)
 
@@ -155,12 +155,12 @@ def _get_moon_data_id(utc_time: str, kernels_path: str, observer_id: int) -> Moo
 
     # Calculate the distance between observer and moon (KM)
     obs_pos, _ = spice.spkpos("MOON", et_date, "MOON_ME", "NONE", "Observer")
-    distance_observer_moon = spice.vnorm( obs_pos )
+    distance_observer_moon = spice.vnorm(obs_pos)
 
     # Calculate the distance between sun and moon (AU)
     sun_pos, _ = spice.spkpos("MOON", et_date, "J2000", "NONE", "SUN")
-    distance_sun_moon = spice.vnorm( sun_pos )
-    distance_sun_moon = spice.convrt( distance_sun_moon, "KM", "AU")
+    distance_sun_moon = spice.vnorm(sun_pos)
+    distance_sun_moon = spice.convrt(distance_sun_moon, "KM", "AU")
 
     spice.kclear()
 
@@ -218,12 +218,12 @@ def _create_earth_point_kernel(utc_time: str, kernels_path: str, lat: int, lon: 
     obs = _EarthLocation(id_code, lat, lon, altitude, ets, delta_t, frame)
 
     custom_kernel_path = os.path.join(kernels_path, CUSTOM_KERNEL_NAME)
-    handle = spice.spkopn(custom_kernel_path, 'SPK_file', 0 )
+    handle = spice.spkopn(custom_kernel_path, 'SPK_file', 0)
 
     center = EARTH_ID_CODE
-    spice.spkw09( handle, obs.point_id, center, frame,
-        ets[ 0 ], ets[ -1 ], '0', polynomial_degree, len( ets ),
-        obs.states.tolist(), ets.tolist() )
+    spice.spkw09(handle, obs.point_id, center, frame,
+        ets[0], ets[-1], '0', polynomial_degree, len(ets),
+        obs.states.tolist(), ets.tolist())
     spice.spkcls(handle)
 
     spice.kclear()
@@ -268,4 +268,3 @@ def get_moon_data(lat: float, lon: float, altitude: float , utc_time: str,
     _remove_custom_kernel_file(kernels_path)
     _create_earth_point_kernel(utc_time, kernels_path, lat, lon, altitude, id_code)
     return _get_moon_data_id(utc_time, kernels_path, id_code)
-    

@@ -1,6 +1,6 @@
 # Rimopy
 
-![Version 0.1.1](https://img.shields.io/badge/version-0.1.1-informational)
+![Version 0.1.2](https://img.shields.io/badge/version-0.1.2-informational)
 
 Rimopy is a package consisting of an implementation of the ROLO model, following RIMO's
 implementation, made in python.
@@ -33,6 +33,14 @@ In order to use the package, a directory with all the kernels must be downloaded
 That directory must contain the same elements as **/tests/kernels**, and the execution must
 be allowed to read and write from that directory.
 
+Alternatively, kernels can be downloaded manually from the following urls:
+- [https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/de440.bsp](https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/de440.bsp)
+- [https://naif.jpl.nasa.gov/pub/naif/generic_kernels/fk/satellites/moon_080317.tf](https://naif.jpl.nasa.gov/pub/naif/generic_kernels/fk/satellites/moon_080317.tf)
+- [https://naif.jpl.nasa.gov/pub/naif/pds/wgc/lessons/binary_pck/kernels/fk/moon_assoc_me.tf](https://naif.jpl.nasa.gov/pub/naif/pds/wgc/lessons/binary_pck/kernels/fk/moon_assoc_me.tf)
+- [https://naif.jpl.nasa.gov/pub/naif/generic_kernels/pck/moon_pa_de421_1900-2050.bpc](https://naif.jpl.nasa.gov/pub/naif/generic_kernels/pck/moon_pa_de421_1900-2050.bpc)
+- [https://naif.jpl.nasa.gov/pub/naif/generic_kernels/lsk/naif0012.tls](https://naif.jpl.nasa.gov/pub/naif/generic_kernels/lsk/naif0012.tls)
+- [https://naif.jpl.nasa.gov/pub/naif/generic_kernels/pck/pck00010.tpc](https://naif.jpl.nasa.gov/pub/naif/generic_kernels/pck/pck00010.tpc)
+
 ## Usage
 
 The main functions are eli.get_eli and eli.get_eli_per_nm. Both return the extraterrestrial
@@ -62,7 +70,7 @@ results = eli.get_eli(wavelengths, full_moon_Valladolid, kernels_path)
 
 These calculations can be customized, defining the settings and the methods used for the calculation of
 the extraterrestrial solar irradiance. For example, if someone wanted to calculate the lunar irradiance
-without applying the RIMO correction factor, and with a different method for the solar irradiance interpolation,
+applying the RIMO correction factor, and with a different method for the solar irradiance interpolation,
 something like the following code block would work:
 
 ```python
@@ -70,7 +78,7 @@ from rimopy import esi
 
 wavelength = 500
 calc = esi.ESICalculator(esi.WehrliFile.ORIGINAL_WEHRLI, esi.ESIMethod.LINEAR_INTERPOLATION)
-eli_settings = eli.ELISettings(False, False, True)
+eli_settings = eli.ELISettings(True, False, True)
 result = eli.get_eli_per_nm(wavelength, full_moon_Valladolid, kernels_path, calc, eli_settings)
 ```
 
