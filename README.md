@@ -33,6 +33,14 @@ In order to use the package, a directory with all the kernels must be downloaded
 That directory must contain the same elements as **/tests/kernels**, and the execution must
 be allowed to read and write from that directory.
 
+Alternatively, kernels can be downloaded manually from the following urls:
+- [https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/de440.bsp](https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/de440.bsp)
+- [https://naif.jpl.nasa.gov/pub/naif/generic_kernels/fk/satellites/moon_080317.tf](https://naif.jpl.nasa.gov/pub/naif/generic_kernels/fk/satellites/moon_080317.tf)
+- [https://naif.jpl.nasa.gov/pub/naif/pds/wgc/lessons/binary_pck/kernels/fk/moon_assoc_me.tf](https://naif.jpl.nasa.gov/pub/naif/pds/wgc/lessons/binary_pck/kernels/fk/moon_assoc_me.tf)
+- [https://naif.jpl.nasa.gov/pub/naif/generic_kernels/pck/moon_pa_de421_1900-2050.bpc](https://naif.jpl.nasa.gov/pub/naif/generic_kernels/pck/moon_pa_de421_1900-2050.bpc)
+- [https://naif.jpl.nasa.gov/pub/naif/generic_kernels/lsk/naif0012.tls](https://naif.jpl.nasa.gov/pub/naif/generic_kernels/lsk/naif0012.tls)
+- [https://naif.jpl.nasa.gov/pub/naif/generic_kernels/pck/pck00010.tpc](https://naif.jpl.nasa.gov/pub/naif/generic_kernels/pck/pck00010.tpc)
+
 ## Usage
 
 The main functions are eli.get_eli and eli.get_eli_per_nm. Both return the extraterrestrial
