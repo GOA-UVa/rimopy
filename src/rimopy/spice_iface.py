@@ -218,7 +218,7 @@ def _create_earth_point_kernel(utc_time: str, kernels_path: str, lat: int, lon: 
     etf = et0 + delta_t * min_states_polynomial
     ets = np.arange(et0, etf, delta_t)
 
-    frame = 'J2000'
+    frame = 'ITRF93'
     obs = _EarthLocation(id_code, lat, lon, altitude, ets, delta_t, frame)
 
     custom_kernel_path = os.path.join(kernels_path, CUSTOM_KERNEL_NAME)
