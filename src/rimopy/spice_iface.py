@@ -44,10 +44,11 @@ def _calculate_states(ets: np.ndarray, pos_iau_earth: np.ndarray, delta_t: float
     """
     num_coordinates = 3
     n_state_attributes = 6
+    source_frame = 'ITRF93' #'IAU_EARTH'
     states = np.zeros((len(ets), n_state_attributes))
     for i, et_value in enumerate(ets):
         states[i, :num_coordinates] = np.dot(
-            spice.pxform('IAU_EARTH', frame, et_value),
+            spice.pxform(source_frame, frame, et_value),
             pos_iau_earth)
 
     for i in range(len(ets) - 1):
@@ -55,7 +56,7 @@ def _calculate_states(ets: np.ndarray, pos_iau_earth: np.ndarray, delta_t: float
                                        states[i, :num_coordinates]) / delta_t
 
     pos_np1 = np.dot(
-        spice.pxform('IAU_EARTH', frame, ets[-1] + delta_t),
+        spice.pxform(source_frame, frame, ets[-1] + delta_t),
         pos_iau_earth)
     states[-1, num_coordinates:] = (pos_np1 - states[-1, :num_coordinates]) / delta_t
     return states
@@ -122,8 +123,10 @@ def _get_moon_data_id(utc_time: str, kernels_path: str, observer_id: int) -> Moo
     MoonData
         Moon data obtained from SPICE toolbox
     """
-    kernels = ["moon_pa_de421_1900-2050.bpc", "moon_080317.tf", "moon_assoc_me.tf",
-        "pck00010.tpc", "naif0012.tls", "de440.bsp", "custom.bsp"]
+    kernels = ["moon_pa_de421_1900-2050.bpc", "moon_080317.tf",
+        "pck00010.tpc", "naif0011.tls", "de421.bsp", "custom.bsp", "earth_assoc_itrf93.tf",
+        "earth_latest_high_prec.bpc", "earth_070425_370426_predict.bpc"]
+    
     for kernel in kernels:
         k_path = os.path.join(kernels_path, kernel)
         spice.furnsh(k_path)
@@ -132,15 +135,15 @@ def _get_moon_data_id(utc_time: str, kernels_path: str, observer_id: int) -> Moo
 
     et_date = spice.str2et(utc_time)
 
-    m_eq_rad = 1738.1 # Moon Equatorial Radius
-    m_pol_rad = 1736 # Moon polar radius
+    _, radios_luna = spice.bodvrd("MOON", "RADII", 3)
+    m_eq_rad = radios_luna[0] # 1738.1 # Moon Equatorial Radius
+    m_pol_rad = radios_luna[2] # 1736 # Moon polar radius
     flattening = (m_eq_rad-m_pol_rad)/m_eq_rad
 
     # Calculate moon phase angle
-    spoint, _, _ = spice.subpnt("NEAR POINT/ELLIPSOID", "MOON", et_date, 'MOON_ME',
+    spoint, _, _ = spice.subpnt("INTERCEPT/ELLIPSOID", "MOON", et_date, 'MOON_ME',
         "NONE", "Observer")
-    _, _, phase, _, _ = spice.ilumin("ELLIPSOID", "MOON", et_date, "MOON_ME", "NONE",
-        "Observer", spoint)
+    phase = spice.phaseq(et_date, "MOON", "SUN", "Observer", "NONE")
     phase = math.degrees(phase)
 
     # Calculate selenographic coordinates of the observer
@@ -149,17 +152,17 @@ def _get_moon_data_id(utc_time: str, kernels_path: str, observer_id: int) -> Moo
     sel_lat = math.degrees(sel_lat)
 
     # Calculate selenographic longitude of sun
-    sun_spoint, _, _ = spice.subpnt("NEAR POINT/ELLIPSOID", "MOON", et_date, 'IAU_MOON',
+    sun_spoint, _, _ = spice.subslr("INTERCEPT/ELLIPSOID", "MOON", et_date, 'MOON_ME',
         "NONE", "SUN")
     sel_lon_sun_rad, _, _ = spice.recpgr("MOON", sun_spoint, m_eq_rad, flattening)
 
     # Calculate the distance between observer and moon (KM)
-    obs_pos, _ = spice.spkpos("MOON", et_date, "MOON_ME", "NONE", "Observer")
-    distance_observer_moon = spice.vnorm(obs_pos)
+    state, _ = spice.spkezr("MOON", et_date, "MOON_ME", "NONE", "Observer")
+    distance_observer_moon = math.sqrt(state[0]**2 + state[1]**2 + state[2]**2)
 
     # Calculate the distance between sun and moon (AU)
-    sun_pos, _ = spice.spkpos("MOON", et_date, "J2000", "NONE", "SUN")
-    distance_sun_moon = spice.vnorm(sun_pos)
+    state, _ = spice.spkezr("MOON", et_date, "MOON_ME", "NONE", "SUN")
+    distance_sun_moon = math.sqrt(state[0]**2 + state[1]**2 + state[2]**2)
     distance_sun_moon = spice.convrt(distance_sun_moon, "KM", "AU")
 
     spice.kclear()
@@ -200,10 +203,11 @@ def _create_earth_point_kernel(utc_time: str, kernels_path: str, lat: int, lon: 
     id_code : int
         ID code that will be associated with the point on Earth's surface
     """
-    pck_kernel_path = os.path.join(kernels_path, "pck00010.tpc")
-    naif_kernel_path = os.path.join(kernels_path, "naif0012.tls")
-    spice.furnsh(pck_kernel_path)
-    spice.furnsh(naif_kernel_path)
+    kernels = ["pck00010.tpc", "naif0011.tls", "earth_assoc_itrf93.tf",
+        "de421.bsp", "earth_latest_high_prec.bpc", "earth_070425_370426_predict.bpc"]
+    for kernel in kernels:
+        k_path = os.path.join(kernels_path, kernel)
+        spice.furnsh(k_path)
 
     polynomial_degree = 5
     # Degree of the lagrange polynomials that will be used to interpolate the states
@@ -214,7 +218,7 @@ def _create_earth_point_kernel(utc_time: str, kernels_path: str, lat: int, lon: 
     etf = et0 + delta_t * min_states_polynomial
     ets = np.arange(et0, etf, delta_t)
 
-    frame = 'J2000'
+    frame = 'ITRF93'
     obs = _EarthLocation(id_code, lat, lon, altitude, ets, delta_t, frame)
 
     custom_kernel_path = os.path.join(kernels_path, CUSTOM_KERNEL_NAME)

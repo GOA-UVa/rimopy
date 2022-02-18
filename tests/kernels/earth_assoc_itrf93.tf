@@ -1,11 +1,11 @@
 KPL/FK
 
 
-   SPICE Lunar ME Reference Frame/Body Association  Kernel
+   SPICE Earth Body-fixed Reference Frame/Body Association Kernel
    =====================================================================
 
-   Original file name:                   moon_assoc_me.tf
-   Creation date:                        2007 February 13 17:24
+   Original file name:                   earth_assoc_itrf93.tf
+   Creation date:                        2007 April 02 16:21
    Created by:                           Nat Bachman  (NAIF/JPL)
 
 
@@ -13,27 +13,31 @@ KPL/FK
    =====================================================================
 
    In the SPICE system, the default body-fixed reference frame
-   associated with the Moon is named
+   associated with the Earth is named
 
-       IAU_MOON
+       IAU_EARTH
 
-   The IAU_MOON reference frame is implemented via approximate formulas
+   The IAU_EARTH reference frame is implemented via approximate formulas
    provided by the IAU report [1] and is not suitable for high-accuracy
    work.
 
-   This kernel directs the SPICE system to associate the lunar "mean
-   Earth" reference frame
+   This kernel directs the SPICE system to associate the IERS
+   terrestrial reference frame
 
-      MOON_ME
+      ITRF93
 
-   with the Moon. 
+   with the Earth. High-accuracy binary Earth PCK files, which 
+   provide the orientation of the ITRF93 frame relative to 
+   the ICRF are available from the NAIF web site:
+
+      ftp://naif.jpl.nasa.gov/pub/naif/generic_kernels/pck
 
    When this kernel is loaded via FURNSH, the SPICE frame system
    routines CNMFRM and CIDFRM, which identify the reference frame
-   associated with a specified body, will indicate that the MOON_ME
-   frame is associated with the Moon.  In addition, higher-level SPICE
+   associated with a specified body, will indicate that the ITRF93
+   frame is associated with the Earth. In addition, higher-level SPICE
    geometry routines that rely on the CNMFRM or CIDFRM routines will
-   use the MOON_ME frame where applicable. As of the release date of
+   use the ITRF93 frame where applicable. As of the release date of
    this kernel, these SPICE routines are:
 
       ET2LST
@@ -43,31 +47,19 @@ KPL/FK
       SUBSOL
 
    Finally, any code that calls these routines to obtain results
-   involving lunar body-fixed frames are affected.  Within SPICE, the
+   involving Earth body-fixed frames are affected. Within SPICE, the
    only higher-level system that is affected is the dynamic frame
    system.
-
-   Note:  to direct SPICE to associate the lunar principal axis frame 
-
-      MOON_PA
-
-   with the Moon, load the kernel
-
-      moon_assoc_pa.tf
-
-   rather than this one.
-
 
 
    Using this kernel
    =====================================================================
 
-   This kernel must be loaded together with a lunar frame specification
-   kernel and a binary lunar PCK.  Below an example meta-kernel that
-   loads these files and a small program illustrating use of the kernel
-   are shown. The names of the kernels used here are current as of the
-   release date of this kernel, but should not be assumed to current at
-   later dates.
+   This kernel must be loaded together with a binary Earth PCK. Below
+   an example meta-kernel that loads these files and a small program
+   illustrating use of the kernel are shown. The names of the kernels
+   used here are current as of the release date of this kernel, but
+   should not be assumed to current at later dates.
 
 
       Example meta-kernel
@@ -85,15 +77,11 @@ KPL/FK
 
              Kernels to load are:
 
-                Lunar kernels
-                -------------
-                Binary lunar PCK:          moon_pa_de403_1950-2198.bpc
-                Lunar FK:                  moon_060721.tf
-                Frame association kernel:  moon_assoc_me.tf
+                Earth association FK:      earth_assoc_itrf93.tf
 
-                Additional kernels to support sub-point computation
-                ---------------------------------------------------
-                Text PCK for lunar radii:  pck00008.tpc
+                Earth binary PCK:          earth_000101_070620_070329.bpc
+
+                Text PCK for Earth radii:  pck00008.tpc
 
                 Leapseconds kernel (for
                 time conversion):          naif0008.tls
@@ -103,12 +91,11 @@ KPL/FK
 
          @begindata
 
-         KERNELS_TO_LOAD = ( 'moon_pa_de403_1950-2198.bpc'
-                             'moon_060721.tf'
-                             'moon_assoc_me.tf'    
+         KERNELS_TO_LOAD = ( 'earth_assoc_itrf93.tf'
+                             'earth_000101_070620_070329.bpc'
                              'pck00008.tpc'
                              'naif0008.tls'         
-                             'de414.bsp'                   )
+                             'de414.bsp'                     )
          @begintext
 
          End of kernel
@@ -119,9 +106,9 @@ KPL/FK
       ------------
 
       Find the geometric (without light time and stellar aberration
-      corrections) sub-Earth point on the Moon at a given UTC time,
-      using the MOON_ME reference frame.  Display the name of the
-      body-fixed lunar frame used for the computation.
+      corrections) sub-Moon point on the Earth at a given UTC time,
+      using the ITRF93 reference frame.  Display the name of the
+      Earth body-fixed frame used for the computation.
 
 
              PROGRAM EX
@@ -166,11 +153,11 @@ KPL/FK
              CALL STR2ET ( TIMSTR, ET )
 
        C
-       C     Find the closest point on the Moon to the center
-       C     of the Earth at ET.
+       C     Find the closest point on the Earth to the center
+       C     of the Moon at ET.
        C
-             CALL SUBPT  ( 'Near point',  'MOON',  ET,  'NONE', 
-            .              'EARTH',       SPOINT,  ALT          )
+             CALL SUBPT  ( 'Near point', 'EARTH', ET,  'NONE', 
+            .              'MOON',       SPOINT,  ALT          )
             .               
        C
        C     Express the sub-observer point in latitudinal
@@ -179,23 +166,23 @@ KPL/FK
              CALL RECLAT ( SPOINT, RADIUS, LON, LAT )
 
        C
-       C     Look up the name of the lunar body-fixed frame.
+       C     Look up the name of the Earth body-fixed frame.
        C     
-             CALL CNMFRM ( 'MOON', FRCODE, FRNAME, FOUND )
+             CALL CNMFRM ( 'EARTH', FRCODE, FRNAME, FOUND )
 
        C
        C     Always check the "found" flag.  Signal an error if we
        C     don't find a frame name.
        C
              IF ( .NOT. FOUND ) THEN
-                CALL SETMSG ( 'No body-fixed frame found for the Moon.' )
+                CALL SETMSG ( 'No body-fixed frame found for the Earth.' )
                 CALL SIGERR ( 'SPICE(NOFRAME)'                          )
              END IF
 
-             WRITE(*,*) 'Lunar body-fixed frame is ', FRNAME
-             WRITE(*,*) 'Sub-Earth planetocentric longitude (deg):', 
+             WRITE(*,*) 'Earth body-fixed frame is ', FRNAME
+             WRITE(*,*) 'Sub-Moon planetocentric longitude (deg):', 
             .            LON*DPR()
-             WRITE(*,*) 'Sub-Earth planetocentric latitude  (deg):',
+             WRITE(*,*) 'Sub-Moon planetocentric latitude  (deg):',
             .            LAT*DPR()
              END
 
@@ -207,13 +194,12 @@ KPL/FK
       expected to differ somewhat across different computing platforms.
 
       When the above example program is run using the example meta-kernel,
-      and the (arbitrary) date 2007 Feb 13 00:00:00 UTC is used
+      and the (arbitrary) date 2007 Apr 2 00:00:00 UTC is used
       as the observation time, the output will be:
 
-         Lunar body-fixed frame is MOON_ME
-         Sub-Earth planetocentric longitude (deg): -6.73726142
-         Sub-Earth planetocentric latitude  (deg):  6.75680538
-
+         Earth body-fixed frame is ITRF93
+         Sub-Moon planetocentric longitude (deg): -6.85794256
+         Sub-Moon planetocentric latitude  (deg): -3.09099529
 
 
    References
@@ -231,15 +217,15 @@ KPL/FK
    Data
    =====================================================================
 
-   The assignment below directs the SPICE system to associate the MOON_ME 
-   reference frame with the Moon.
+   The assignment below directs the SPICE system to associate the ITRF93
+   reference frame with the Earth.
 
    For further information, see the Frames Required Reading section
    titled "Connecting an Object to its Body-fixed Frame."
 
    \begindata
 
-      OBJECT_MOON_FRAME =  'MOON_ME'
+      OBJECT_EARTH_FRAME =  'ITRF93'
 
    \begintext
 
