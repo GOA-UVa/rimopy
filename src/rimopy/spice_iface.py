@@ -268,7 +268,7 @@ def get_moon_data(lat: float, lon: float, altitude: float , utc_time: str,
     MoonData
         Moon data obtained from SPICE toolbox
     """
-    id_code = 301100
+    id_code = 399100
     _remove_custom_kernel_file(kernels_path)
     _create_earth_point_kernel(utc_time, kernels_path, lat, lon, altitude, id_code)
     return _get_moon_data_id(utc_time, kernels_path, id_code)
