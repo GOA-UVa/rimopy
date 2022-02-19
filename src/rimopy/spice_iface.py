@@ -4,12 +4,13 @@ Interface with NASA's SPICE toolbox
 
 It exports the following functions:
 
-    * get_moon_data - Calculates needed MoonData from SPICE toolbox
+    * get_moon_datas - Calculates needed MoonData from SPICE toolbox
 """
 
 from dataclasses import dataclass
 import os
 import math
+from typing import List
 import numpy as np
 import spiceypy as spice
 from .types import MoonData
@@ -103,36 +104,19 @@ class _EarthLocation():
             eq_rad, flattening)
         self.states = _calculate_states(ets, pos_iau_earth, delta_t, frame)
 
-def _get_moon_data_id(utc_time: str, kernels_path: str, observer_id: int) -> MoonData:
-    """Calculation of needed Moon data from SPICE toolbox
-
-    Moon phase angle, selenographic coordinates and distance from observer point to moon.
-    Selenographic longitude and distance from sun to moon.
-
+def _get_moon_data(utc_time: str) -> MoonData:
+    """Calculation of the moon data for the given utc_time for the loaded observer
+    
     Parameters
     ----------
     utc_time : str
         Time at which the ELI will be calculated, in a valid UTC DateTime format
-    kernels_path : str
-        Path where the SPICE kernels are stored
-    observer_id : int
-        Observer's body ID
 
     Returns
     -------
     MoonData
         Moon data obtained from SPICE toolbox
     """
-    kernels = ["moon_pa_de421_1900-2050.bpc", "moon_080317.tf",
-        "pck00010.tpc", "naif0011.tls", "de421.bsp", "custom.bsp", "earth_assoc_itrf93.tf",
-        "earth_latest_high_prec.bpc", "earth_070425_370426_predict.bpc"]
-    
-    for kernel in kernels:
-        k_path = os.path.join(kernels_path, kernel)
-        spice.furnsh(k_path)
-
-    spice.boddef("Observer", observer_id)
-
     et_date = spice.str2et(utc_time)
 
     _, radios_luna = spice.bodvrd("MOON", "RADII", 3)
@@ -165,8 +149,6 @@ def _get_moon_data_id(utc_time: str, kernels_path: str, observer_id: int) -> Moo
     distance_sun_moon = math.sqrt(state[0]**2 + state[1]**2 + state[2]**2)
     distance_sun_moon = spice.convrt(distance_sun_moon, "KM", "AU")
 
-    spice.kclear()
-
     limit_lat = 90
     if sel_lat > limit_lat:
         sel_lat -= limit_lat*2
@@ -181,17 +163,54 @@ def _get_moon_data_id(utc_time: str, kernels_path: str, observer_id: int) -> Moo
 
     moon_data = MoonData(distance_sun_moon, distance_observer_moon, sel_lon_sun_rad, sel_lat,
         sel_lon,phase)
-
     return moon_data
 
-def _create_earth_point_kernel(utc_time: str, kernels_path: str, lat: int, lon: int,
+def _get_moon_datas_id(utc_times: List[str], kernels_path: str, observer_id: int) -> List[MoonData]:
+    """Calculation of needed MoonDatas from SPICE toolbox
+
+    Moon phase angle, selenographic coordinates and distance from observer point to moon.
+    Selenographic longitude and distance from sun to moon.
+
+    Parameters
+    ----------
+    utc_times : list of str
+        Times at which the ELI will be calculated, in a valid UTC DateTime format
+    kernels_path : str
+        Path where the SPICE kernels are stored
+    observer_id : int
+        Observer's body ID
+
+    Returns
+    -------
+    list of MoonData
+        Moon data obtained from SPICE toolbox
+    """
+    kernels = ["moon_pa_de421_1900-2050.bpc", "moon_080317.tf",
+        "pck00010.tpc", "naif0011.tls", "de421.bsp", "custom.bsp", "earth_assoc_itrf93.tf",
+        "earth_latest_high_prec.bpc", "earth_070425_370426_predict.bpc"]
+    
+    for kernel in kernels:
+        k_path = os.path.join(kernels_path, kernel)
+        spice.furnsh(k_path)
+
+    spice.boddef("Observer", observer_id)
+    moon_datas = []
+
+    for utc_time in utc_times:
+        moon_datas.append(_get_moon_data(utc_time)) 
+
+    spice.kclear()
+
+    return moon_datas
+
+def _create_earth_point_kernel(utc_times: List[str], kernels_path: str, lat: int, lon: int,
     altitude: float, id_code: int) -> None:
     """Creates a SPK custom kernel file containing the data of a point on Earth's surface
 
     Parameters
     ----------
-    utc_time : str
-        Time at which the ELI will be calculated, in a valid UTC DateTime format
+    utc_times : list of str
+        Times at which the ELI will be calculated, in a valid UTC DateTime format
     kernels_path : str
         Path where the SPICE kernels are stored
     lat : float
@@ -211,12 +230,19 @@ def _create_earth_point_kernel(utc_time: str, kernels_path: str, lat: int, lon: 
 
     polynomial_degree = 5
     # Degree of the lagrange polynomials that will be used to interpolate the states
-    delta_t = 1000 # TDB seconds between states
-    et0 = spice.str2et(utc_time)
+    delta_t = 1 # TDB seconds between states. Arbitrary.
     min_states_polynomial = polynomial_degree + 1
     # Min # states that are required to define a polynomial of that degree
-    etf = et0 + delta_t * min_states_polynomial
-    ets = np.arange(et0, etf, delta_t)
+    ets = np.array([])
+    for utc_time in utc_times:
+        et0 = spice.str2et(utc_time)
+        etprev = et0 - delta_t * min_states_polynomial
+        etf = et0 + delta_t * min_states_polynomial
+        ets_t = np.arange(etprev, etf, delta_t)
+        for et_t in ets_t:
+            if et_t not in ets:
+                index = np.searchsorted(ets, et_t)
+                ets = np.insert(ets, index, et_t)
 
     frame = 'ITRF93'
     obs = _EarthLocation(id_code, lat, lon, altitude, ets, delta_t, frame)
@@ -244,8 +270,8 @@ def _remove_custom_kernel_file(kernels_path: str) -> None:
     if os.path.exists(custom_kernel_path):
         os.remove(custom_kernel_path)
 
-def get_moon_data(lat: float, lon: float, altitude: float , utc_time: str,
-    kernels_path: str) -> MoonData:
+def get_moon_datas(lat: float, lon: float, altitude: float , utc_times: List[str],
+    kernels_path: str) -> List[MoonData]:
     """Calculation of needed Moon data from SPICE toolbox
 
     Moon phase angle, selenographic coordinates and distance from observer point to moon.
@@ -259,16 +285,16 @@ def get_moon_data(lat: float, lon: float, altitude: float , utc_time: str,
         Geographic longitude (in degrees) of the location.
     altitude : float
         Altitude over the sea level in meters.
-    utc_time : str
-        Time at which the ELI will be calculated, in a valid UTC DateTime format
+    utc_times : str
+        Times at which the ELI will be calculated, in a valid UTC DateTime format
     kernels_path : str
         Path where the SPICE kernels are stored
     Returns
     -------
-    MoonData
+    list of MoonData
         Moon data obtained from SPICE toolbox
     """
     id_code = 399100
     _remove_custom_kernel_file(kernels_path)
-    _create_earth_point_kernel(utc_time, kernels_path, lat, lon, altitude, id_code)
-    return _get_moon_data_id(utc_time, kernels_path, id_code)
+    _create_earth_point_kernel(utc_times, kernels_path, lat, lon, altitude, id_code)
+    return _get_moon_datas_id(utc_times, kernels_path, id_code)

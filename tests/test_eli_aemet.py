@@ -20,7 +20,7 @@ calc = esi.ESICalculator(esi.WehrliFile.ORIGINAL_WEHRLI, esi.ESIMethod.GAUSSIAN_
 eli_settings = eli.ELISettings(False, False, True)
 
 def _testValladolidNoCorr(ts: 'TestSum', wavelength, expected, date):
-    ed_Vall.utc_time = date
+    ed_Vall.set_utc_times(date)
     res = eli.get_eli_per_nm(wavelength, ed_Vall, KERNELS_PATH, calc, eli_settings)
     ts.assertAlmostEqual(res, expected, delta=expected*prop_error)
 
