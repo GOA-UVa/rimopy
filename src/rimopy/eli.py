@@ -84,13 +84,13 @@ class EarthPoint():
         Geographic latitude (in degrees) of the location.
     lon : float
         Geographic longitude (in degrees) of the location.
-    utc_time : str
-        Time at which the ELI will be calculated, in a valid UTC DateTime format.
+    utc_times : list of str | str
+        Time/s at which the ELI will be calculated, in a valid UTC DateTime format.
     altitude : float
         Altitude over the sea level in meters. Default = 0.
     """
-    __slots__ = ['lat', 'lon', 'utc_time', 'altitude']
-    def __init__(self, lat: float, lon: float, utc_time: str, altitude: float = 0):
+    __slots__ = ['lat', 'lon', 'utc_times', 'altitude']
+    def __init__(self, lat: float, lon: float, utc_times: Union[List[str], str], altitude: float = 0):
         """
         Parameters
         ----------
@@ -98,15 +98,32 @@ class EarthPoint():
             Geographic latitude (in degrees) of the location.
         lon : float
             Geographic longitude (in degrees) of the location.
-        utc_time : str
-            Time at which the ELI will be calculated, in a valid UTC DateTime format.
+        utc_times : list of str | str
+            Time/s at which the ELI will be calculated, in a valid UTC DateTime format.
         altitude : float
             Altitude over the sea level in meters. Default = 0.
         """
         self.lat = lat
         self.lon = lon
-        self.utc_time = utc_time
         self.altitude = altitude
+        if isinstance(utc_times, list):
+            self.utc_times = utc_times
+        else:
+            self.utc_times = [utc_times]
+
+    def set_utc_times(self, utc_times: Union[List[str], str]):
+        """
+        Modifies the utc_times attribute
+        
+        Parameters
+        ----------
+        utc_times : list of str | str
+            Time/s at which the ELI will be calculated, in a valid UTC DateTime format.
+        """
+        if isinstance(utc_times, list):
+            self.utc_times = utc_times
+        else:
+            self.utc_times = [utc_times]
 
 def _summatory_a(wavelength_nm: float, gr_value: float) -> float:
     """The first summatory of Eq. 2 in Roman et al., 2020
@@ -428,13 +445,18 @@ def get_eli(wavelength_nm: Union[float, List[float]], earth_data: EarthPoint, ke
         The extraterrestrial lunar irradiance/s calculated. It will be a list if parameter
         "wavelength_nm" was a list.
     """
-    moon_data = spice_iface.get_moon_data(earth_data.lat, earth_data.lon, earth_data.altitude,
-        earth_data.utc_time, kernels_path)
-    return get_eli_bypass(wavelength_nm, moon_data, esi_calc, eli_settings)
+    moon_data = spice_iface.get_moon_datas(earth_data.lat, earth_data.lon, earth_data.altitude,
+        earth_data.utc_times, kernels_path)
+    irradiances = []
+    for moon_d in moon_data:
+        irradiances.append(get_eli_bypass(wavelength_nm, moon_d, esi_calc, eli_settings))
+    if len(irradiances) == 1:
+        return irradiances[0]
+    return irradiances
 
 def get_eli_bypass_per_nm(wavelength_nm: Union[float, List[float]], moon_data: MoonData,
     esi_calc: esi.ESICalculator = esi.ESICalculator(),
-    eli_settings: ELISettings = ELISettings()) -> Union[float, List[float]]:
+    eli_settings: ELISettings = ELISettings()) -> Union[float, List[float], List[List[float]]]:
     """Calculation of Extraterrestrial Lunar Irradiance following Eq 3 in Roman et al., 2020
 
     Allow users to simulate lunar observation for any observer/solar selenographic
@@ -471,7 +493,7 @@ def get_eli_bypass_per_nm(wavelength_nm: Union[float, List[float]], moon_data: M
 
 def get_eli_per_nm(wavelength_nm: Union[float, List[float]], earth_data: EarthPoint,
     kernels_path: str, esi_calc: esi.ESICalculator = esi.ESICalculator(),
-    eli_settings: ELISettings = ELISettings()) -> Union[float, List[float]]:
+    eli_settings: ELISettings = ELISettings()) -> Union[float, List[float], List[List[float]]]:
     """Calculation of Extraterrestrial Lunar Irradiance from geographic coordinates
 
     Allow users to simulate lunar observations for any observer position around the Earth
@@ -500,7 +522,11 @@ def get_eli_per_nm(wavelength_nm: Union[float, List[float]], earth_data: EarthPo
         The extraterrestrial lunar irradiance/s calculated. It will be a list if parameter
         "wavelength_nm" was a list.
     """
-    moon_data = spice_iface.get_moon_data(earth_data.lat, earth_data.lon, earth_data.altitude,
-        earth_data.utc_time, kernels_path)
-    return get_eli_bypass_per_nm(wavelength_nm, moon_data, esi_calc, eli_settings)
-    
+    moon_data = spice_iface.get_moon_datas(earth_data.lat, earth_data.lon, earth_data.altitude,
+        earth_data.utc_times, kernels_path)
+    irradiances = []
+    for moon_d in moon_data:
+        irradiances.append(get_eli_bypass_per_nm(wavelength_nm, moon_d, esi_calc, eli_settings))
+    if len(irradiances) == 1:
+        return irradiances[0]
+    return irradiances

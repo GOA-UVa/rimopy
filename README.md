@@ -1,6 +1,6 @@
 # Rimopy
 
-![Version 0.1.3](https://img.shields.io/badge/version-0.1.3-informational)
+![Version 0.1.4](https://img.shields.io/badge/version-0.1.4-informational)
 
 Rimopy is a package consisting of an implementation of the ROLO model, following RIMO's
 implementation, made in python.
@@ -34,11 +34,13 @@ That directory must contain the same elements as **/tests/kernels**, and the exe
 be allowed to read and write from that directory.
 
 Alternatively, kernels can be downloaded manually from the following urls:
-- [https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/de440.bsp](https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/de440.bsp)
+- [https://naif.jpl.nasa.gov/pub/naif/JUNO/kernels/spk/de421.bsp](https://naif.jpl.nasa.gov/pub/naif/JUNO/kernels/spk/de421.bsp)
+- [https://naif.jpl.nasa.gov/pub/naif/pds/wgc/kernels/pck/earth_070425_370426_predict.bpc](https://naif.jpl.nasa.gov/pub/naif/pds/wgc/kernels/pck/earth_070425_370426_predict.bpc)
+- [https://naif.jpl.nasa.gov/pub/naif/generic_kernels/fk/planets/earth_assoc_itrf93.tf](https://naif.jpl.nasa.gov/pub/naif/generic_kernels/fk/planets/earth_assoc_itrf93.tf)
+- [https://naif.jpl.nasa.gov/pub/naif/generic_kernels/pck/earth_latest_high_prec.bpc](https://naif.jpl.nasa.gov/pub/naif/generic_kernels/pck/earth_latest_high_prec.bpc)
 - [https://naif.jpl.nasa.gov/pub/naif/generic_kernels/fk/satellites/moon_080317.tf](https://naif.jpl.nasa.gov/pub/naif/generic_kernels/fk/satellites/moon_080317.tf)
-- [https://naif.jpl.nasa.gov/pub/naif/pds/wgc/lessons/binary_pck/kernels/fk/moon_assoc_me.tf](https://naif.jpl.nasa.gov/pub/naif/pds/wgc/lessons/binary_pck/kernels/fk/moon_assoc_me.tf)
 - [https://naif.jpl.nasa.gov/pub/naif/generic_kernels/pck/moon_pa_de421_1900-2050.bpc](https://naif.jpl.nasa.gov/pub/naif/generic_kernels/pck/moon_pa_de421_1900-2050.bpc)
-- [https://naif.jpl.nasa.gov/pub/naif/generic_kernels/lsk/naif0012.tls](https://naif.jpl.nasa.gov/pub/naif/generic_kernels/lsk/naif0012.tls)
+- [https://naif.jpl.nasa.gov/pub/naif/generic_kernels/lsk/naif0011.tls](https://naif.jpl.nasa.gov/pub/naif/generic_kernels/lsk/naif0011.tls)
 - [https://naif.jpl.nasa.gov/pub/naif/generic_kernels/pck/pck00010.tpc](https://naif.jpl.nasa.gov/pub/naif/generic_kernels/pck/pck00010.tpc)
 
 ## Usage
