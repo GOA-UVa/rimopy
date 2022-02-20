@@ -17,7 +17,6 @@ retrieval and comparison with a star photometer.
 ## Requirements
 
 - numpy >= 1.22.0
-- scipy >= 1.7.3
 - spiceypy >= 4.0.3
 
 ## Installation
