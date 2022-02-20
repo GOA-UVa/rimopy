@@ -23,7 +23,7 @@ It exports the following functions:
 from dataclasses import dataclass
 import math
 from typing import List, Union
-from scipy.interpolate import interp1d
+import numpy as np
 
 from . import spice_iface
 from . import coefficients as coeffs
@@ -262,8 +262,7 @@ def _interpolated_moon_disk_reflectance(absolute_mpa_degrees: float, wavelength_
         moon_data)) * apollo_coeffs[left_index])
     y_values.append(math.exp(_ln_moon_disk_reflectance(absolute_mpa_degrees, x_values[1],
         moon_data)) * apollo_coeffs[right_index])
-    f_interp = interp1d(x_values, y_values, 'linear', fill_value="extrapolate")
-    return f_interp(wavelength_nm).item()
+    return np.interp(wavelength_nm, x_values, y_values)
 
 def _get_correction_factor(wavelength_nm: float, mpa: float) -> float:
     """Calculation of RIMO correction factor (RCF) following Eq 9 in Roman et al., 2020
