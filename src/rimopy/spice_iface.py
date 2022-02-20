@@ -19,7 +19,7 @@ CUSTOM_KERNEL_NAME = "custom.bsp"
 EARTH_ID_CODE = 399
 
 def _calculate_states(ets: np.ndarray, pos_iau_earth: np.ndarray, delta_t: float,
-                      frame: str) -> np.ndarray:
+                      source_frame: str, target_frame: str) -> np.ndarray:
     """
     Returns a ndarray containing the states of a point referencing the target frame.
 
@@ -35,7 +35,9 @@ def _calculate_states(ets: np.ndarray, pos_iau_earth: np.ndarray, delta_t: float
         Rectangular coordinates of the point, referencing IAU_EARTH frame.
     delta_t : float
         TDB seconds between states
-    frame : str
+    source_frame : str
+        Name of the frame to transform from.
+    target_frame : str
         Name of the frame which the location will be referencing.
 
     Returns
@@ -45,11 +47,10 @@ def _calculate_states(ets: np.ndarray, pos_iau_earth: np.ndarray, delta_t: float
     """
     num_coordinates = 3
     n_state_attributes = 6
-    source_frame = 'ITRF93' #'IAU_EARTH'
     states = np.zeros((len(ets), n_state_attributes))
     for i, et_value in enumerate(ets):
         states[i, :num_coordinates] = np.dot(
-            spice.pxform(source_frame, frame, et_value),
+            spice.pxform(source_frame, target_frame, et_value),
             pos_iau_earth)
 
     for i in range(len(ets) - 1):
@@ -57,7 +58,7 @@ def _calculate_states(ets: np.ndarray, pos_iau_earth: np.ndarray, delta_t: float
                                        states[i, :num_coordinates]) / delta_t
 
     pos_np1 = np.dot(
-        spice.pxform(source_frame, frame, ets[-1] + delta_t),
+        spice.pxform(source_frame, target_frame, ets[-1] + delta_t),
         pos_iau_earth)
     states[-1, num_coordinates:] = (pos_np1 - states[-1, :num_coordinates]) / delta_t
     return states
@@ -76,7 +77,7 @@ class _EarthLocation():
     """
     __slots__ = ['point_id', 'states']
     def __init__(self, point_id: int, lat: float, lon: float, altitude: float, ets: np.ndarray,
-        delta_t: float, frame: str):
+        delta_t: float, source_frame: str, target_frame: str):
         """
         Parameters
         ----------
@@ -92,7 +93,9 @@ class _EarthLocation():
             Array of TDB seconds from J2000 (et dates) of which the data will be taken
         delta_t : float
             TDB seconds between states
-        frame : str
+        source_frame : str
+            Name of the frame to transform from.
+        target_frame : str
             Name of the frame which the location will be referencing.
         """
         self.point_id = point_id
@@ -102,7 +105,7 @@ class _EarthLocation():
         flattening = (eq_rad - pol_rad)/eq_rad
         pos_iau_earth = spice.pgrrec('EARTH', math.radians(lon), math.radians(lat), alt_km,
             eq_rad, flattening)
-        self.states = _calculate_states(ets, pos_iau_earth, delta_t, frame)
+        self.states = _calculate_states(ets, pos_iau_earth, delta_t, source_frame, target_frame)
 
 def _get_moon_data(utc_time: str) -> MoonData:
     """Calculation of the moon data for the given utc_time for the loaded observer
@@ -234,24 +237,26 @@ def _create_earth_point_kernel(utc_times: List[str], kernels_path: str, lat: int
     min_states_polynomial = polynomial_degree + 1
     # Min # states that are required to define a polynomial of that degree
     ets = np.array([])
+    left_states = int(min_states_polynomial/2)
+    right_states = left_states + min_states_polynomial%2
     for utc_time in utc_times:
         et0 = spice.str2et(utc_time)
-        etprev = et0 - delta_t * min_states_polynomial
-        etf = et0 + delta_t * min_states_polynomial
+        etprev = et0 - delta_t * left_states
+        etf = et0 + delta_t * right_states
         ets_t = np.arange(etprev, etf, delta_t)
         for et_t in ets_t:
             if et_t not in ets:
                 index = np.searchsorted(ets, et_t)
                 ets = np.insert(ets, index, et_t)
 
-    frame = 'ITRF93'
-    obs = _EarthLocation(id_code, lat, lon, altitude, ets, delta_t, frame)
+    target_frame = source_frame = 'ITRF93'
+    obs = _EarthLocation(id_code, lat, lon, altitude, ets, delta_t, source_frame, target_frame)
 
     custom_kernel_path = os.path.join(kernels_path, CUSTOM_KERNEL_NAME)
     handle = spice.spkopn(custom_kernel_path, 'SPK_file', 0)
 
     center = EARTH_ID_CODE
-    spice.spkw09(handle, obs.point_id, center, frame,
+    spice.spkw09(handle, obs.point_id, center, target_frame,
         ets[0], ets[-1], '0', polynomial_degree, len(ets),
         obs.states.tolist(), ets.tolist())
     spice.spkcls(handle)
