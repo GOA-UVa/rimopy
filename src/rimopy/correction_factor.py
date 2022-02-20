@@ -17,10 +17,9 @@ It exports the following functions:
     * get_correction_params - returns the RCF coefficients estimated for a wavelength
 """
 
-from argparse import ArgumentError
 from dataclasses import dataclass
 from typing import List
-from scipy.interpolate import interp1d
+import numpy as np
 
 @dataclass
 class CorrectionParams:
@@ -108,23 +107,13 @@ def _get_all_cs() -> List[float]:
     """
     return list(map(lambda x : x[2], _get_all_correction_params()))
 
-def _get_interpolated_correction_params(wavelength_nm: float, kind='linear') -> 'CorrectionParams':
+def _get_interpolated_correction_params(wavelength_nm: float) -> 'CorrectionParams':
     """Estimate the RCF params with interpolation
 
     Parameters
     ----------
     wavelength_nm : float
-        Wavelength (in nanometers) of which one wants to interpolate the RCF params
-    kind: str
-        Kind of interpolation performed. Specifies the kind of interpolation as a string or as an
-        integer specifying the order of the spline interpolator to use. The string has to be one
-        of 'linear', 'nearest', 'nearest-up', 'zero', 'slinear', 'quadratic', 'cubic', 'previous',
-        or 'next'. Default is 'linear'.
-
-    Raises
-    ------
-    ArgumentError
-        If the argument kind does not fit the requirements specified in the section Parameters.
+        Wavelength (in nanometers) of which one wants to linearly interpolate the RCF params
 
     Returns
     -------
@@ -138,18 +127,12 @@ def _get_interpolated_correction_params(wavelength_nm: float, kind='linear') -> 
     if wavelength_nm > x_values[-1]:
         # Is this the best solution?
         return get_correction_params(x_values[-1])
-    if kind not in ['linear', 'nearest', 'nearest-up', 'zero', 'slinear', 'quadratic',
-        'cubic', 'previous', 'next'] and not isinstance(kind, int):
-        raise ArgumentError(None, kind + " is unsupported, use a valid argument")
     all_as = _get_all_as()
-    f_interp_a = interp1d(x_values, all_as, kind)
-    a_coeff = f_interp_a(wavelength_nm).item()
+    a_coeff = np.interp(wavelength_nm, x_values, all_as)
     all_bs = _get_all_bs()
-    f_interp_b = interp1d(x_values, all_bs, kind)
-    b_coeff = f_interp_b(wavelength_nm).item()
+    b_coeff = np.interp(wavelength_nm, x_values, all_bs)
     all_cs = _get_all_cs()
-    f_interp_c = interp1d(x_values, all_cs, kind)
-    c_coeff = f_interp_c(wavelength_nm).item()
+    c_coeff = np.interp(wavelength_nm, x_values, all_cs)
     return CorrectionParams(a_coeff, b_coeff, c_coeff)
 
 def get_correction_params(wavelength_nm: float) -> 'CorrectionParams':

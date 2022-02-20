@@ -19,7 +19,7 @@ from typing import Tuple, Dict, List
 import math
 import pkgutil
 import enum
-from scipy.interpolate import interp1d
+import numpy as np
 
 def _linear_interpolation(wavelength_nm: float, x_values: List[float],
     y_values: List[float]) -> float:
@@ -40,9 +40,8 @@ def _linear_interpolation(wavelength_nm: float, x_values: List[float],
     float
         Interpolated value.
     """
-    f_interp = interp1d(x_values, y_values, 'linear')
     # This works because, supposedly, python dicts preserve insertion order since 3.7
-    return f_interp(wavelength_nm).item()
+    return np.interp(wavelength_nm, x_values, y_values)
 
 def _gaussian_filter_non_eq_filter_input(center: float, all_x: List[float], all_y: List[float],
     radius: float, sigma: float) -> Tuple[List[float], List[float]]:

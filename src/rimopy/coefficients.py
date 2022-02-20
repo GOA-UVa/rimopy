@@ -21,9 +21,7 @@ from typing import List, Dict
 import csv
 import pkgutil
 from io import StringIO
-from scipy.interpolate import interp1d
-
-_INTERPOLATION_TYPE = 'linear'
+import numpy as np
 
 @dataclass
 class _CoefficientsWln():
@@ -145,12 +143,11 @@ def get_coefficients_a(wavelength_nm: float) -> List[float]:
         return a_coeffs[0]
     if wavelength_nm > wvs[-1]:
         return a_coeffs[-1]
-    f_interp_0 = interp1d(wvs, [elem[0] for elem in a_coeffs], _INTERPOLATION_TYPE)
-    f_interp_1 = interp1d(wvs, [elem[1] for elem in a_coeffs], _INTERPOLATION_TYPE)
-    f_interp_2 = interp1d(wvs, [elem[2] for elem in a_coeffs], _INTERPOLATION_TYPE)
-    f_interp_3 = interp1d(wvs, [elem[3] for elem in a_coeffs], _INTERPOLATION_TYPE)
-    a_coeffs_concrete = [f_interp_0(wavelength_nm).item(), f_interp_1(wavelength_nm).item(),
-        f_interp_2(wavelength_nm).item(), f_interp_3(wavelength_nm).item()]
+    a_0 = np.interp(wavelength_nm, wvs, [elem[0] for elem in a_coeffs])
+    a_1 = np.interp(wavelength_nm, wvs, [elem[1] for elem in a_coeffs])
+    a_2 = np.interp(wavelength_nm, wvs, [elem[2] for elem in a_coeffs])
+    a_3 = np.interp(wavelength_nm, wvs, [elem[3] for elem in a_coeffs])
+    a_coeffs_concrete = [a_0, a_1, a_2, a_3]
     return a_coeffs_concrete
 
 def get_coefficients_b(wavelength_nm: float) -> List[float]:
@@ -174,11 +171,10 @@ def get_coefficients_b(wavelength_nm: float) -> List[float]:
         return b_coeffs[0]
     if wavelength_nm > wvs[-1]:
         return b_coeffs[-1]
-    f_interp_0 = interp1d(wvs, [elem[0] for elem in b_coeffs], _INTERPOLATION_TYPE)
-    f_interp_1 = interp1d(wvs, [elem[1] for elem in b_coeffs], _INTERPOLATION_TYPE)
-    f_interp_2 = interp1d(wvs, [elem[2] for elem in b_coeffs], _INTERPOLATION_TYPE)
-    b_coeffs_concrete = [f_interp_0(wavelength_nm).item(), f_interp_1(wavelength_nm).item(),
-        f_interp_2(wavelength_nm).item()]
+    b_0 = np.interp(wavelength_nm, wvs, [elem[0] for elem in b_coeffs])
+    b_1 = np.interp(wavelength_nm, wvs, [elem[1] for elem in b_coeffs])
+    b_2 = np.interp(wavelength_nm, wvs, [elem[2] for elem in b_coeffs])
+    b_coeffs_concrete = [b_0, b_1, b_2]
     return b_coeffs_concrete
 
 def get_coefficients_d(wavelength_nm: float) -> List[float]:
@@ -202,11 +198,10 @@ def get_coefficients_d(wavelength_nm: float) -> List[float]:
         return d_coeffs[0]
     if wavelength_nm > wvs[-1]:
         return d_coeffs[-1]
-    f_interp_0 = interp1d(wvs, [elem[0] for elem in d_coeffs], _INTERPOLATION_TYPE)
-    f_interp_1 = interp1d(wvs, [elem[1] for elem in d_coeffs], _INTERPOLATION_TYPE)
-    f_interp_2 = interp1d(wvs, [elem[2] for elem in d_coeffs], _INTERPOLATION_TYPE)
-    d_coeffs_concrete = [f_interp_0(wavelength_nm).item(), f_interp_1(wavelength_nm).item(),
-        f_interp_2(wavelength_nm).item()]
+    d_0 = np.interp(wavelength_nm, wvs, [elem[0] for elem in d_coeffs])
+    d_1 = np.interp(wavelength_nm, wvs, [elem[1] for elem in d_coeffs])
+    d_2 = np.interp(wavelength_nm, wvs, [elem[2] for elem in d_coeffs])
+    d_coeffs_concrete = [d_0, d_1, d_2]
     return d_coeffs_concrete
 
 def get_coefficients_c() -> List[float]:
