@@ -22,7 +22,7 @@ import enum
 import numpy as np
 
 def _linear_interpolation(wavelength_nm: float, x_values: List[float],
-    y_values: List[float]) -> float:
+                          y_values: List[float]) -> float:
     """
     Wrapper that linearly interpolates
 
@@ -44,7 +44,8 @@ def _linear_interpolation(wavelength_nm: float, x_values: List[float],
     return np.interp(wavelength_nm, x_values, y_values)
 
 def _gaussian_filter_non_eq_filter_input(center: float, all_x: List[float], all_y: List[float],
-    radius: float, sigma: float) -> Tuple[List[float], List[float]]:
+                                         radius: float, sigma: float
+                                         ) -> Tuple[List[float], List[float]]:
     """
     Calculates the gaussian values from all_x that are in the range of
     [center-radius, center+radius].
@@ -83,7 +84,7 @@ def _gaussian_filter_non_eq_filter_input(center: float, all_x: List[float], all_
     return gauss_vals, final_y
 
 def _gaussian_filter_non_eq_sum_percentages(gauss_vals: List[float],
-    final_y: List[float]) -> float:
+                                            final_y: List[float]) -> float:
     """
     Adjust the gaussian values for the non equidistant data, and calculates
     the gaussian filtered value.
@@ -110,7 +111,7 @@ def _gaussian_filter_non_eq_sum_percentages(gauss_vals: List[float],
     return val_sum
 
 def _gaussian_filter_non_equidistant(center: float, all_x: List[float], all_y: List[float],
-    radius: float=1, sigma: float=1) -> float:
+                                     radius: float = 1, sigma: float = 1) -> float:
     """
     Gaussian filter for non equidistant data.
 
@@ -134,7 +135,7 @@ def _gaussian_filter_non_equidistant(center: float, all_x: List[float], all_y: L
         Gaussian-filtered value
     """
     gauss_vals, final_y = _gaussian_filter_non_eq_filter_input(center, all_x, all_y,
-        radius, sigma)
+                                                               radius, sigma)
     return _gaussian_filter_non_eq_sum_percentages(gauss_vals, final_y)
 
 class WehrliFile(enum.Enum):
@@ -202,9 +203,9 @@ class ESICalculator():
         Parameters of the gaussian filter method, in case that that is the chosen one.
     """
     __slots__ = ['wehrli_file', 'method', 'gfp']
-    def __init__(self, wehrli_file: WehrliFile=WehrliFile.ORIGINAL_WEHRLI,
-        method: ESIMethod=ESIMethod.GAUSSIAN_FILTER,
-        gaussian_filter_params: GaussianFilterParams=None):
+    def __init__(self, wehrli_file: WehrliFile = WehrliFile.ORIGINAL_WEHRLI,
+                 method: ESIMethod = ESIMethod.GAUSSIAN_FILTER,
+                 gaussian_filter_params: GaussianFilterParams = None):
         """
         Parameters
         ----------
@@ -265,12 +266,12 @@ class ESICalculator():
             return wehrli_data[wehrli_x[0]][1]
         if wavelength_nm > wehrli_x[-1]:
             return wehrli_data[wehrli_x[-1]][1]
-        wehrli_y = list(map(lambda x : x[1], wehrli_data.values()))
+        wehrli_y = list(map(lambda x: x[1], wehrli_data.values()))
         if self.method == ESIMethod.LINEAR_INTERPOLATION:
             return _linear_interpolation(wavelength_nm, wehrli_x, wehrli_y)
         # ESIMethod.GAUSSIAN_FILTER
-        gauss_res =  _gaussian_filter_non_equidistant(wavelength_nm, wehrli_x, wehrli_y,
-            self.gfp.radius, self.gfp.sigma)
+        gauss_res = _gaussian_filter_non_equidistant(wavelength_nm, wehrli_x, wehrli_y,
+                                                     self.gfp.radius, self.gfp.sigma)
         if gauss_res == 0: # There was no wehrli data near enough from the given wavelength_nm
             return _linear_interpolation(wavelength_nm, wehrli_x, wehrli_y)
         return gauss_res
@@ -298,12 +299,12 @@ class ESICalculator():
             return wehrli_data[wehrli_x[0]][0]
         if wavelength_nm > wehrli_x[-1]:
             return wehrli_data[wehrli_x[-1]][0]
-        wehrli_y = list(map(lambda x : x[0], wehrli_data.values()))
+        wehrli_y = list(map(lambda x: x[0], wehrli_data.values()))
         if self.method == ESIMethod.LINEAR_INTERPOLATION:
             return _linear_interpolation(wavelength_nm, wehrli_x, wehrli_y)
         # ESIMethod.GAUSSIAN_FILTER
         gauss_res = _gaussian_filter_non_equidistant(wavelength_nm, wehrli_x, wehrli_y,
-            self.gfp.radius, self.gfp.sigma)
+                                                     self.gfp.radius, self.gfp.sigma)
         if gauss_res == 0: # There was no wehrli data near enough from the given wavelength_nm
             return _linear_interpolation(wavelength_nm, wehrli_x, wehrli_y)
         return gauss_res

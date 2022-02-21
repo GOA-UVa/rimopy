@@ -53,7 +53,7 @@ class ELISettings():
     """
     __slots__ = ['apply_correction', 'interpolate_rolo_coefficients', 'adjust_apollo']
     def __init__(self, apply_correction: bool = False, interpolate_rolo_coefficients: bool = False,
-        adjust_apollo: bool = True):
+                 adjust_apollo: bool = True):
         """
         Parameters
         ----------
@@ -90,7 +90,8 @@ class EarthPoint():
         Altitude over the sea level in meters. Default = 0.
     """
     __slots__ = ['lat', 'lon', 'utc_times', 'altitude']
-    def __init__(self, lat: float, lon: float, utc_times: Union[List[str], str], altitude: float = 0):
+    def __init__(self, lat: float, lon: float, utc_times: Union[List[str], str],
+                 altitude: float = 0):
         """
         Parameters
         ----------
@@ -114,7 +115,7 @@ class EarthPoint():
     def set_utc_times(self, utc_times: Union[List[str], str]):
         """
         Modifies the utc_times attribute
-        
+
         Parameters
         ----------
         utc_times : list of str | str
@@ -168,7 +169,7 @@ def _summatory_b(wavelength_nm: float, phi: float) -> float:
     return count
 
 def _ln_moon_disk_reflectance(absolute_mpa_degrees: float, wavelength_nm: float,
-    moon_data: MoonData) -> float:
+                              moon_data: MoonData) -> float:
     """The calculation of the ln of the reflectance of the Moon's disk, following Eq.2 in
     Roman et al., 2020
 
@@ -199,15 +200,15 @@ def _ln_moon_disk_reflectance(absolute_mpa_degrees: float, wavelength_nm: float,
     l_phi = moon_data.long_obs
     sum_a = _summatory_a(wavelength_nm, gr_value)
     sum_b = _summatory_b(wavelength_nm, phi)
-    d1_value = d_coeffs[0] * math.exp( - gd_value / p_coeffs[0])
-    d2_value = d_coeffs[1] * math.exp( - gd_value / p_coeffs[1])
-    d3_value = d_coeffs[2] * math.cos( (gd_value - p_coeffs[2]) / p_coeffs[3])
+    d1_value = d_coeffs[0] * math.exp(- gd_value / p_coeffs[0])
+    d2_value = d_coeffs[1] * math.exp(- gd_value / p_coeffs[1])
+    d3_value = d_coeffs[2] * math.cos((gd_value - p_coeffs[2]) / p_coeffs[3])
     result = sum_a + sum_b + c_coeffs[0] * l_phi + c_coeffs[1] * l_theta + c_coeffs[2] * phi * \
         l_phi + c_coeffs[3] * phi * l_theta + d1_value + d2_value + d3_value
     return result
 
 def _interpolated_moon_disk_reflectance(absolute_mpa_degrees: float, wavelength_nm: float,
-    moon_data: 'MoonData', adjust_apollo: bool) -> float:
+                                        moon_data: 'MoonData', adjust_apollo: bool) -> float:
     """The calculation of the reflectance of the Moon's disk, following Eq.2 in Roman et al., 2020
 
     If the wavelength is not present in the ROLO coefficients, it calculates the linear
@@ -238,15 +239,15 @@ def _interpolated_moon_disk_reflectance(absolute_mpa_degrees: float, wavelength_
     if wavelength_nm in wvlens:
         apollo_i = wvlens.index(wavelength_nm)
         return math.exp(_ln_moon_disk_reflectance(absolute_mpa_degrees, wavelength_nm,
-            moon_data))*apollo_coeffs[apollo_i]
+                                                  moon_data))*apollo_coeffs[apollo_i]
     if wavelength_nm < wvlens[0]:
         # The extrapolation done is "nearest"
         return _interpolated_moon_disk_reflectance(absolute_mpa_degrees, wvlens[0],
-            moon_data, adjust_apollo)
+                                                   moon_data, adjust_apollo)
     if wavelength_nm > wvlens[-1]:
         # The extrapolation done is "nearest"
         return _interpolated_moon_disk_reflectance(absolute_mpa_degrees, wvlens[-1],
-            moon_data, adjust_apollo)
+                                                   moon_data, adjust_apollo)
     near_left = -math.inf
     near_right = math.inf
     for wvlen in wvlens:
@@ -259,9 +260,9 @@ def _interpolated_moon_disk_reflectance(absolute_mpa_degrees: float, wavelength_
     right_index = wvlens.index(x_values[1])
     y_values = []
     y_values.append(math.exp(_ln_moon_disk_reflectance(absolute_mpa_degrees, x_values[0],
-        moon_data)) * apollo_coeffs[left_index])
+                                                       moon_data)) * apollo_coeffs[left_index])
     y_values.append(math.exp(_ln_moon_disk_reflectance(absolute_mpa_degrees, x_values[1],
-        moon_data)) * apollo_coeffs[right_index])
+                                                       moon_data)) * apollo_coeffs[right_index])
     return np.interp(wavelength_nm, x_values, y_values)
 
 def _get_correction_factor(wavelength_nm: float, mpa: float) -> float:
@@ -325,7 +326,7 @@ def _get_esi_per_nm(esi_calc: esi.ESICalculator, wavelength_nm: float) -> float:
     return esi_calc.get_esi_per_nm(wavelength_nm)
 
 def _calculate_eli(wavelength_nm: float, moon_data: MoonData, esi_calc: esi.ESICalculator,
-    eli_settings: ELISettings, per_nm: bool = False) -> float:
+                   eli_settings: ELISettings, per_nm: bool = False) -> float:
     """Calculation of Extraterrestrial Lunar Irradiance following Eq 3 in Roman et al., 2020
 
     Simulates a lunar observation for a wavelength for any observer/solar selenographic
@@ -352,16 +353,17 @@ def _calculate_eli(wavelength_nm: float, moon_data: MoonData, esi_calc: esi.ESIC
         The extraterrestrial lunar irradiance calculated
     """
     if not eli_settings.interpolate_rolo_coefficients:
-        a_l =_interpolated_moon_disk_reflectance(moon_data.absolute_mpa_degrees, wavelength_nm,
-            moon_data, eli_settings.adjust_apollo)
+        a_l = _interpolated_moon_disk_reflectance(moon_data.absolute_mpa_degrees, wavelength_nm,
+                                                  moon_data, eli_settings.adjust_apollo)
     else:
         ln_moon_reflectance = _ln_moon_disk_reflectance(moon_data.absolute_mpa_degrees,
-            wavelength_nm, moon_data)
+                                                        wavelength_nm, moon_data)
         a_l = math.exp(ln_moon_reflectance)
 
     solid_angle_moon: float = 6.4177e-05
     if eli_settings.apply_correction:
-        mr_correction_factor = _get_correction_factor(wavelength_nm, moon_data.absolute_mpa_degrees)
+        mr_correction_factor = _get_correction_factor(wavelength_nm,
+                                                      moon_data.absolute_mpa_degrees)
         a_l = a_l * mr_correction_factor
     omega = solid_angle_moon
     if per_nm:
@@ -377,8 +379,8 @@ def _calculate_eli(wavelength_nm: float, moon_data: MoonData, esi_calc: esi.ESIC
     return lunar_irr
 
 def get_eli_bypass(wavelength_nm: Union[float, List[float]], moon_data: MoonData,
-    esi_calc: esi.ESICalculator = esi.ESICalculator(),
-    eli_settings: ELISettings = ELISettings()) -> Union[float, List[float]]:
+                   esi_calc: esi.ESICalculator = esi.ESICalculator(),
+                   eli_settings: ELISettings = ELISettings()) -> Union[float, List[float]]:
     """Calculation of Extraterrestrial Lunar Irradiance following Eq 3 in Roman et al., 2020
 
     Allow users to simulate lunar observation for any observer/solar selenographic
@@ -414,8 +416,8 @@ def get_eli_bypass(wavelength_nm: Union[float, List[float]], moon_data: MoonData
     return _calculate_eli(wavelength_nm, moon_data, esi_calc, eli_settings)
 
 def get_eli(wavelength_nm: Union[float, List[float]], earth_data: EarthPoint, kernels_path: str,
-    esi_calc: esi.ESICalculator = esi.ESICalculator(),
-    eli_settings: ELISettings = ELISettings()) -> Union[float, List[float]]:
+            esi_calc: esi.ESICalculator = esi.ESICalculator(),
+            eli_settings: ELISettings = ELISettings()) -> Union[float, List[float]]:
     """Calculation of Extraterrestrial Lunar Irradiance from geographic coordinates
 
     Allow users to simulate lunar observations for any observer position around the Earth
@@ -445,7 +447,7 @@ def get_eli(wavelength_nm: Union[float, List[float]], earth_data: EarthPoint, ke
         "wavelength_nm" was a list.
     """
     moon_data = spice_iface.get_moon_datas(earth_data.lat, earth_data.lon, earth_data.altitude,
-        earth_data.utc_times, kernels_path)
+                                           earth_data.utc_times, kernels_path)
     irradiances = []
     for moon_d in moon_data:
         irradiances.append(get_eli_bypass(wavelength_nm, moon_d, esi_calc, eli_settings))
@@ -454,8 +456,9 @@ def get_eli(wavelength_nm: Union[float, List[float]], earth_data: EarthPoint, ke
     return irradiances
 
 def get_eli_bypass_per_nm(wavelength_nm: Union[float, List[float]], moon_data: MoonData,
-    esi_calc: esi.ESICalculator = esi.ESICalculator(),
-    eli_settings: ELISettings = ELISettings()) -> Union[float, List[float], List[List[float]]]:
+                          esi_calc: esi.ESICalculator = esi.ESICalculator(),
+                          eli_settings: ELISettings = ELISettings()
+                          ) -> Union[float, List[float], List[List[float]]]:
     """Calculation of Extraterrestrial Lunar Irradiance following Eq 3 in Roman et al., 2020
 
     Allow users to simulate lunar observation for any observer/solar selenographic
@@ -491,8 +494,9 @@ def get_eli_bypass_per_nm(wavelength_nm: Union[float, List[float]], moon_data: M
     return _calculate_eli(wavelength_nm, moon_data, esi_calc, eli_settings, True)
 
 def get_eli_per_nm(wavelength_nm: Union[float, List[float]], earth_data: EarthPoint,
-    kernels_path: str, esi_calc: esi.ESICalculator = esi.ESICalculator(),
-    eli_settings: ELISettings = ELISettings()) -> Union[float, List[float], List[List[float]]]:
+                   kernels_path: str, esi_calc: esi.ESICalculator = esi.ESICalculator(),
+                   eli_settings: ELISettings = ELISettings()
+                   ) -> Union[float, List[float], List[List[float]]]:
     """Calculation of Extraterrestrial Lunar Irradiance from geographic coordinates
 
     Allow users to simulate lunar observations for any observer position around the Earth
@@ -522,7 +526,7 @@ def get_eli_per_nm(wavelength_nm: Union[float, List[float]], earth_data: EarthPo
         "wavelength_nm" was a list.
     """
     moon_data = spice_iface.get_moon_datas(earth_data.lat, earth_data.lon, earth_data.altitude,
-        earth_data.utc_times, kernels_path)
+                                           earth_data.utc_times, kernels_path)
     irradiances = []
     for moon_d in moon_data:
         irradiances.append(get_eli_bypass_per_nm(wavelength_nm, moon_d, esi_calc, eli_settings))

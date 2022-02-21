@@ -30,10 +30,11 @@ class MoonData:
         Absolute Moon phase angle (in degrees)
     """
     __slots__ = ['distance_sun_moon', 'distance_observer_moon', 'long_sun_radians', 'lat_obs',
-        'long_obs', 'absolute_mpa_degrees']
+                 'long_obs', 'absolute_mpa_degrees']
 
     def __init__(self, distance_sun_moon: float, distance_observer_moon: float,
-            long_sun_radians: float, lat_obs: float, long_obs: float, absolute_mpa_degrees: float):
+                 long_sun_radians: float, lat_obs: float, long_obs: float,
+                 absolute_mpa_degrees: float):
         """
         Parameters
         ----------

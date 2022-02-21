@@ -1,6 +1,6 @@
 # Rimopy
 
-![Version 0.1.5](https://img.shields.io/badge/version-0.1.5-informational)
+![Version 0.1.6](https://img.shields.io/badge/version-0.1.6-informational)
 
 Rimopy is a package consisting of an implementation of the ROLO model, following RIMO's
 implementation, made in python.
@@ -17,7 +17,6 @@ retrieval and comparison with a star photometer.
 ## Requirements
 
 - numpy >= 1.22.0
-- scipy >= 1.7.3
 - spiceypy >= 4.0.3
 
 ## Installation

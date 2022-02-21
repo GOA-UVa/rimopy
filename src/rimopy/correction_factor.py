@@ -71,11 +71,11 @@ def _get_all_correction_params() -> List[List[float]]:
         A list containing multiple list of floats. Each sublist is the list of coefficients
         for a wavelength
     """
-    return [ [1.186, -2.35 * 10**-2, 1.92 * 10**-1 ], [1.082, -4.17 * 10**-3, 7.10 * 10**-2],
-        [1.062, -5.35 * 10**-4, 1.14 * 10**-2], [1.078, -8.93 * 10**-4, 1.11 * 10**-2],
-        [1.092, -4.50 * 10**-4, 1.38 * 10**-2], [1.075, -2.05 * 10**-3, 1.37 * 10**-2],
-        [1.071, -2.41 * 10**-3, 1.36 * 10**-2], [1.035, 5.55 * 10**-3, 2.79 * 10**-2],
-        [1.047, -1.25 * 10**-3, 2.26 * 10**-2] ]
+    return [[1.186, -2.35 * 10**-2, 1.92 * 10**-1], [1.082, -4.17 * 10**-3, 7.10 * 10**-2],
+            [1.062, -5.35 * 10**-4, 1.14 * 10**-2], [1.078, -8.93 * 10**-4, 1.11 * 10**-2],
+            [1.092, -4.50 * 10**-4, 1.38 * 10**-2], [1.075, -2.05 * 10**-3, 1.37 * 10**-2],
+            [1.071, -2.41 * 10**-3, 1.36 * 10**-2], [1.035, 5.55 * 10**-3, 2.79 * 10**-2],
+            [1.047, -1.25 * 10**-3, 2.26 * 10**-2]]
 
 def _get_all_as() -> List[float]:
     """Gets all 'a' RCF coefficients
@@ -85,7 +85,7 @@ def _get_all_as() -> List[float]:
     list of float
         A list containing all 'a' coefficients in wavelength order
     """
-    return list(map(lambda x : x[0], _get_all_correction_params()))
+    return list(map(lambda x: x[0], _get_all_correction_params()))
 
 def _get_all_bs() -> List[float]:
     """Gets all 'b' RCF coefficients
@@ -95,7 +95,7 @@ def _get_all_bs() -> List[float]:
     list of float
         A list containing all 'b' coefficients in wavelength order
     """
-    return list(map(lambda x : x[1], _get_all_correction_params()))
+    return list(map(lambda x: x[1], _get_all_correction_params()))
 
 def _get_all_cs() -> List[float]:
     """Gets all 'c' RCF coefficients
@@ -105,7 +105,7 @@ def _get_all_cs() -> List[float]:
     list of float
         A list containing all 'c' coefficients in wavelength order
     """
-    return list(map(lambda x : x[2], _get_all_correction_params()))
+    return list(map(lambda x: x[2], _get_all_correction_params()))
 
 def _get_interpolated_correction_params(wavelength_nm: float) -> 'CorrectionParams':
     """Estimate the RCF params with interpolation
@@ -153,5 +153,5 @@ def get_correction_params(wavelength_nm: float) -> 'CorrectionParams':
         index = wvs.index(wavelength_nm)
         corr_params = _get_all_correction_params()
         return CorrectionParams(corr_params[index][0], corr_params[index][1],
-            corr_params[index][2])
+                                corr_params[index][2])
     return _get_interpolated_correction_params(wavelength_nm)
