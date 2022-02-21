@@ -77,7 +77,7 @@ class _EarthLocation():
     """
     __slots__ = ['point_id', 'states']
     def __init__(self, point_id: int, lat: float, lon: float, altitude: float, ets: np.ndarray,
-        delta_t: float, source_frame: str, target_frame: str):
+                 delta_t: float, source_frame: str, target_frame: str):
         """
         Parameters
         ----------
@@ -104,12 +104,12 @@ class _EarthLocation():
         alt_km = altitude/1000
         flattening = (eq_rad - pol_rad)/eq_rad
         pos_iau_earth = spice.pgrrec('EARTH', math.radians(lon), math.radians(lat), alt_km,
-            eq_rad, flattening)
+                                     eq_rad, flattening)
         self.states = _calculate_states(ets, pos_iau_earth, delta_t, source_frame, target_frame)
 
 def _get_moon_data(utc_time: str) -> MoonData:
     """Calculation of the moon data for the given utc_time for the loaded observer
-    
+
     Parameters
     ----------
     utc_time : str
@@ -129,7 +129,7 @@ def _get_moon_data(utc_time: str) -> MoonData:
 
     # Calculate moon phase angle
     spoint, _, _ = spice.subpnt("INTERCEPT/ELLIPSOID", "MOON", et_date, 'MOON_ME',
-        "NONE", "Observer")
+                                "NONE", "Observer")
     phase = spice.phaseq(et_date, "MOON", "SUN", "Observer", "NONE")
     phase = math.degrees(phase)
 
@@ -140,7 +140,7 @@ def _get_moon_data(utc_time: str) -> MoonData:
 
     # Calculate selenographic longitude of sun
     sun_spoint, _, _ = spice.subslr("INTERCEPT/ELLIPSOID", "MOON", et_date, 'MOON_ME',
-        "NONE", "SUN")
+                                    "NONE", "SUN")
     sel_lon_sun_rad, _, _ = spice.recpgr("MOON", sun_spoint, m_eq_rad, flattening)
 
     # Calculate the distance between observer and moon (KM)
@@ -165,10 +165,11 @@ def _get_moon_data(utc_time: str) -> MoonData:
         sel_lon += limit_lon*2
 
     moon_data = MoonData(distance_sun_moon, distance_observer_moon, sel_lon_sun_rad, sel_lat,
-        sel_lon,phase)
+                         sel_lon,phase)
     return moon_data
 
-def _get_moon_datas_id(utc_times: List[str], kernels_path: str, observer_id: int) -> List[MoonData]:
+def _get_moon_datas_id(utc_times: List[str], kernels_path: str,
+                       observer_id: int) -> List[MoonData]:
     """Calculation of needed MoonDatas from SPICE toolbox
 
     Moon phase angle, selenographic coordinates and distance from observer point to moon.
@@ -189,9 +190,9 @@ def _get_moon_datas_id(utc_times: List[str], kernels_path: str, observer_id: int
         Moon data obtained from SPICE toolbox
     """
     kernels = ["moon_pa_de421_1900-2050.bpc", "moon_080317.tf",
-        "pck00010.tpc", "naif0011.tls", "de421.bsp", "custom.bsp", "earth_assoc_itrf93.tf",
-        "earth_latest_high_prec.bpc", "earth_070425_370426_predict.bpc"]
-    
+               "pck00010.tpc", "naif0011.tls", "de421.bsp", "custom.bsp", "earth_assoc_itrf93.tf",
+               "earth_latest_high_prec.bpc", "earth_070425_370426_predict.bpc"]
+
     for kernel in kernels:
         k_path = os.path.join(kernels_path, kernel)
         spice.furnsh(k_path)
@@ -200,14 +201,14 @@ def _get_moon_datas_id(utc_times: List[str], kernels_path: str, observer_id: int
     moon_datas = []
 
     for utc_time in utc_times:
-        moon_datas.append(_get_moon_data(utc_time)) 
+        moon_datas.append(_get_moon_data(utc_time))
 
     spice.kclear()
 
     return moon_datas
 
 def _create_earth_point_kernel(utc_times: List[str], kernels_path: str, lat: int, lon: int,
-    altitude: float, id_code: int) -> None:
+                               altitude: float, id_code: int) -> None:
     """Creates a SPK custom kernel file containing the data of a point on Earth's surface
 
     Parameters
@@ -226,7 +227,7 @@ def _create_earth_point_kernel(utc_times: List[str], kernels_path: str, lat: int
         ID code that will be associated with the point on Earth's surface
     """
     kernels = ["pck00010.tpc", "naif0011.tls", "earth_assoc_itrf93.tf",
-        "de421.bsp", "earth_latest_high_prec.bpc", "earth_070425_370426_predict.bpc"]
+               "de421.bsp", "earth_latest_high_prec.bpc", "earth_070425_370426_predict.bpc"]
     for kernel in kernels:
         k_path = os.path.join(kernels_path, kernel)
         spice.furnsh(k_path)
@@ -257,8 +258,8 @@ def _create_earth_point_kernel(utc_times: List[str], kernels_path: str, lat: int
 
     center = EARTH_ID_CODE
     spice.spkw09(handle, obs.point_id, center, target_frame,
-        ets[0], ets[-1], '0', polynomial_degree, len(ets),
-        obs.states.tolist(), ets.tolist())
+                 ets[0], ets[-1], '0', polynomial_degree, len(ets),
+                 obs.states.tolist(), ets.tolist())
     spice.spkcls(handle)
 
     spice.kclear()
@@ -275,8 +276,8 @@ def _remove_custom_kernel_file(kernels_path: str) -> None:
     if os.path.exists(custom_kernel_path):
         os.remove(custom_kernel_path)
 
-def get_moon_datas(lat: float, lon: float, altitude: float , utc_times: List[str],
-    kernels_path: str) -> List[MoonData]:
+def get_moon_datas(lat: float, lon: float, altitude: float, utc_times: List[str],
+                   kernels_path: str) -> List[MoonData]:
     """Calculation of needed Moon data from SPICE toolbox
 
     Moon phase angle, selenographic coordinates and distance from observer point to moon.
