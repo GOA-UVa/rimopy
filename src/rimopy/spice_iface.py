@@ -99,8 +99,8 @@ class _EarthLocation():
             Name of the frame which the location will be referencing.
         """
         self.point_id = point_id
-        eq_rad = 6378 # Earth equatorial radius
-        pol_rad = 6357 # Earth polar radius
+        eq_rad = 6378.1366 # Earth equatorial radius
+        pol_rad = 6356.7519 # Earth polar radius
         alt_km = altitude/1000
         flattening = (eq_rad - pol_rad)/eq_rad
         pos_iau_earth = spice.pgrrec('EARTH', math.radians(lon), math.radians(lat), alt_km,
