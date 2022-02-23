@@ -148,6 +148,9 @@ class WehrliFile(enum.Enum):
     ORIGINAL_WEHRLI : Original wehrli data.
     SIMPLE_FILTER_WEHRLI : Wehrli data passed through a gaussian filter and linear interpolation.
         (See utils/wehrli_gauss).
+    GAUSSIAN_WEHRLI : Wehrli data passed through a gaussian filter with data for every 0.1 nm.
+        Similar effectiveness to using ORIGINAL_WEHRLI with GAUSSIAN_FILTER, but with worse performance.
+        Not recommended.
     """
     ORIGINAL_WEHRLI = 'data/wehrli_original.csv'
     SIMPLE_FILTER_WEHRLI = 'data/wehrli_filtered.csv'
