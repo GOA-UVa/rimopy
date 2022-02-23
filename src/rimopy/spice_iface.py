@@ -164,6 +164,12 @@ def _get_moon_data(utc_time: str) -> MoonData:
     elif sel_lon < -limit_lon:
         sel_lon += limit_lon*2
 
+    limit_lon_rad = math.pi
+    if sel_lon_sun_rad > limit_lon_rad:
+        sel_lon_sun_rad -= limit_lon_rad*2
+    elif sel_lon_sun_rad < -limit_lon_rad:
+        sel_lon_sun_rad += limit_lon_rad*2
+
     moon_data = MoonData(distance_sun_moon, distance_observer_moon, sel_lon_sun_rad, sel_lat,
                          sel_lon,phase)
     return moon_data
