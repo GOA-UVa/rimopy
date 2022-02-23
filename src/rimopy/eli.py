@@ -442,9 +442,11 @@ def get_eli(wavelength_nm: Union[float, List[float]], earth_data: EarthPoint, ke
 
     Returns
     -------
-    float | list of float
+    float | list of float | list of list of float
         The extraterrestrial lunar irradiance/s calculated. It will be a list if parameter
-        "wavelength_nm" was a list.
+        "wavelength_nm" was a list, or if EarthPoint utc_times is a list. In case both are lists,
+        it will be a list of lists of floats. The list will contain a list for every utc_time
+        present, and each of those will contain all irradiances associated for each wavelength.
     """
     moon_data = spice_iface.get_moon_datas(earth_data.lat, earth_data.lon, earth_data.altitude,
                                            earth_data.utc_times, kernels_path)
@@ -521,9 +523,11 @@ def get_eli_per_nm(wavelength_nm: Union[float, List[float]], earth_data: EarthPo
 
     Returns
     -------
-    float | list of float
+    float | list of float | list of list of float
         The extraterrestrial lunar irradiance/s calculated. It will be a list if parameter
-        "wavelength_nm" was a list.
+        "wavelength_nm" was a list, or if EarthPoint utc_times is a list. In case both are lists,
+        it will be a list of lists of floats. The list will contain a list for every utc_time
+        present, and each of those will contain all irradiances associated for each wavelength.
     """
     moon_data = spice_iface.get_moon_datas(earth_data.lat, earth_data.lon, earth_data.altitude,
                                            earth_data.utc_times, kernels_path)
