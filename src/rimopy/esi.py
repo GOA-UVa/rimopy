@@ -75,9 +75,10 @@ def _gaussian_filter_non_eq_filter_input(center: float, all_x: List[float], all_
     max_x = center + radius
     gauss_vals = []
     final_y = []
+    sigma = float(sigma)
     for i, x_val in enumerate(all_x):
         if min_x <= x_val <= max_x:
-            gauss_param = x_val - center
+            gauss_param = float(x_val - center)
             val = (1/(sigma*math.sqrt(2*math.pi)))*(math.exp(-(gauss_param**2)/(2*sigma**2)))
             gauss_vals.append(val)
             final_y.append(all_y[i])
@@ -150,6 +151,7 @@ class WehrliFile(enum.Enum):
     """
     ORIGINAL_WEHRLI = 'data/wehrli_original.csv'
     SIMPLE_FILTER_WEHRLI = 'data/wehrli_filtered.csv'
+    GAUSSIAN_WEHRLI = 'data/wehrli_gaussian.csv'
 
 class ESIMethod(enum.Enum):
     """
