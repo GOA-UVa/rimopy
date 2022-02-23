@@ -21,6 +21,9 @@ import pkgutil
 import enum
 import numpy as np
 
+_loaded_data = {}
+_last_loaded_file = ""
+
 def _linear_interpolation(wavelength_nm: float, x_values: List[float],
                           y_values: List[float]) -> float:
     """
@@ -149,8 +152,7 @@ class WehrliFile(enum.Enum):
     SIMPLE_FILTER_WEHRLI : Wehrli data passed through a gaussian filter and linear interpolation.
         (See utils/wehrli_gauss).
     GAUSSIAN_WEHRLI : Wehrli data passed through a gaussian filter with data for every 0.1 nm.
-        Similar effectiveness to using ORIGINAL_WEHRLI with GAUSSIAN_FILTER, but with worse performance.
-        Not recommended.
+        Similar effectiveness to using ORIGINAL_WEHRLI with GAUSSIAN_FILTER.
     """
     ORIGINAL_WEHRLI = 'data/wehrli_original.csv'
     SIMPLE_FILTER_WEHRLI = 'data/wehrli_filtered.csv'
@@ -237,6 +239,10 @@ class ESICalculator():
         A dict that has the wavelengths as keys (float), and as values it has tuples of the
         (Wm⁻²/nm, Wm⁻²/sm) values.
         """
+        global _loaded_data
+        global _last_loaded_file
+        if _loaded_data and self.wehrli_file.value == _last_loaded_file:
+            return _loaded_data
         wehrli_bytes = pkgutil.get_data(__name__, self.wehrli_file.value)
         wehrli_string = wehrli_bytes.decode()
         file = StringIO(wehrli_string)
@@ -246,7 +252,9 @@ class ESICalculator():
         for row in csvreader:
             data[float(row[0])] = (float(row[1]), float(row[2]))
         file.close()
-        return data
+        _last_loaded_file = self.wehrli_file.value
+        _loaded_data = data
+        return _loaded_data
 
     def get_esi(self, wavelength_nm: float) -> float:
         """Gets the expected extraterrestrial solar irradiance at a concrete wavelength
