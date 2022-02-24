@@ -40,12 +40,20 @@ compile:
   artifacts:
     paths:
       - dist/*.whl
+  only:
+    variables:
+    - $CI_PIPELINE_SOURCE == "web"
+    - $CI_COMMIT_REF_NAME == "master"
 
 lint:
   stage: test
   script:
     - pip install pylint
     - pylint --fail-under=9 src/rimopy/*.py
+  only:
+    variables:
+    - $CI_PIPELINE_SOURCE == "web"
+    - $CI_COMMIT_REF_NAME == "master"
 
 test:
   stage: test
@@ -57,3 +65,7 @@ test:
     when: always
     reports:
       junit: report.xml
+  only:
+    variables:
+    - $CI_PIPELINE_SOURCE == "web"
+    - $CI_COMMIT_REF_NAME == "master"

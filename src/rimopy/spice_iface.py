@@ -99,8 +99,8 @@ class _EarthLocation():
             Name of the frame which the location will be referencing.
         """
         self.point_id = point_id
-        eq_rad = 6378 # Earth equatorial radius
-        pol_rad = 6357 # Earth polar radius
+        eq_rad = 6378.1366 # Earth equatorial radius
+        pol_rad = 6356.7519 # Earth polar radius
         alt_km = altitude/1000
         flattening = (eq_rad - pol_rad)/eq_rad
         pos_iau_earth = spice.pgrrec('EARTH', math.radians(lon), math.radians(lat), alt_km,
@@ -163,6 +163,12 @@ def _get_moon_data(utc_time: str) -> MoonData:
         sel_lon -= limit_lon*2
     elif sel_lon < -limit_lon:
         sel_lon += limit_lon*2
+
+    limit_lon_rad = math.pi
+    if sel_lon_sun_rad > limit_lon_rad:
+        sel_lon_sun_rad -= limit_lon_rad*2
+    elif sel_lon_sun_rad < -limit_lon_rad:
+        sel_lon_sun_rad += limit_lon_rad*2
 
     moon_data = MoonData(distance_sun_moon, distance_observer_moon, sel_lon_sun_rad, sel_lat,
                          sel_lon,phase)

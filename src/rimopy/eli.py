@@ -51,27 +51,9 @@ class ELISettings():
         calculated interpolating surrounding reflectances. The Apollo spectra is the spectra
         generated with the Moon samples from Apollo 16th mission.
     """
-    __slots__ = ['apply_correction', 'interpolate_rolo_coefficients', 'adjust_apollo']
-    def __init__(self, apply_correction: bool = False, interpolate_rolo_coefficients: bool = False,
-                 adjust_apollo: bool = True):
-        """
-        Parameters
-        ----------
-        apply_correction : bool
-            If True the result will have been multiplied by the RCF (Rimo Correction Factor),
-            which corrects the data for the photometers' calibration.
-            Otherwise it won't.
-        interpolate_rolo_coefficients : bool
-            If True the reflectance will be calculated linearly interpolating the ROLO
-            coefficients. Otherwise it will be calculated interpolating the surrounding
-            reflectances, calculated with empirical coefficients.
-        adjust_apollo : bool
-            If True the ROLO model reflectance will be adjusted using Apollo spectra, in
-            case it's calculated interpolating surrounding reflectances.
-        """
-        self.apply_correction = apply_correction
-        self.interpolate_rolo_coefficients = interpolate_rolo_coefficients
-        self.adjust_apollo = adjust_apollo
+    apply_correction: bool = False
+    interpolate_rolo_coefficients: bool = False
+    adjust_apollo: bool = True
 
 @dataclass
 class EarthPoint():
@@ -442,9 +424,11 @@ def get_eli(wavelength_nm: Union[float, List[float]], earth_data: EarthPoint, ke
 
     Returns
     -------
-    float | list of float
+    float | list of float | list of list of float
         The extraterrestrial lunar irradiance/s calculated. It will be a list if parameter
-        "wavelength_nm" was a list.
+        "wavelength_nm" was a list, or if EarthPoint utc_times is a list. In case both are lists,
+        it will be a list of lists of floats. The list will contain a list for every utc_time
+        present, and each of those will contain all irradiances associated for each wavelength.
     """
     moon_data = spice_iface.get_moon_datas(earth_data.lat, earth_data.lon, earth_data.altitude,
                                            earth_data.utc_times, kernels_path)
@@ -521,9 +505,11 @@ def get_eli_per_nm(wavelength_nm: Union[float, List[float]], earth_data: EarthPo
 
     Returns
     -------
-    float | list of float
+    float | list of float | list of list of float
         The extraterrestrial lunar irradiance/s calculated. It will be a list if parameter
-        "wavelength_nm" was a list.
+        "wavelength_nm" was a list, or if EarthPoint utc_times is a list. In case both are lists,
+        it will be a list of lists of floats. The list will contain a list for every utc_time
+        present, and each of those will contain all irradiances associated for each wavelength.
     """
     moon_data = spice_iface.get_moon_datas(earth_data.lat, earth_data.lon, earth_data.altitude,
                                            earth_data.utc_times, kernels_path)
