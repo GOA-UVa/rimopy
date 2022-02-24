@@ -286,7 +286,28 @@ def _remove_custom_kernel_file(kernels_path: str) -> None:
 def get_moon_datas_from_extra_kernels(utc_times: List[str], kernels_path: str,
                                       extra_kernels: List[str], extra_kernels_path: str,
                                       observer_name: str) -> List[MoonData]:
-    """"""
+    """Calculation of needed Moon data from SPICE toolbox
+
+    Moon phase angle, selenographic coordinates and distance from observer point to moon.
+    Selenographic longitude and distance from sun to moon.
+
+    Parameters
+    ----------
+    utc_times : str
+        Times at which the ELI will be calculated, in a valid UTC DateTime format
+    kernels_path : str
+        Path where the SPICE kernels are stored
+    extra_kernels: list of str
+        Custom kernels from which the observer body will be loaded, instead of calculating it.
+    extra_kernels_path: str
+        Folder where the extra kernels are located.
+    observer_name: str
+        Name of the body of the observer that will be loaded from the extra kernels.
+    Returns
+    -------
+    list of MoonData
+        Moon data obtained from SPICE toolbox
+    """
     base_kernels = ["moon_pa_de421_1900-2050.bpc", "moon_080317.tf",
                "pck00010.tpc", "naif0011.tls", "de421.bsp", "earth_assoc_itrf93.tf",
                "earth_latest_high_prec.bpc", "earth_070425_370426_predict.bpc"]
