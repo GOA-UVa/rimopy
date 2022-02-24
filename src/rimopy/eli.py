@@ -14,10 +14,16 @@ It exports the following functions:
         any observer/solar selenographic coordinates, in Wm⁻².
     * get_eli - returns the expected extraterrestrial lunar irradiation of a wavelength in any
         geographic coordinates, in Wm⁻².
+    * get_eli_from_extra_kernels - returns the expected extraterrestrial lunar irradiation of
+        a wavelength in any geographic coordinates, in Wm⁻², using data from extra kernels for the
+        observer body.
     * get_eli_bypass_per_nm - returns the expected extraterrestrial lunar irradiation of a
         wavelength for any observer/solar selenographic coordinates, in Wm⁻²/nm.
     * get_eli_per_nm - returns the expected extraterrestrial lunar irradiation of a wavelength in
         any geographic coordinates, in Wm⁻²/nm.
+    * get_eli_per_nm_from_extra_kernels - returns the expected extraterrestrial lunar irradiation of
+        a wavelength in any geographic coordinates, in Wm⁻²/nm, using data from extra kernels for the
+        observer body.
 """
 
 from dataclasses import dataclass

@@ -5,6 +5,8 @@ Interface with NASA's SPICE toolbox
 It exports the following functions:
 
     * get_moon_datas - Calculates needed MoonData from SPICE toolbox
+    * get_moon_datas_from_extra_kernels - Calculates needed MoonData from SPICE toolbox
+        and using data from extra kernels for the observer body
 """
 
 from dataclasses import dataclass
