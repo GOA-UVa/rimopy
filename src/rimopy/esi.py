@@ -154,10 +154,13 @@ class WehrliFile(enum.Enum):
     GAUSSIAN_WEHRLI : Wehrli data passed through a gaussian filter with data for every 0.1 nm.
         Similar effectiveness to using ORIGINAL_WEHRLI with GAUSSIAN_FILTER.
         Not recommended for obtaining "Wm⁻²" data, only "Wm⁻²/nm".
+    ASC_WEHRLI : Wehrli data passed through different filters. This is the default one.
+        Not recommended for obtaining "Wm⁻²" data, only "Wm⁻²/nm".
     """
     ORIGINAL_WEHRLI = 'data/wehrli_original.csv'
     SIMPLE_FILTER_WEHRLI = 'data/wehrli_filtered.csv'
     GAUSSIAN_WEHRLI = 'data/wehrli_gaussian.csv'
+    ASC_WEHRLI = 'data/wehrli_asc.csv'
 
 class ESIMethod(enum.Enum):
     """
@@ -202,7 +205,7 @@ class ESICalculator():
         Parameters of the gaussian filter method, in case that that is the chosen one.
     """
     __slots__ = ['wehrli_file', 'method', 'gfp']
-    def __init__(self, wehrli_file: WehrliFile = WehrliFile.ORIGINAL_WEHRLI,
+    def __init__(self, wehrli_file: WehrliFile = WehrliFile.ASC_WEHRLI,
                  method: ESIMethod = ESIMethod.LINEAR_INTERPOLATION,
                  gaussian_filter_params: GaussianFilterParams = None):
         """
@@ -229,7 +232,7 @@ class ESICalculator():
         Returns
         -------
         A dict that has the wavelengths as keys (float), and as values it has tuples of the
-        (Wm⁻²/nm, Wm⁻²/sm) values.
+        (Wm⁻²/nm, Wm⁻²) values.
         """
         global _loaded_data
         global _last_loaded_file

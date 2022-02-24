@@ -1,4 +1,5 @@
 include src/rimopy/data/wehrli_filtered.csv
 include src/rimopy/data/wehrli_original.csv
 include src/rimopy/data/wehrli_gaussian.csv
+include src/rimopy/data/wehrli_asc.csv
 include src/rimopy/data/coefficients.csv
