@@ -107,7 +107,7 @@ class _EarthLocation():
                                      eq_rad, flattening)
         self.states = _calculate_states(ets, pos_iau_earth, delta_t, source_frame, target_frame)
 
-def _get_moon_data(utc_time: str) -> MoonData:
+def _get_moon_data(utc_time: str, observer_name: str = "Observer") -> MoonData:
     """Calculation of the moon data for the given utc_time for the loaded observer
 
     Parameters
@@ -129,8 +129,8 @@ def _get_moon_data(utc_time: str) -> MoonData:
 
     # Calculate moon phase angle
     spoint, _, _ = spice.subpnt("INTERCEPT/ELLIPSOID", "MOON", et_date, 'MOON_ME',
-                                "NONE", "Observer")
-    phase = spice.phaseq(et_date, "MOON", "SUN", "Observer", "NONE")
+                                "NONE", observer_name)
+    phase = spice.phaseq(et_date, "MOON", "SUN", observer_name, "NONE")
     phase = math.degrees(phase)
 
     # Calculate selenographic coordinates of the observer
@@ -144,7 +144,7 @@ def _get_moon_data(utc_time: str) -> MoonData:
     sel_lon_sun_rad, _, _ = spice.recpgr("MOON", sun_spoint, m_eq_rad, flattening)
 
     # Calculate the distance between observer and moon (KM)
-    state, _ = spice.spkezr("MOON", et_date, "MOON_ME", "NONE", "Observer")
+    state, _ = spice.spkezr("MOON", et_date, "MOON_ME", "NONE", observer_name)
     distance_observer_moon = math.sqrt(state[0]**2 + state[1]**2 + state[2]**2)
 
     # Calculate the distance between sun and moon (AU)
@@ -203,11 +203,12 @@ def _get_moon_datas_id(utc_times: List[str], kernels_path: str,
         k_path = os.path.join(kernels_path, kernel)
         spice.furnsh(k_path)
 
-    spice.boddef("Observer", observer_id)
+    observer_name = "Observer"
+    spice.boddef(observer_name, observer_id)
     moon_datas = []
 
     for utc_time in utc_times:
-        moon_datas.append(_get_moon_data(utc_time))
+        moon_datas.append(_get_moon_data(utc_time, observer_name))
 
     spice.kclear()
 
@@ -281,6 +282,28 @@ def _remove_custom_kernel_file(kernels_path: str) -> None:
     custom_kernel_path = os.path.join(kernels_path, CUSTOM_KERNEL_NAME)
     if os.path.exists(custom_kernel_path):
         os.remove(custom_kernel_path)
+
+def get_moon_datas_from_extra_kernels(utc_times: List[str], kernels_path: str,
+                                      extra_kernels: List[str], extra_kernels_path: str,
+                                      observer_name: str) -> List[MoonData]:
+    """"""
+    base_kernels = ["moon_pa_de421_1900-2050.bpc", "moon_080317.tf",
+               "pck00010.tpc", "naif0011.tls", "de421.bsp", "earth_assoc_itrf93.tf",
+               "earth_latest_high_prec.bpc", "earth_070425_370426_predict.bpc"]
+    for kernel in base_kernels:
+        k_path = os.path.join(kernels_path, kernel)
+        spice.furnsh(k_path)
+    for kernel in extra_kernels:
+        k_path = os.path.join(extra_kernels_path, kernel)
+        spice.furnsh(k_path)
+
+    moon_datas = []
+    for utc_time in utc_times:
+        moon_datas.append(_get_moon_data(utc_time, observer_name))
+
+    spice.kclear()
+
+    return moon_datas
 
 def get_moon_datas(lat: float, lon: float, altitude: float, utc_times: List[str],
                    kernels_path: str) -> List[MoonData]:

@@ -397,9 +397,65 @@ def get_eli_bypass(wavelength_nm: Union[float, List[float]], moon_data: MoonData
         return elis
     return _calculate_eli(wavelength_nm, moon_data, esi_calc, eli_settings)
 
+def get_eli_from_extra_kernels(wavelength_nm: Union[float, List[float]],
+        utc_times: Union[str, List[str]], kernels_path: str, extra_kernels: List[str],
+        extra_kernels_path: str, observer_name: str,
+        esi_calc: esi.ESICalculator = esi.ESICalculator(),
+        eli_settings: ELISettings = ELISettings()
+        ) -> Union[float, List[float], List[List[float]]]:
+    """Calculation of Extraterrestrial Lunar Irradiance from geographic coordinates
+
+    Allow users to simulate lunar observations for any observer position around the Earth
+    and at any time.
+
+    It loads the observer body data from custom extra kernels instead of generating it from
+    basic kernels.
+
+    Returns the data in Wm⁻²
+
+    Parameters
+    ----------
+    wavelength_nm : float | list of float
+        Wavelength/s (in nanometers) of which the extraterrestrial lunar irradiance will be
+        calculated.
+    utc_times: str | list of str
+        Time/s at which the ELI will be calculated, in a valid UTC DateTime format.
+    kernels_path : str
+        Folder where the needed SPICE kernels are stored.
+    extra_kernels: list of str
+        Custom kernels from which the observer body will be loaded, instead of calculating it.
+    extra_kernels_path: str
+        Folder where the extra kernels are located.
+    observer_name: str
+        Name of the body of the observer that will be loaded from the extra kernels.
+    esi_calc : esi.ESICalculator
+        ESI Calculator that will be used in the calculation of the Extraterrestrial Solar
+        Irradiance.
+    eli_settings : ELISettings
+        Configuration of the ELI calculation method.
+
+    Returns
+    -------
+    float | list of float | list of list of float
+        The extraterrestrial lunar irradiance/s calculated. It will be a list if parameter
+        "wavelength_nm" was a list, or if EarthPoint utc_times is a list. In case both are lists,
+        it will be a list of lists of floats. The list will contain a list for every utc_time
+        present, and each of those will contain all irradiances associated for each wavelength.
+    """
+    moon_data = spice_iface.get_moon_datas_from_extra_kernels(utc_times, kernels_path,
+                                                              extra_kernels, extra_kernels_path,
+                                                              observer_name)
+    irradiances = []
+    for moon_d in moon_data:
+        irradiances.append(get_eli_bypass(wavelength_nm, moon_d, esi_calc, eli_settings))
+    if len(irradiances) == 1:
+        return irradiances[0]
+    return irradiances
+
 def get_eli(wavelength_nm: Union[float, List[float]], earth_data: EarthPoint, kernels_path: str,
             esi_calc: esi.ESICalculator = esi.ESICalculator(),
-            eli_settings: ELISettings = ELISettings()) -> Union[float, List[float]]:
+            eli_settings: ELISettings = ELISettings()
+            ) -> Union[float, List[float], List[List[float]]]:
     """Calculation of Extraterrestrial Lunar Irradiance from geographic coordinates
 
     Allow users to simulate lunar observations for any observer position around the Earth
@@ -442,7 +498,7 @@ def get_eli(wavelength_nm: Union[float, List[float]], earth_data: EarthPoint, ke
 def get_eli_bypass_per_nm(wavelength_nm: Union[float, List[float]], moon_data: MoonData,
                           esi_calc: esi.ESICalculator = esi.ESICalculator(),
                           eli_settings: ELISettings = ELISettings()
-                          ) -> Union[float, List[float], List[List[float]]]:
+                          ) -> Union[float, List[float]]:
     """Calculation of Extraterrestrial Lunar Irradiance following Eq 3 in Roman et al., 2020
 
     Allow users to simulate lunar observation for any observer/solar selenographic
@@ -476,6 +532,61 @@ def get_eli_bypass_per_nm(wavelength_nm: Union[float, List[float]], moon_data: M
             elis.append(_calculate_eli(wlen, moon_data, esi_calc, eli_settings, True))
         return elis
     return _calculate_eli(wavelength_nm, moon_data, esi_calc, eli_settings, True)
+
+def get_eli_per_nm_from_extra_kernels(wavelength_nm: Union[float, List[float]],
+        utc_times: Union[str, List[str]], kernels_path: str, extra_kernels: List[str],
+        extra_kernels_path: str, observer_name: str,
+        esi_calc: esi.ESICalculator = esi.ESICalculator(),
+        eli_settings: ELISettings = ELISettings()
+        ) -> Union[float, List[float], List[List[float]]]:
+    """Calculation of Extraterrestrial Lunar Irradiance from geographic coordinates
+
+    Allow users to simulate lunar observations for any observer position around the Earth
+    and at any time.
+
+    It loads the observer body data from custom extra kernels instead of generating it from
+    basic kernels.
+
+    Returns the data in Wm⁻²/nm
+
+    Parameters
+    ----------
+    wavelength_nm : float | list of float
+        Wavelength/s (in nanometers) of which the extraterrestrial lunar irradiance will be
+        calculated.
+    utc_times: str | list of str
+        Time/s at which the ELI will be calculated, in a valid UTC DateTime format.
+    kernels_path : str
+        Folder where the needed SPICE kernels are stored.
+    extra_kernels: list of str
+        Custom kernels from which the observer body will be loaded, instead of calculating it.
+    extra_kernels_path: str
+        Folder where the extra kernels are located.
+    observer_name: str
+        Name of the body of the observer that will be loaded from the extra kernels.
+    esi_calc : esi.ESICalculator
+        ESI Calculator that will be used in the calculation of the Extraterrestrial Solar
+        Irradiance.
+    eli_settings : ELISettings
+        Configuration of the ELI calculation method.
+
+    Returns
+    -------
+    float | list of float | list of list of float
+        The extraterrestrial lunar irradiance/s calculated. It will be a list if parameter
+        "wavelength_nm" was a list, or if EarthPoint utc_times is a list. In case both are lists,
+        it will be a list of lists of floats. The list will contain a list for every utc_time
+        present, and each of those will contain all irradiances associated for each wavelength.
+    """
+    moon_data = spice_iface.get_moon_datas_from_extra_kernels(utc_times, kernels_path,
+                                                              extra_kernels, extra_kernels_path,
+                                                              observer_name)
+    irradiances = []
+    for moon_d in moon_data:
+        irradiances.append(get_eli_bypass_per_nm(wavelength_nm, moon_d, esi_calc, eli_settings))
+    if len(irradiances) == 1:
+        return irradiances[0]
+    return irradiances
 
 def get_eli_per_nm(wavelength_nm: Union[float, List[float]], earth_data: EarthPoint,
                    kernels_path: str, esi_calc: esi.ESICalculator = esi.ESICalculator(),
@@ -511,8 +622,9 @@ def get_eli_per_nm(wavelength_nm: Union[float, List[float]], earth_data: EarthPo
         it will be a list of lists of floats. The list will contain a list for every utc_time
         present, and each of those will contain all irradiances associated for each wavelength.
     """
-    moon_data = spice_iface.get_moon_datas(earth_data.lat, earth_data.lon, earth_data.altitude,
-                                           earth_data.utc_times, kernels_path)
+    moon_data = spice_iface.get_moon_datas(earth_data.lat, earth_data.lon,
+                                               earth_data.altitude, earth_data.utc_times,
+                                               kernels_path)
     irradiances = []
     for moon_d in moon_data:
         irradiances.append(get_eli_bypass_per_nm(wavelength_nm, moon_d, esi_calc, eli_settings))

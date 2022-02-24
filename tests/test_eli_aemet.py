@@ -14,6 +14,9 @@ JAN_FULL_MOON_17 = "2022-01-17 17:00:00"
 FEB_NEW_MOON_00 = "2022-02-02 00:00:00"
 DEFAULT_PROP_ERROR = 0.005/100 # up to 0.005% of error is allowed in this test set.
 ed_Vall = eli.EarthPoint(VALL_LAT, VALL_LON, JAN_FULL_MOON_00, VALL_ALT)
+EXK = ["EarthStations.bsp", "EarthStations.tf"]
+EXK_PATH = "./extra.temp.kernels"
+VALL_NAME = "VALLADOLID"
 
 prop_error = DEFAULT_PROP_ERROR
 gfp = esi.GaussianFilterParams(1, 1)
@@ -23,8 +26,10 @@ eli_settings = eli.ELISettings(False, False, True)
 def _testValladolidNoCorr(ts: 'TestSum', wavelength, expected, date):
     ed_Vall.set_utc_times(date)
     res = eli.get_eli_per_nm(wavelength, ed_Vall, KERNELS_PATH, calc, eli_settings)
+    #res = eli.get_eli_per_nm_from_extra_kernels(wavelength, ed_Vall.utc_times,
+    #    KERNELS_PATH, EXK, EXK_PATH, VALL_NAME, calc, eli_settings)
+    res = float('{:0.4e}'.format(res))
     ts.assertAlmostEqual(res, expected, delta=expected*prop_error)
-
 class TestSum(unittest.TestCase):
     
     def test_get_eli_Valladolid(self):
