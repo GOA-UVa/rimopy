@@ -35,22 +35,9 @@ class CorrectionParams:
     c_coeff : float
         RCF coefficient 'c'
     """
-    __slots__ = ['a_coeff', 'b_coeff', 'c_coeff']
-
-    def __init__(self, a_coeff: float, b_coeff: float, c_coeff: float):
-        """
-        Parameters
-        ----------
-        a_coeff : float
-            RCF coefficient 'a'
-        b_coeff : float
-            RCF coefficient 'b'
-        c_coeff : float
-            RCF coefficient 'c'
-        """
-        self.a_coeff = a_coeff
-        self.b_coeff = b_coeff
-        self.c_coeff = c_coeff
+    a_coeff: float
+    b_coeff: float
+    c_coeff: float
 
 def _get_corrected_wavelengths() -> List[float]:
     """Gets all wavelengths (in nanometers) presented in the RCF model

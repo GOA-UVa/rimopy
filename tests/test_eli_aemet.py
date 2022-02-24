@@ -17,7 +17,7 @@ ed_Vall = eli.EarthPoint(VALL_LAT, VALL_LON, JAN_FULL_MOON_00, VALL_ALT)
 
 prop_error = DEFAULT_PROP_ERROR
 gfp = esi.GaussianFilterParams(1, 1)
-calc = esi.ESICalculator(esi.WehrliFile.ORIGINAL_WEHRLI, esi.ESIMethod.GAUSSIAN_FILTER, gfp)
+calc = esi.ESICalculator(esi.WehrliFile.ORIGINAL_WEHRLI, esi.ESIMethod.LINEAR_INTERPOLATION, gfp)
 eli_settings = eli.ELISettings(False, False, True)
 
 def _testValladolidNoCorr(ts: 'TestSum', wavelength, expected, date):
@@ -97,7 +97,7 @@ class TestSum(unittest.TestCase):
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
-        prop_error = float(sys.argv[1])
+        prop_error = float(sys.argv[1])/100
     else:
         prop_error = DEFAULT_PROP_ERROR
     unittest.main(argv=['first-arg-is-ignored'], exit=False)

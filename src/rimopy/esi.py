@@ -183,17 +183,8 @@ class GaussianFilterParams():
     sigma : float
         Standard deviation for the Gaussian filter.
     """
-    def __init__(self, radius: float = 1, sigma: float = 1):
-        """
-        Parameters
-        ----------
-        radius : float
-            Radius of the width of the Gaussian filter.
-        sigma : float
-            Standard deviation for the Gaussian filter.
-        """
-        self.radius = radius
-        self.sigma = sigma
+    radius: float = 1
+    sigma: float = 1
 
 class ESICalculator():
     """
@@ -212,7 +203,7 @@ class ESICalculator():
     """
     __slots__ = ['wehrli_file', 'method', 'gfp']
     def __init__(self, wehrli_file: WehrliFile = WehrliFile.ORIGINAL_WEHRLI,
-                 method: ESIMethod = ESIMethod.GAUSSIAN_FILTER,
+                 method: ESIMethod = ESIMethod.LINEAR_INTERPOLATION,
                  gaussian_filter_params: GaussianFilterParams = None):
         """
         Parameters
