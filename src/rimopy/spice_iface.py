@@ -133,12 +133,12 @@ def _get_moon_data(utc_time: str, observer_name: str = "Observer") -> MoonData:
     spoint, _, _ = spice.subpnt("INTERCEPT/ELLIPSOID", "MOON", et_date, 'MOON_ME',
                                 "NONE", observer_name)
     phase = spice.phaseq(et_date, "MOON", "SUN", observer_name, "NONE")
-    phase = math.degrees(phase)
+    phase = phase * spice.dpr()
 
     # Calculate selenographic coordinates of the observer
     sel_lon, sel_lat, _ = spice.recpgr("MOON", spoint, m_eq_rad, flattening)
-    sel_lon = math.degrees(sel_lon)
-    sel_lat = math.degrees(sel_lat)
+    sel_lon = sel_lon * spice.dpr()
+    sel_lat = sel_lat * spice.dpr()
 
     # Calculate selenographic longitude of sun
     sun_spoint, _, _ = spice.subslr("INTERCEPT/ELLIPSOID", "MOON", et_date, 'MOON_ME',
