@@ -38,7 +38,7 @@ def get_moon_datas_from_extra_kernels(utc_times: List[str], kernels_path: str,
     list of MoonData
         Moon data obtained from SPICE toolbox
     """
-    spmds = spicedmoon.get_moon_datas_from_extra_kernels(utc_times, kernels_path, extra_kernels, extra_kernels_path, observer_name, 'ITRF93')
+    spmds = spicedmoon.get_moon_datas_from_extra_kernels(utc_times, kernels_path, extra_kernels, extra_kernels_path, observer_name, 'ITRF93', ignore_bodvrd=False)
     result = []
     for spmd in spmds:
         result.append(MoonData(spmd.dist_sun_moon_au, spmd.dist_obs_moon, spmd.lon_sun_rad, spmd.lat_obs, spmd.lon_obs, abs(spmd.mpa_deg)))
@@ -68,7 +68,7 @@ def get_moon_datas(lat: float, lon: float, altitude: float, utc_times: List[str]
     list of MoonData
         Moon data obtained from SPICE toolbox
     """
-    spmds = spicedmoon.get_moon_datas(lat, lon, altitude, utc_times, kernels_path)
+    spmds = spicedmoon.get_moon_datas(lat, lon, altitude, utc_times, kernels_path, ignore_bodvrd=False)
     result = []
     for spmd in spmds:
         result.append(MoonData(spmd.dist_sun_moon_au, spmd.dist_obs_moon, spmd.lon_sun_rad, spmd.lat_obs, spmd.lon_obs, abs(spmd.mpa_deg)))
