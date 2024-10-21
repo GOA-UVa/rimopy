@@ -65,7 +65,7 @@ def _get_correction_factor(wavelength_nm: float, mpa: float) -> float:
         Wavelength (in nanometers) of which the extraterrestrial lunar irradiance will be
         calculated
     mpa : float
-        Absolute Moon phase angle (in degrees)
+        Absolute Moon phase angle (in radians)
 
     Returns
     -------
@@ -181,7 +181,7 @@ def get_reflectance_interpolating_coefficients(absolute_mpa_degrees: float, wave
     if apply_correction:
         mr_correction_factor = _get_correction_factor(
             wavelength_nm,
-            moon_data.absolute_mpa_degrees
+            np.radians(moon_data.absolute_mpa_degrees)
         )
         a_l = a_l * mr_correction_factor
     return a_l
@@ -192,7 +192,7 @@ def get_interpolated_reflectance(absolute_mpa_degrees: float, wavelength_nm: flo
     if apply_correction:
         mr_correction_factor = _get_correction_factor(
             wavelength_nm,
-            moon_data.absolute_mpa_degrees
+            np.radians(moon_data.absolute_mpa_degrees)
         )
         a_l = a_l * mr_correction_factor
     return a_l
