@@ -179,8 +179,10 @@ def _interpolated_moon_disk_reflectance(absolute_mpa_degrees: float, wavelength_
 def get_reflectance_interpolating_coefficients(absolute_mpa_degrees: float, wavelength_nm: float, moon_data: MoonData, apply_correction: bool = True):
     a_l = np.exp(_ln_moon_disk_reflectance(absolute_mpa_degrees, wavelength_nm, moon_data))
     if apply_correction:
-        mr_correction_factor = _get_correction_factor(wavelength_nm,
-                                                        moon_data.absolute_mpa_degrees)
+        mr_correction_factor = _get_correction_factor(
+            wavelength_nm,
+            moon_data.absolute_mpa_degrees
+        )
         a_l = a_l * mr_correction_factor
     return a_l
 
@@ -188,7 +190,9 @@ def get_reflectance_interpolating_coefficients(absolute_mpa_degrees: float, wave
 def get_interpolated_reflectance(absolute_mpa_degrees: float, wavelength_nm: float, moon_data: MoonData, apply_correction: bool = True, adjust_apollo: bool = True):
     a_l = _interpolated_moon_disk_reflectance(absolute_mpa_degrees, wavelength_nm, moon_data, adjust_apollo)
     if apply_correction:
-        mr_correction_factor = _get_correction_factor(wavelength_nm,
-                                                        moon_data.absolute_mpa_degrees)
+        mr_correction_factor = _get_correction_factor(
+            wavelength_nm,
+            moon_data.absolute_mpa_degrees
+        )
         a_l = a_l * mr_correction_factor
     return a_l
