@@ -18,7 +18,7 @@ retrieval and comparison with a star photometer.
 
 - numpy >= 1.22.0
 - spiceypy >= 5.0.0
-- spicedmoon >= 1.0.8
+- spicedmoon >= 1.0.13
 
 ## Installation
 
