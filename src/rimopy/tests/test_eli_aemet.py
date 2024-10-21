@@ -3,9 +3,12 @@
 
 import unittest
 import sys
+import os
+
 from rimopy import eli, esi
 
-KERNELS_PATH = "./kernels"
+
+KERNELS_PATH = os.path.join(os.path.dirname(__file__), "./kernels")
 VALL_LAT = 41.6636
 VALL_LON = -4.70583
 VALL_ALT = 705
