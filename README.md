@@ -22,7 +22,7 @@ retrieval and comparison with a star photometer.
 
 ### Prerequisites
 
-* python >= 3.9.0
+* python >= 3.8
 * python package dependencies are specified in `requirements.txt`
 
 
