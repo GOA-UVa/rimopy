@@ -35,3 +35,6 @@ class MoonData:
     lat_obs: float
     long_obs: float
     absolute_mpa_degrees: float
+
+    def __post_init__(self):
+        self.absolute_mpa_degrees = ((self.absolute_mpa_degrees+180) % 360)-180

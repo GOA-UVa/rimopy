@@ -1,6 +1,74 @@
 [build-system]
-requires = [
-    "setuptools>=42",
-    "wheel"
-]
+requires = ["setuptools>=42", "wheel", "setuptools_scm[toml]>=6.0"]
 build-backend = "setuptools.build_meta"
+
+
+[project]
+name = "rimopy"
+dynamic = ["version"]
+description = "ROLO Implementation for Moon Observation (RIMO), in Python"
+readme = "README.md"
+authors = [
+    { name = "Javier Gatón Herguedas", email = "gaton@goa.uva.es" },
+]
+maintainers = [
+    { name = "Javier Gatón Herguedas", email = "gaton@goa.uva.es" }
+]
+
+requires-python = ">=3.8"
+classifiers=[
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Scientific/Engineering :: Astronomy",
+    "Topic :: Scientific/Engineering :: Atmospheric Science",
+]
+dependencies = [
+    "numpy>=1.22.0",
+    "spicedmoon>=1.0.13",
+]
+
+[project.urls]
+Homepage = "https://github.com/GOA-UVa/rimopy"
+Repository = "https://github.com/GOA-UVa/rimopy.git"
+Issues = "https://github.com/GOA-UVa/rimopy/issues"
+
+
+[tool.setuptools_scm]
+root = "."
+fallback_version = "1"
+
+[tool.versioneer]
+VCS = "git"
+style = "pep440"
+versionfile_source = "rimopy/_version.py"
+versionfile_build = "rimopy/_version.py"
+tag_prefix = ""
+parentdir_prefix = ""
+
+[tool.flake8]
+exclude = ["docs"]
+max-line-length = 120
+extend-ignore = ["W291"]
+
+[tool.mypy]
+allow_untyped_globals = true
+ignore_missing_imports = true
+
+[tool.mypy-setup]
+ignore_errors = true
+
+[tool.mypy-tests]
+ignore_errors = true
+
+[tool.mypy-versioneer]
+ignore_errors = true

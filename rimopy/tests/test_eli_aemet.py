@@ -3,16 +3,19 @@
 
 import unittest
 import sys
+import os
+
 from rimopy import eli, esi
 
-KERNELS_PATH = "./kernels"
+
+KERNELS_PATH = os.path.join(os.path.dirname(__file__), "./kernels")
 VALL_LAT = 41.6636
 VALL_LON = -4.70583
 VALL_ALT = 705
 JAN_FULL_MOON_00 = "2022-01-17 00:00:00"
 JAN_FULL_MOON_17 = "2022-01-17 17:00:00"
 FEB_NEW_MOON_00 = "2022-02-02 00:00:00"
-DEFAULT_PROP_ERROR = 0.005/100 # up to 0.005% of error is allowed in this test set.
+DEFAULT_PROP_ERROR = 0 # 0% error, now the result is formatted as the one in AEMET's
 ed_Vall = eli.EarthPoint(VALL_LAT, VALL_LON, JAN_FULL_MOON_00, VALL_ALT)
 EXK = ["EarthStations.bsp", "EarthStations.tf"]
 EXK_PATH = "./extra.temp.kernels"

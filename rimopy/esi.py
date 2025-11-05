@@ -154,8 +154,8 @@ class WehrliFile(enum.Enum):
     GAUSSIAN_WEHRLI : Wehrli data passed through a gaussian filter with data for every 0.1 nm.
         Similar effectiveness to using ORIGINAL_WEHRLI with GAUSSIAN_FILTER.
         Not recommended for obtaining "Wm⁻²" data, only "Wm⁻²/nm".
-    ASC_WEHRLI : Wehrli data passed through different filters. This is the default one.
-        Not recommended for obtaining "Wm⁻²" data, only "Wm⁻²/nm".
+    ASC_WEHRLI : Wehrli data passed through different filters. This is the default one as it's the
+        one used in AEMET's RimoApp. Not recommended for obtaining "Wm⁻²" data, only "Wm⁻²/nm".
     """
     ORIGINAL_WEHRLI = 'data/wehrli_original.csv'
     SIMPLE_FILTER_WEHRLI = 'data/wehrli_filtered.csv'

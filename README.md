@@ -1,6 +1,10 @@
-# Rimopy
+# rimopy
 
-![Version 0.1.8](https://img.shields.io/badge/version-0.1.8-informational)
+![Version 0.2.1](https://img.shields.io/badge/version-0.2.1-informational?style=for-the-badge)
+
+ROLO Implementation for Moon Observation (RIMO), in Python.
+
+## About the project
 
 Rimopy is a package consisting of an implementation of the ROLO model, following RIMO's
 implementation, made in python.
@@ -14,16 +18,13 @@ models in the frame of the first multi-instrument nocturnal intercomparison camp
 - Roman et al., 2020: Correction of a lunar-irradiance model for aerosol optical depth
 retrieval and comparison with a star photometer.
 
-## Requirements
+## Getting started
 
-- numpy >= 1.22.0
-- spiceypy >= 4.0.3
+### Prerequisites
 
-## Installation
+* python >= 3.8
+* python package dependencies are specified in `requirements.txt`
 
-```sh
-pip install rimopy
-```
 
 ### Kernels
 
@@ -41,6 +42,18 @@ Alternatively, kernels can be downloaded manually from the following urls:
 - [https://naif.jpl.nasa.gov/pub/naif/generic_kernels/pck/moon_pa_de421_1900-2050.bpc](https://naif.jpl.nasa.gov/pub/naif/generic_kernels/pck/moon_pa_de421_1900-2050.bpc)
 - [https://naif.jpl.nasa.gov/pub/naif/generic_kernels/lsk/naif0011.tls](https://naif.jpl.nasa.gov/pub/naif/generic_kernels/lsk/naif0011.tls)
 - [https://naif.jpl.nasa.gov/pub/naif/generic_kernels/pck/pck00010.tpc](https://naif.jpl.nasa.gov/pub/naif/generic_kernels/pck/pck00010.tpc)
+
+### Installation
+
+Install this package from the directory:
+```sh
+pip install -e .
+```
+
+Or install it from pypi:
+```sh
+pip install rimopy
+```
 
 ## Usage
 
@@ -71,8 +84,8 @@ results = eli.get_eli(wavelengths, full_moon_Valladolid, kernels_path)
 
 These calculations can be customized, defining the settings and the methods used for the calculation of
 the extraterrestrial solar irradiance. For example, if someone wanted to calculate the lunar irradiance
-applying the RIMO correction factor, and with a different method for the solar irradiance interpolation,
-something like the following code block would work:
+applying the RIMO correction factor, and with a different source data for the extraterrestrial solar irradiance,
+in this case the original Wehrli 1985 data, something like the following code block would work:
 
 ```python
 from rimopy import esi
@@ -82,6 +95,57 @@ calc = esi.ESICalculator(esi.WehrliFile.ORIGINAL_WEHRLI, esi.ESIMethod.LINEAR_IN
 eli_settings = eli.ELISettings(True, False, True)
 result = eli.get_eli_per_nm(wavelength, full_moon_Valladolid, kernels_path, calc, eli_settings)
 ```
+
+### Main functions
+
+The most important functions are the ones that obtain the extraterrestrial lunar irradiance, so they
+are all contained in the **eli** module.
+
+* **get_eli_bypass** - returns the expected extraterrestrial lunar irradiation of a wavelength for
+any observer/solar selenographic coordinates, in Wm⁻².
+* **get_eli** - returns the expected extraterrestrial lunar irradiation of a wavelength in any
+geographic coordinates, in Wm⁻².
+* **get_eli_from_extra_kernels** - returns the expected extraterrestrial lunar irradiation of
+a wavelength in any geographic coordinates, in Wm⁻², using data from extra kernels for the
+observer body.
+* **get_eli_bypass_per_nm** - returns the expected extraterrestrial lunar irradiation of a
+wavelength for any observer/solar selenographic coordinates, in Wm⁻²/nm.
+* **get_eli_per_nm** - returns the expected extraterrestrial lunar irradiation of a wavelength in
+any geographic coordinates, in Wm⁻²/nm.
+* **get_eli_per_nm_from_extra_kernels** - returns the expected extraterrestrial lunar irradiation of
+a wavelength in any geographic coordinates, in Wm⁻²/nm, using data from extra kernels for the
+observer body.
+
+### Configuration options
+
+**ELISettings**
+
+ELISettings is a dataclass that contains settings that will modify the methodology of calculating the ELI.
+
+These settings are:
+- **apply_correction**: If True the result will have been multiplied by the RCF (Rimo Correction Factor),
+which corrects the data for the photometers' calibration. Otherwise it won't. The default value is *False*.
+- **interpolate_rolo_coefficients**: If True the reflectance will be calculated linearly interpolating
+the ROLO coefficients. Otherwise it will be calculated interpolating the surrounding reflectances,
+calculated with empirical coefficients. The default value is *False*.
+- **adjust_apollo**: If True the ROLO model reflectance will be adjusted using Apollo spectra, in case
+it's calculated interpolating surrounding reflectances. The Apollo spectra is the spectra generated
+with the Moon samples from Apollo 16th mission. The default value is *True*.
+
+**ESICalculator**
+
+ESICalculator is the class of which instances contain the functions that calculate the extraterrestrial
+solar irradiance. This calculations will vary depending on the values of ESICalculator attributes.
+
+These attributes are:
+- **wehrli_file**: Wehrli data source that will be used in the calculation of the ESI. It could be the original
+data or some filtered data. The default value is "ASC_WEHRLI", the Wehrli data passed throught some filters, and it's
+the one used in AEMET's RimoApp and others. Although it's the default value, it might not be the best for obtaining
+"Wm⁻²" data (**get_eli()**), as in this file the solar irradiance in "Wm⁻²" is obtained from the "Wm⁻²/nm" data, instead of
+having passed the original "Wm⁻²" data through the same filters.
+- **method**: Interpolation method that will be used in the calculation of the ESI. The default one is "LINEAR_INTERPOLATION".
+- **gaussian_filter_params**: Parameters for the gaussian filter method, in case that that one is the chosen one. It contains
+the radius and the standard deviation, which by default both are equal to one.
 
 ## Structure
 
