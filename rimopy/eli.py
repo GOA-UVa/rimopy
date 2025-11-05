@@ -11,18 +11,11 @@ It exports the following classes:
 It exports the following functions:
 
     * get_eli_bypass - returns the expected extraterrestrial lunar irradiation of a wavelength for
-        any observer/solar selenographic coordinates, in Wm⁻².
+        any observer/solar selenographic coordinates.
     * get_eli - returns the expected extraterrestrial lunar irradiation of a wavelength in any
-        geographic coordinates, in Wm⁻².
+        geographic coordinates.
     * get_eli_from_extra_kernels - returns the expected extraterrestrial lunar irradiation of
-        a wavelength in any geographic coordinates, in Wm⁻², using data from extra kernels for the
-        observer body.
-    * get_eli_bypass_per_nm - returns the expected extraterrestrial lunar irradiation of a
-        wavelength for any observer/solar selenographic coordinates, in Wm⁻²/nm.
-    * get_eli_per_nm - returns the expected extraterrestrial lunar irradiation of a wavelength in
-        any geographic coordinates, in Wm⁻²/nm.
-    * get_eli_per_nm_from_extra_kernels - returns the expected extraterrestrial lunar irradiation of
-        a wavelength in any geographic coordinates, in Wm⁻²/nm, using data from extra kernels for the
+        a wavelength in any geographic coordinates, using data from extra kernels for the
         observer body.
 """
 
@@ -31,7 +24,8 @@ import math
 from typing import List, Union, Iterable
 
 from . import spice_iface, esi, elref
-from .types import MoonData
+from .types import MoonDatas
+
 
 @dataclass(frozen=True)
 class ELISettings:
@@ -138,7 +132,7 @@ def _get_esi(esi_calc: esi.ESICalculator, wavelength_nm: float, eli_settings: EL
     return esi_calc.get_esi(wavelength_nm, eli_settings.per_nm)
 
 
-def _calculate_eli(wavelength_nm: float, moon_data: MoonData, esi_calc: esi.ESICalculator,
+def _calculate_eli(wavelength_nm: float, mds: MoonDatas, esi_calc: esi.ESICalculator,
                    eli_settings: ELISettings) -> float:
     """Calculation of Extraterrestrial Lunar Irradiance following Eq 3 in Roman et al., 2020
 
@@ -150,7 +144,7 @@ def _calculate_eli(wavelength_nm: float, moon_data: MoonData, esi_calc: esi.ESIC
     wavelength_nm : float
         Wavelength (in nanometers) of which the extraterrestrial lunar irradiance will be
         calculated.
-    moon_data : MoonData
+    mds : MoonDatas
         Moon data needed to calculate Moon's irradiance
     esi_calc : esi.ESICalculator
         ESI Calculator that will be used in the calculation of the Extraterrestrial Solar
@@ -165,25 +159,25 @@ def _calculate_eli(wavelength_nm: float, moon_data: MoonData, esi_calc: esi.ESIC
     """
     if not eli_settings.interpolate_rolo_coefficients:
         a_l = elref.get_interpolated_reflectance(
-            moon_data.absolute_mpa_degrees,
+            mds.ampa,
             wavelength_nm,
-            moon_data,
+            mds,
             eli_settings.apply_correction,
             eli_settings.adjust_apollo
         )
     else:
         a_l = elref.get_reflectance_interpolating_coefficients(
-            moon_data.absolute_mpa_degrees,
+            mds.ampa,
             wavelength_nm,
-            moon_data,
+            mds,
             eli_settings.apply_correction,
         )
 
     solid_angle_moon: float = 6.4177e-05
     omega = solid_angle_moon
     esk = _get_esi(esi_calc, wavelength_nm, eli_settings)
-    dsm = moon_data.distance_sun_moon
-    dom = moon_data.distance_observer_moon
+    dsm = mds.dsm
+    dom = mds.dom
     distance_earth_moon_km: int = 384400
 
     lunar_irr = ((a_l * omega * esk) / math.pi) * ((1 / dsm) ** 2) * \
@@ -191,7 +185,7 @@ def _calculate_eli(wavelength_nm: float, moon_data: MoonData, esi_calc: esi.ESIC
     return lunar_irr
 
 
-def get_eli_bypass(wavelength_nm: Iterable[float], moon_data: MoonData,
+def get_eli_bypass(wavelength_nm: Iterable[float], mds: MoonDatas,
                    esi_calc: esi.ESICalculator = None,
                    eli_settings: ELISettings = None) -> List[float]:
     """Calculation of Extraterrestrial Lunar Irradiance following Eq 3 in Roman et al., 2020
@@ -207,7 +201,7 @@ def get_eli_bypass(wavelength_nm: Iterable[float], moon_data: MoonData,
     wavelength_nm : iterable of float
         Wavelengths (in nanometers) of which the extraterrestrial lunar irradiance will be
         calculated.
-    moon_data : MoonData
+    mds : MoonDatas
         Moon data needed to calculate Moon's irradiance
     esi_calc : esi.ESICalculator
         ESI Calculator that will be used in the calculation of the Extraterrestrial Solar
@@ -226,7 +220,7 @@ def get_eli_bypass(wavelength_nm: Iterable[float], moon_data: MoonData,
         esi_calc = esi.ESICalculator()
     elis = []
     for wlen in wavelength_nm:
-        elis.append(_calculate_eli(wlen, moon_data, esi_calc, eli_settings))
+        elis.append(_calculate_eli(wlen, mds, esi_calc, eli_settings))
     return elis
 
 
@@ -275,12 +269,10 @@ def get_eli_from_extra_kernels(wavelength_nm: Iterable[float],
         a list for every utc_time present, and each of those will contain all irradiances
         associated for each wavelength.
     """
-    moon_data = spice_iface.get_moon_datas_from_extra_kernels(utc_times, kernels_path,
+    mds = spice_iface.get_moon_datas_from_extra_kernels(utc_times, kernels_path,
                                                               extra_kernels, extra_kernels_path,
                                                               observer_name)
-    irradiances = []
-    for moon_d in moon_data:
-        irradiances.append(get_eli_bypass(wavelength_nm, moon_d, esi_calc, eli_settings))
+    irradiances = get_eli_bypass(wavelength_nm, mds, esi_calc, eli_settings)
     if len(irradiances) == 1:
         return irradiances[0]
     return irradiances
@@ -319,11 +311,9 @@ def get_eli(wavelength_nm: Iterable[float], earth_data: EarthPoint, kernels_path
         a list for every utc_time present, and each of those will contain all irradiances
         associated for each wavelength.
     """
-    moon_data = spice_iface.get_moon_datas(earth_data.lat, earth_data.lon, earth_data.altitude,
+    mds = spice_iface.get_moon_datas(earth_data.lat, earth_data.lon, earth_data.altitude,
                                            earth_data.utc_times, kernels_path)
-    irradiances = []
-    for moon_d in moon_data:
-        irradiances.append(get_eli_bypass(wavelength_nm, moon_d, esi_calc, eli_settings))
+    irradiances = get_eli_bypass(wavelength_nm, mds, esi_calc, eli_settings)
     if len(irradiances) == 1:
         return irradiances[0]
     return irradiances

@@ -21,7 +21,9 @@ from typing import List, Dict
 import csv
 import pkgutil
 from io import StringIO
+
 import numpy as np
+from numpy.typing import NDArray
 
 @dataclass
 class _CoefficientsWln():
@@ -177,7 +179,7 @@ def get_coefficients_b(wavelength_nm: float) -> List[float]:
     b_coeffs_concrete = [b_0, b_1, b_2]
     return b_coeffs_concrete
 
-def get_coefficients_d(wavelength_nm: float) -> List[float]:
+def get_coefficients_d(wavelength_nm: float) -> NDArray[np.float32]:
     """Gets all 'd' coefficients for a concrete wavelength
 
     Parameters
@@ -187,8 +189,8 @@ def get_coefficients_d(wavelength_nm: float) -> List[float]:
 
     Returns
     -------
-    list of float
-        A list containing the 'd' coefficients for the wavelength
+    np.array of float
+        An array containing the 'd' coefficients for the wavelength
     """
     d_coeffs = get_all_coefficients_d()
     wvs = get_wavelengths()
@@ -201,37 +203,37 @@ def get_coefficients_d(wavelength_nm: float) -> List[float]:
     d_0 = np.interp(wavelength_nm, wvs, [elem[0] for elem in d_coeffs])
     d_1 = np.interp(wavelength_nm, wvs, [elem[1] for elem in d_coeffs])
     d_2 = np.interp(wavelength_nm, wvs, [elem[2] for elem in d_coeffs])
-    d_coeffs_concrete = [d_0, d_1, d_2]
+    d_coeffs_concrete = np.array([d_0, d_1, d_2])
     return d_coeffs_concrete
 
-def get_coefficients_c() -> List[float]:
+def get_coefficients_c() -> NDArray[np.float32]:
     """Gets all 'c' coefficients
 
     Returns
     -------
-    list of float
-        A list containing all 'c' coefficients
+    np.array of float
+        An array containing all 'c' coefficients
     """
-    return [0.00034115, -0.0013425, 0.00095906, 0.00066229]
+    return np.array([0.00034115, -0.0013425, 0.00095906, 0.00066229])
 
-def get_coefficients_p() -> List[float]:
+def get_coefficients_p() -> NDArray[np.float32]:
     """Gets all 'p' coefficients
 
     Returns
     -------
-    list of float
-        A list containing all 'p' coefficients
+    np.array of float
+        An array containing all 'p' coefficients
     """
-    return [4.06054, 12.8802, -30.5858, 16.7498]
+    return np.array([4.06054, 12.8802, -30.5858, 16.7498])
 
-def get_apollo_coefficients() -> List[float]:
+def get_apollo_coefficients() -> NDArray[np.float32]:
     """Coefficients used for the adjustment of the ROLO model using Apollo spectra.
 
     Returns
     -------
-    list of float
-        A list containing all Apollo coefficients
+    np.array of float
+        An array containing all Apollo coefficients
     """
-    return [1.0301, 1.0970, 0.9325, 0.9466, 1.0225, 1.0157, 1.0470, 1.0084, 1.0100, 1.0148,
+    return np.array([1.0301, 1.0970, 0.9325, 0.9466, 1.0225, 1.0157, 1.0470, 1.0084, 1.0100, 1.0148,
             0.9843, 1.0134, 0.9329, 0.9849, 0.9994, 0.9957, 1.0059, 0.9618, 0.9561, 0.9796, 0.9568,
-            0.9873, 1.0575, 1.0108, 0.9743, 1.0386, 1.0338, 1.0577, 1.0650, 1.0815, 0.8945, 0.9689]
+            0.9873, 1.0575, 1.0108, 0.9743, 1.0386, 1.0338, 1.0577, 1.0650, 1.0815, 0.8945, 0.9689])
