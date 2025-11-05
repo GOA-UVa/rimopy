@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Removed default values that created objects in function definitions. Changed to None and the instance is created inside the function.
+- Removed `per_nm` specific functions, and added it as an attribute of `ELISettings`
+- `get_eli` functions now only accept an iterable of wavelengths as input, removing the option for a sole wavelength.
 
 ## [0.2.1] - 2025-11-05
 

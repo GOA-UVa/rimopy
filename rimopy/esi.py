@@ -251,63 +251,35 @@ class ESICalculator:
         _loaded_data = data
         return _loaded_data
 
-    def get_esi(self, wavelength_nm: float) -> float:
+    def get_esi(self, wavelength_nm: float, per_nm: bool = False) -> float:
         """Gets the expected extraterrestrial solar irradiance at a concrete wavelength
-        Returns the data in Wm⁻²
+        Returns the data in Wm⁻² or Wm⁻²/nm
 
         Parameters
         ----------
         wavelength_nm : float
             Wavelength (in nanometers) of which the extraterrestrial solar irradiance will be
             obtained
+        per_nm : bool
+            If True the irradiance will be in Wm⁻²/nm, otherwise it will be in Wm⁻². Default is False.
 
         Returns
         -------
         float
-            The expected extraterrestrial solar irradiance in Wm⁻²
+            The expected extraterrestrial solar irradiance
         """
         wehrli_data = self._get_wehrli_data()
         wehrli_x = list(wehrli_data.keys())
+        value_index = 1
+        if per_nm:
+            value_index = 0
         if wavelength_nm in wehrli_x:
-            return wehrli_data[wavelength_nm][1]
+            return wehrli_data[wavelength_nm][value_index]
         if wavelength_nm < wehrli_x[0]:
-            return wehrli_data[wehrli_x[0]][1]
+            return wehrli_data[wehrli_x[0]][value_index]
         if wavelength_nm > wehrli_x[-1]:
-            return wehrli_data[wehrli_x[-1]][1]
-        wehrli_y = list(map(lambda x: x[1], wehrli_data.values()))
-        if self.method == ESIMethod.LINEAR_INTERPOLATION:
-            return _linear_interpolation(wavelength_nm, wehrli_x, wehrli_y)
-        # ESIMethod.GAUSSIAN_FILTER
-        gauss_res = _gaussian_filter_non_equidistant(wavelength_nm, wehrli_x, wehrli_y,
-                                                     self.gfp.radius, self.gfp.sigma)
-        if gauss_res == 0: # There was no wehrli data near enough from the given wavelength_nm
-            return _linear_interpolation(wavelength_nm, wehrli_x, wehrli_y)
-        return gauss_res
-
-    def get_esi_per_nm(self, wavelength_nm: float) -> float:
-        """Gets the expected extraterrestrial solar irradiance at a concrete wavelength
-        Returns the data in Wm⁻²/nm
-
-        Parameters
-        ----------
-        wavelength_nm : float
-            Wavelength (in nanometers) of which the extraterrestrial solar irradiance will be
-            obtained
-
-        Returns
-        -------
-        float
-            The expected extraterrestrial solar irradiance in Wm⁻²/nm
-        """
-        wehrli_data = self._get_wehrli_data()
-        wehrli_x = list(wehrli_data.keys())
-        if wavelength_nm in wehrli_x:
-            return wehrli_data[wavelength_nm][0]
-        if wavelength_nm < wehrli_x[0]:
-            return wehrli_data[wehrli_x[0]][0]
-        if wavelength_nm > wehrli_x[-1]:
-            return wehrli_data[wehrli_x[-1]][0]
-        wehrli_y = list(map(lambda x: x[0], wehrli_data.values()))
+            return wehrli_data[wehrli_x[-1]][value_index]
+        wehrli_y = list(map(lambda x: x[value_index], wehrli_data.values()))
         if self.method == ESIMethod.LINEAR_INTERPOLATION:
             return _linear_interpolation(wavelength_nm, wehrli_x, wehrli_y)
         # ESIMethod.GAUSSIAN_FILTER

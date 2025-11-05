@@ -3,7 +3,7 @@
 This module allows for the calculation of the extraterrestrial lunar reflectance.
 """
 
-from typing import List
+from typing import Iterable
 
 import numpy as np
 
@@ -29,7 +29,7 @@ def _summatory_a(wavelength_nm: float, gr_value: float) -> float:
         Result of the computation of the first summatory
     """
     count: float = 0.0
-    a_coeffs: List[float] = coeffs.get_coefficients_a(wavelength_nm)
+    a_coeffs: Iterable[float] = coeffs.get_coefficients_a(wavelength_nm)
     for i, a_value in enumerate(a_coeffs):
         count = count + a_value * gr_value ** i
     return count
@@ -50,7 +50,7 @@ def _summatory_b(wavelength_nm: float, phi: float) -> float:
         Result of the computation of the second summatory
     """
     count: float = 0.0
-    b_coeffs: List[float] = coeffs.get_coefficients_b(wavelength_nm)
+    b_coeffs: Iterable[float] = coeffs.get_coefficients_b(wavelength_nm)
     for j, b_value in enumerate(b_coeffs):
         count = count + b_value * phi ** (2*(j + 1) - 1)
     return count
@@ -102,9 +102,9 @@ def _ln_moon_disk_reflectance(absolute_mpa_degrees: float, wavelength_nm: float,
     gd_value = absolute_mpa_degrees
     gr_value = np.radians(gd_value)
     phi = moon_data.long_sun_radians
-    c_coeffs: List[float] = coeffs.get_coefficients_c()
-    d_coeffs: List[float] = coeffs.get_coefficients_d(wavelength_nm)
-    p_coeffs: List[float] = coeffs.get_coefficients_p()
+    c_coeffs: Iterable[float] = coeffs.get_coefficients_c()
+    d_coeffs: Iterable[float] = coeffs.get_coefficients_d(wavelength_nm)
+    p_coeffs: Iterable[float] = coeffs.get_coefficients_p()
     l_theta = moon_data.lat_obs
     l_phi = moon_data.long_obs
     sum_a = _summatory_a(wavelength_nm, gr_value)
