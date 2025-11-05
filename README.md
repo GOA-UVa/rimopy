@@ -1,6 +1,10 @@
-# Rimopy
+# rimopy
 
-![Version 0.2.1](https://img.shields.io/badge/version-0.2.1-informational)
+![Version 0.2.1](https://img.shields.io/badge/version-0.2.1-informational?style=for-the-badge)
+
+ROLO Implementation for Moon Observation (RIMO), in Python.
+
+## About the project
 
 Rimopy is a package consisting of an implementation of the ROLO model, following RIMO's
 implementation, made in python.
@@ -14,17 +18,13 @@ models in the frame of the first multi-instrument nocturnal intercomparison camp
 - Roman et al., 2020: Correction of a lunar-irradiance model for aerosol optical depth
 retrieval and comparison with a star photometer.
 
-## Requirements
+## Getting started
 
-- numpy >= 1.22.0
-- spiceypy >= 5.0.0
-- spicedmoon >= 1.0.13
+### Prerequisites
 
-## Installation
+* python >= 3.9.0
+* python package dependencies are specified in `requirements.txt`
 
-```sh
-pip install rimopy
-```
 
 ### Kernels
 
@@ -42,6 +42,18 @@ Alternatively, kernels can be downloaded manually from the following urls:
 - [https://naif.jpl.nasa.gov/pub/naif/generic_kernels/pck/moon_pa_de421_1900-2050.bpc](https://naif.jpl.nasa.gov/pub/naif/generic_kernels/pck/moon_pa_de421_1900-2050.bpc)
 - [https://naif.jpl.nasa.gov/pub/naif/generic_kernels/lsk/naif0011.tls](https://naif.jpl.nasa.gov/pub/naif/generic_kernels/lsk/naif0011.tls)
 - [https://naif.jpl.nasa.gov/pub/naif/generic_kernels/pck/pck00010.tpc](https://naif.jpl.nasa.gov/pub/naif/generic_kernels/pck/pck00010.tpc)
+
+### Installation
+
+Install this package from the directory:
+```sh
+pip install -e .
+```
+
+Or install it from pypi:
+```sh
+pip install rimopy
+```
 
 ## Usage
 
