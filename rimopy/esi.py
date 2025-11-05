@@ -189,7 +189,7 @@ class GaussianFilterParams():
     radius: float = 1
     sigma: float = 1
 
-class ESICalculator():
+class ESICalculator:
     """
     Calculator of Extraterrestrial Solar Irradiance.
     Based on Wehrli data and some sort of interpolation.

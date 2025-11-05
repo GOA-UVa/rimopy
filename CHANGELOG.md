@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [//]: # "## [unreleased] - yyyy-mm-dd"
 
+## [unreleased] - yyyy-mm-dd
+
+### Changed
+- Removed default values that created objects in function definitions. Changed to None and the instance is created inside the function.
+
 ## [0.2.1] - 2025-11-05
 
 Initial version that serves as the baseline for tracking changes in the change log.

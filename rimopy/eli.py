@@ -33,8 +33,8 @@ from typing import List, Union
 from . import spice_iface, esi, elref
 from .types import MoonData
 
-@dataclass
-class ELISettings():
+@dataclass(frozen=True)
+class ELISettings:
     """
     Settings that will modify the methodology of calculating the ELI
 
@@ -58,7 +58,7 @@ class ELISettings():
     adjust_apollo: bool = True
 
 @dataclass
-class EarthPoint():
+class EarthPoint:
     """
     Data of the point on Earth surface of which the ELI will be calculated.
 
@@ -209,8 +209,8 @@ def _calculate_eli(wavelength_nm: float, moon_data: MoonData, esi_calc: esi.ESIC
     return lunar_irr
 
 def get_eli_bypass(wavelength_nm: Union[float, List[float]], moon_data: MoonData,
-                   esi_calc: esi.ESICalculator = esi.ESICalculator(),
-                   eli_settings: ELISettings = ELISettings()) -> Union[float, List[float]]:
+                   esi_calc: esi.ESICalculator = None,
+                   eli_settings: ELISettings = None) -> Union[float, List[float]]:
     """Calculation of Extraterrestrial Lunar Irradiance following Eq 3 in Roman et al., 2020
 
     Allow users to simulate lunar observation for any observer/solar selenographic
@@ -238,6 +238,10 @@ def get_eli_bypass(wavelength_nm: Union[float, List[float]], moon_data: MoonData
         The extraterrestrial lunar irradiance/s calculated. It will be a list if parameter
         "wavelength_nm" was a list.
     """
+    if eli_settings is None:
+        eli_settings = ELISettings()
+    if esi_calc is None:
+        esi_calc = esi.ESICalculator()
     if isinstance(wavelength_nm, list):
         elis = []
         for wlen in wavelength_nm:
@@ -301,8 +305,8 @@ def get_eli_from_extra_kernels(wavelength_nm: Union[float, List[float]],
     return irradiances
 
 def get_eli(wavelength_nm: Union[float, List[float]], earth_data: EarthPoint, kernels_path: str,
-            esi_calc: esi.ESICalculator = esi.ESICalculator(),
-            eli_settings: ELISettings = ELISettings()
+            esi_calc: esi.ESICalculator = None,
+            eli_settings: ELISettings = None,
             ) -> Union[float, List[float], List[List[float]]]:
     """Calculation of Extraterrestrial Lunar Irradiance from geographic coordinates
 
@@ -344,8 +348,8 @@ def get_eli(wavelength_nm: Union[float, List[float]], earth_data: EarthPoint, ke
     return irradiances
 
 def get_eli_bypass_per_nm(wavelength_nm: Union[float, List[float]], moon_data: MoonData,
-                          esi_calc: esi.ESICalculator = esi.ESICalculator(),
-                          eli_settings: ELISettings = ELISettings()
+                          esi_calc: esi.ESICalculator = None,
+                          eli_settings: ELISettings = None,
                           ) -> Union[float, List[float]]:
     """Calculation of Extraterrestrial Lunar Irradiance following Eq 3 in Roman et al., 2020
 
@@ -374,6 +378,10 @@ def get_eli_bypass_per_nm(wavelength_nm: Union[float, List[float]], moon_data: M
         The extraterrestrial lunar irradiance/s calculated. It will be a list if parameter
         "wavelength_nm" was a list.
     """
+    if eli_settings is None:
+        eli_settings = ELISettings()
+    if esi_calc is None:
+        esi_calc = esi.ESICalculator()
     if isinstance(wavelength_nm, list):
         elis = []
         for wlen in wavelength_nm:
@@ -384,8 +392,8 @@ def get_eli_bypass_per_nm(wavelength_nm: Union[float, List[float]], moon_data: M
 def get_eli_per_nm_from_extra_kernels(wavelength_nm: Union[float, List[float]],
         utc_times: Union[str, List[str]], kernels_path: str, extra_kernels: List[str],
         extra_kernels_path: str, observer_name: str,
-        esi_calc: esi.ESICalculator = esi.ESICalculator(),
-        eli_settings: ELISettings = ELISettings()
+        esi_calc: esi.ESICalculator = None,
+        eli_settings: ELISettings = None,
         ) -> Union[float, List[float], List[List[float]]]:
     """Calculation of Extraterrestrial Lunar Irradiance from geographic coordinates
 
@@ -437,8 +445,8 @@ def get_eli_per_nm_from_extra_kernels(wavelength_nm: Union[float, List[float]],
     return irradiances
 
 def get_eli_per_nm(wavelength_nm: Union[float, List[float]], earth_data: EarthPoint,
-                   kernels_path: str, esi_calc: esi.ESICalculator = esi.ESICalculator(),
-                   eli_settings: ELISettings = ELISettings()
+                   kernels_path: str, esi_calc: esi.ESICalculator = None,
+                   eli_settings: ELISettings = None,
                    ) -> Union[float, List[float], List[List[float]]]:
     """Calculation of Extraterrestrial Lunar Irradiance from geographic coordinates
 
