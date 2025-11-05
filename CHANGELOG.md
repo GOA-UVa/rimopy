@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased] - yyyy-mm-dd
 
+### Added
+- Complete vectorisation based on wavelengths and lunar geometries.
+
 ### Changed
 - Removed default values that created objects in function definitions. Changed to None and the instance is created inside the function.
 - Removed `per_nm` specific functions, and added it as an attribute of `ELISettings`

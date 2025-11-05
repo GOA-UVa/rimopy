@@ -15,11 +15,13 @@ It exports the following classes:
 import csv
 from dataclasses import dataclass
 from io import StringIO
-from typing import Tuple, Dict, List
+from typing import Tuple, Dict, List, Iterable
 import math
 import pkgutil
 import enum
+
 import numpy as np
+from numpy.typing import NDArray
 
 _loaded_data = {}
 _last_loaded_file = ""
@@ -251,40 +253,37 @@ class ESICalculator:
         _loaded_data = data
         return _loaded_data
 
-    def get_esi(self, wavelength_nm: float, per_nm: bool = False) -> float:
+    def get_esi(self, wavelengths_nm: Iterable[float], per_nm: bool = False) -> NDArray[np.float32]:
         """Gets the expected extraterrestrial solar irradiance at a concrete wavelength
         Returns the data in Wm⁻² or Wm⁻²/nm
 
         Parameters
         ----------
-        wavelength_nm : float
-            Wavelength (in nanometers) of which the extraterrestrial solar irradiance will be
+        wavelengths_nm : iterable of float
+            Wavelengths (in nanometers) of which the extraterrestrial solar irradiance will be
             obtained
         per_nm : bool
             If True the irradiance will be in Wm⁻²/nm, otherwise it will be in Wm⁻². Default is False.
 
         Returns
         -------
-        float
+        np.array of float
             The expected extraterrestrial solar irradiance
         """
+        wavelengths_nm = np.array(wavelengths_nm)
         wehrli_data = self._get_wehrli_data()
         wehrli_x = list(wehrli_data.keys())
         value_index = 1
         if per_nm:
             value_index = 0
-        if wavelength_nm in wehrli_x:
-            return wehrli_data[wavelength_nm][value_index]
-        if wavelength_nm < wehrli_x[0]:
-            return wehrli_data[wehrli_x[0]][value_index]
-        if wavelength_nm > wehrli_x[-1]:
-            return wehrli_data[wehrli_x[-1]][value_index]
+        wavelengths_nm = np.where(wavelengths_nm < wehrli_x[0], wehrli_x[0], wavelengths_nm)
+        wavelengths_nm = np.where(wavelengths_nm > wehrli_x[-1], wehrli_x[-1], wavelengths_nm)
         wehrli_y = list(map(lambda x: x[value_index], wehrli_data.values()))
         if self.method == ESIMethod.LINEAR_INTERPOLATION:
-            return _linear_interpolation(wavelength_nm, wehrli_x, wehrli_y)
+            return _linear_interpolation(wavelengths_nm, wehrli_x, wehrli_y)
         # ESIMethod.GAUSSIAN_FILTER
-        gauss_res = _gaussian_filter_non_equidistant(wavelength_nm, wehrli_x, wehrli_y,
+        gauss_res = _gaussian_filter_non_equidistant(wavelengths_nm, wehrli_x, wehrli_y,
                                                      self.gfp.radius, self.gfp.sigma)
         if gauss_res == 0: # There was no wehrli data near enough from the given wavelength_nm
-            return _linear_interpolation(wavelength_nm, wehrli_x, wehrli_y)
+            return _linear_interpolation(wavelengths_nm, wehrli_x, wehrli_y)
         return gauss_res
