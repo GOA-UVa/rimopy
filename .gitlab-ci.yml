@@ -35,7 +35,7 @@ before_script:
 compile:
   stage: build
   script:
-    - python setup.py bdist_wheel
+    - python -m build
     - pip install --force-reinstall dist/*
   artifacts:
     paths:
