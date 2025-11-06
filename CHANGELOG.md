@@ -15,14 +15,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   improving performance and eliminating global state.
 
 ### Changed
-- Removed default values that created objects in function definitions. Changed to None and the instance is created inside the function.
-- Removed `per_nm` specific functions, and added it as an attribute of `ELISettings`
-- `get_eli` functions now only accept an iterable of wavelengths as input, removing the option for a sole wavelength.
-- `ELICalculator` has been converted into an abstract class, now implemented by `ELICalculatorWehrli`
+- Removed default values that created objects in function definitions. Changed to None, with instances now created inside the function.
+- Merged former `per_nm`-specific functions (`get_eli_bypass_per_nm` , `get_eli_per_nm`, `get_eli_per_nm_from_extra_kernels`)
+  into a more unified `get_eli`interface.
+  - The desired behaviour is now controlled via the `per_nm` attribute in `ELISettings`.
+- `get_eli` functions now only accept iterables of wavelengths as input (single-wavelength calls removed).
+- `ELICalculator` converted into an abstract base class, implemented by `ELICalculatorWehrli`
+
 
 ## [0.2.1] - 2025-11-05
 
 Initial version that serves as the baseline for tracking changes in the change log.
+
 
 [unreleased]: https://gitlab.com/GOA-UVa/rimopy/compare/v0.2.1...HEAD
 [0.2.1]: https://gitlab.com/GOA-UVa/rimopy/-/tags/v0.2.1
