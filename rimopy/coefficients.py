@@ -17,11 +17,13 @@ It exports the following functions:
     * get_apollo_coefficients - returns all Apollo adjusting coefficients
 """
 from dataclasses import dataclass
-from typing import List, Dict
+from typing import List, Dict, Iterable
 import csv
 import pkgutil
 from io import StringIO
+
 import numpy as np
+from numpy.typing import NDArray
 
 @dataclass
 class _CoefficientsWln():
@@ -122,116 +124,107 @@ def get_all_coefficients_d() -> List[List[float]]:
     coeffs = _get_coefficients_data()
     return [elem.d_coeffs for elem in coeffs.values()]
 
-def get_coefficients_a(wavelength_nm: float) -> List[float]:
+def get_coefficients_a(wavelengths_nm: NDArray[np.float32]) -> NDArray[np.float32]:
     """Gets all 'a' coefficients for a concrete wavelength
 
     Parameters
     ----------
-    wavelength_nm : float
-        Wavelength in nanometers from which one wants to obtain the coefficients.
+    wavelength_nm : array of float
+        Wavelengths in nanometers from which one wants to obtain the coefficients.
 
     Returns
     -------
-    list of float
-        A list containing the 'a' coefficients for the wavelength
+    np.array of float
+        An array containing the 'a' coefficients for the wavelengths.
+        It contains 4 arrays, one per coeff, and each inner array contains one value per given wavelength.
     """
     a_coeffs = get_all_coefficients_a()
     wvs = get_wavelengths()
-    if wavelength_nm in wvs:
-        return a_coeffs[wvs.index(wavelength_nm)]
-    if wavelength_nm < wvs[0]:
-        return a_coeffs[0]
-    if wavelength_nm > wvs[-1]:
-        return a_coeffs[-1]
-    a_0 = np.interp(wavelength_nm, wvs, [elem[0] for elem in a_coeffs])
-    a_1 = np.interp(wavelength_nm, wvs, [elem[1] for elem in a_coeffs])
-    a_2 = np.interp(wavelength_nm, wvs, [elem[2] for elem in a_coeffs])
-    a_3 = np.interp(wavelength_nm, wvs, [elem[3] for elem in a_coeffs])
-    a_coeffs_concrete = [a_0, a_1, a_2, a_3]
+    wavelengths_nm = np.where(wavelengths_nm < wvs[0], wvs[0], wavelengths_nm)
+    wavelengths_nm = np.where(wavelengths_nm > wvs[-1], wvs[-1], wavelengths_nm)
+    a_0 = np.interp(wavelengths_nm, wvs, [elem[0] for elem in a_coeffs])
+    a_1 = np.interp(wavelengths_nm, wvs, [elem[1] for elem in a_coeffs])
+    a_2 = np.interp(wavelengths_nm, wvs, [elem[2] for elem in a_coeffs])
+    a_3 = np.interp(wavelengths_nm, wvs, [elem[3] for elem in a_coeffs])
+    a_coeffs_concrete = np.array([a_0, a_1, a_2, a_3])
     return a_coeffs_concrete
 
-def get_coefficients_b(wavelength_nm: float) -> List[float]:
+def get_coefficients_b(wavelengths_nm: NDArray[np.float32]) -> NDArray[np.float32]:
     """Gets all 'b' coefficients for a concrete wavelength
 
     Parameters
     ----------
-    wavelength_nm : float
+    wavelengths_nm : array of float
         Wavelength in nanometers from which one wants to obtain the coefficients.
 
     Returns
     -------
-    list of float
-        A list containing the 'b' coefficients for the wavelength
+    np.array of float
+        An array containing the 'b' coefficients for the wavelengths.
+        It contains 3 arrays, one per coeff, and each inner array contains one value per given wavelength.
     """
     b_coeffs = get_all_coefficients_b()
     wvs = get_wavelengths()
-    if wavelength_nm in wvs:
-        return b_coeffs[wvs.index(wavelength_nm)]
-    if wavelength_nm < wvs[0]:
-        return b_coeffs[0]
-    if wavelength_nm > wvs[-1]:
-        return b_coeffs[-1]
-    b_0 = np.interp(wavelength_nm, wvs, [elem[0] for elem in b_coeffs])
-    b_1 = np.interp(wavelength_nm, wvs, [elem[1] for elem in b_coeffs])
-    b_2 = np.interp(wavelength_nm, wvs, [elem[2] for elem in b_coeffs])
-    b_coeffs_concrete = [b_0, b_1, b_2]
+    wavelengths_nm = np.where(wavelengths_nm < wvs[0], wvs[0], wavelengths_nm)
+    wavelengths_nm = np.where(wavelengths_nm > wvs[-1], wvs[-1], wavelengths_nm)
+    b_0 = np.interp(wavelengths_nm, wvs, [elem[0] for elem in b_coeffs])
+    b_1 = np.interp(wavelengths_nm, wvs, [elem[1] for elem in b_coeffs])
+    b_2 = np.interp(wavelengths_nm, wvs, [elem[2] for elem in b_coeffs])
+    b_coeffs_concrete = np.array([b_0, b_1, b_2])
     return b_coeffs_concrete
 
-def get_coefficients_d(wavelength_nm: float) -> List[float]:
+def get_coefficients_d(wavelengths_nm: NDArray[np.float32]) -> NDArray[np.float32]:
     """Gets all 'd' coefficients for a concrete wavelength
 
     Parameters
     ----------
-    wavelength_nm : float
-        Wavelength in nanometers from which one wants to obtain the coefficients.
+    wavelengths_nm : array of float
+        Wavelengths in nanometers from which one wants to obtain the coefficients.
 
     Returns
     -------
-    list of float
-        A list containing the 'd' coefficients for the wavelength
+    np.array of float
+        An array containing the 'd' coefficients for the wavelengths.
+        It contains 3 arrays, and each inner array contains one value per given wavelength
     """
     d_coeffs = get_all_coefficients_d()
     wvs = get_wavelengths()
-    if wavelength_nm in wvs:
-        return d_coeffs[wvs.index(wavelength_nm)]
-    if wavelength_nm < wvs[0]:
-        return d_coeffs[0]
-    if wavelength_nm > wvs[-1]:
-        return d_coeffs[-1]
-    d_0 = np.interp(wavelength_nm, wvs, [elem[0] for elem in d_coeffs])
-    d_1 = np.interp(wavelength_nm, wvs, [elem[1] for elem in d_coeffs])
-    d_2 = np.interp(wavelength_nm, wvs, [elem[2] for elem in d_coeffs])
-    d_coeffs_concrete = [d_0, d_1, d_2]
+    wavelengths_nm = np.where(wavelengths_nm < wvs[0], wvs[0], wavelengths_nm)
+    wavelengths_nm = np.where(wavelengths_nm > wvs[-1], wvs[-1], wavelengths_nm)
+    d_0 = np.interp(wavelengths_nm, wvs, [elem[0] for elem in d_coeffs])
+    d_1 = np.interp(wavelengths_nm, wvs, [elem[1] for elem in d_coeffs])
+    d_2 = np.interp(wavelengths_nm, wvs, [elem[2] for elem in d_coeffs])
+    d_coeffs_concrete = np.array([d_0, d_1, d_2])
     return d_coeffs_concrete
 
-def get_coefficients_c() -> List[float]:
+def get_coefficients_c() -> NDArray[np.float32]:
     """Gets all 'c' coefficients
 
     Returns
     -------
-    list of float
-        A list containing all 'c' coefficients
+    np.array of float
+        An array containing all 'c' coefficients
     """
-    return [0.00034115, -0.0013425, 0.00095906, 0.00066229]
+    return np.array([0.00034115, -0.0013425, 0.00095906, 0.00066229])
 
-def get_coefficients_p() -> List[float]:
+def get_coefficients_p() -> NDArray[np.float32]:
     """Gets all 'p' coefficients
 
     Returns
     -------
-    list of float
-        A list containing all 'p' coefficients
+    np.array of float
+        An array containing all 'p' coefficients
     """
-    return [4.06054, 12.8802, -30.5858, 16.7498]
+    return np.array([4.06054, 12.8802, -30.5858, 16.7498])
 
-def get_apollo_coefficients() -> List[float]:
+def get_apollo_coefficients() -> NDArray[np.float32]:
     """Coefficients used for the adjustment of the ROLO model using Apollo spectra.
 
     Returns
     -------
-    list of float
-        A list containing all Apollo coefficients
+    np.array of float
+        An array containing all Apollo coefficients
     """
-    return [1.0301, 1.0970, 0.9325, 0.9466, 1.0225, 1.0157, 1.0470, 1.0084, 1.0100, 1.0148,
+    return np.array([1.0301, 1.0970, 0.9325, 0.9466, 1.0225, 1.0157, 1.0470, 1.0084, 1.0100, 1.0148,
             0.9843, 1.0134, 0.9329, 0.9849, 0.9994, 0.9957, 1.0059, 0.9618, 0.9561, 0.9796, 0.9568,
-            0.9873, 1.0575, 1.0108, 0.9743, 1.0386, 1.0338, 1.0577, 1.0650, 1.0815, 0.8945, 0.9689]
+            0.9873, 1.0575, 1.0108, 0.9743, 1.0386, 1.0338, 1.0577, 1.0650, 1.0815, 0.8945, 0.9689])

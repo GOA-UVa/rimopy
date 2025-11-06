@@ -24,11 +24,12 @@ VALL_NAME = "VALLADOLID"
 prop_error = DEFAULT_PROP_ERROR
 gfp = esi.GaussianFilterParams(1, 1)
 calc = esi.ESICalculator(esi.WehrliFile.ASC_WEHRLI, esi.ESIMethod.LINEAR_INTERPOLATION, gfp)
-eli_settings = eli.ELISettings(False, False, True)
+eli_settings = eli.ELISettings(False, False, True, False)
 
 def _testValladolidNoCorr(ts: 'TestSum', wavelength, expected, date):
     ed_Vall.set_utc_times(date)
-    res = eli.get_eli_per_nm(wavelength, ed_Vall, KERNELS_PATH, calc, eli_settings)
+    eli_setts_2 = eli.ELISettings(False, False, True, True)
+    res = eli.get_eli([wavelength], ed_Vall, KERNELS_PATH, calc, eli_setts_2)[0]
     #res = eli.get_eli_per_nm_from_extra_kernels(wavelength, ed_Vall.utc_times,
     #    KERNELS_PATH, EXK, EXK_PATH, VALL_NAME, calc, eli_settings)
     res = float('{:0.4e}'.format(res))
@@ -37,7 +38,7 @@ class TestSum(unittest.TestCase):
     
     def test_get_eli_Valladolid(self):
         ed_Vall_t = eli.EarthPoint(VALL_LAT, VALL_LON, "2022-01-17 02:30:00", VALL_ALT)
-        res = eli.get_eli(400, ed_Vall_t, KERNELS_PATH)
+        res = eli.get_eli([400], ed_Vall_t, KERNELS_PATH)
         self.assertGreater(res, 0, "Should be greater than 0")
 
     def test_eli336_uncorrected_Valladolid_20220117_00(self):
