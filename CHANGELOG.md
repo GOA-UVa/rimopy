@@ -11,11 +11,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Complete vectorisation based on wavelengths and lunar geometries.
+- Class-level, thread-safe file cache in `ESICalculatorWehrli` for Wehrli data,
+  improving performance and eliminating global state.
 
 ### Changed
 - Removed default values that created objects in function definitions. Changed to None and the instance is created inside the function.
 - Removed `per_nm` specific functions, and added it as an attribute of `ELISettings`
 - `get_eli` functions now only accept an iterable of wavelengths as input, removing the option for a sole wavelength.
+- `ELICalculator` has been converted into an abstract class, now implemented by `ELICalculatorWehrli`
 
 ## [0.2.1] - 2025-11-05
 
