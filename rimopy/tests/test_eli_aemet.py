@@ -15,7 +15,7 @@ VALL_ALT = 705
 JAN_FULL_MOON_00 = "2022-01-17 00:00:00"
 JAN_FULL_MOON_17 = "2022-01-17 17:00:00"
 FEB_NEW_MOON_00 = "2022-02-02 00:00:00"
-DEFAULT_PROP_ERROR = 0 # 0% error, now the result is formatted as the one in AEMET's
+DEFAULT_PROP_ERROR = 0  # 0% error, now the result is formatted as the one in AEMET's
 ed_Vall = eli.EarthPoint(VALL_LAT, VALL_LON, JAN_FULL_MOON_00, VALL_ALT)
 EXK = ["EarthStations.bsp", "EarthStations.tf"]
 EXK_PATH = "./extra.temp.kernels"
@@ -23,19 +23,23 @@ VALL_NAME = "VALLADOLID"
 
 prop_error = DEFAULT_PROP_ERROR
 gfp = esi.GaussianFilterParams(1, 1)
-calc = esi.ESICalculator(esi.WehrliFile.ASC_WEHRLI, esi.ESIMethod.LINEAR_INTERPOLATION, gfp)
+calc = esi.ESICalculatorWehrli(
+    esi.WehrliFile.ASC_WEHRLI, esi.ESIMethod.LINEAR_INTERPOLATION, gfp
+)
 eli_settings = eli.ELISettings(False, False, True, False)
 
-def _testValladolidNoCorr(ts: 'TestSum', wavelength, expected, date):
+
+def _testValladolidNoCorr(ts: "TestSum", wavelength, expected, date):
     ed_Vall.set_utc_times(date)
     eli_setts_2 = eli.ELISettings(False, False, True, True)
     res = eli.get_eli([wavelength], ed_Vall, KERNELS_PATH, calc, eli_setts_2)[0]
-    #res = eli.get_eli_per_nm_from_extra_kernels(wavelength, ed_Vall.utc_times,
+    # res = eli.get_eli_per_nm_from_extra_kernels(wavelength, ed_Vall.utc_times,
     #    KERNELS_PATH, EXK, EXK_PATH, VALL_NAME, calc, eli_settings)
-    res = float('{:0.4e}'.format(res))
-    ts.assertAlmostEqual(res, expected, delta=expected*prop_error)
+    res = float("{:0.4e}".format(res))
+    ts.assertAlmostEqual(res, expected, delta=expected * prop_error)
+
+
 class TestSum(unittest.TestCase):
-    
     def test_get_eli_Valladolid(self):
         ed_Vall_t = eli.EarthPoint(VALL_LAT, VALL_LON, "2022-01-17 02:30:00", VALL_ALT)
         res = eli.get_eli([400], ed_Vall_t, KERNELS_PATH)
@@ -104,9 +108,15 @@ class TestSum(unittest.TestCase):
     def test_eli1662_uncorrected_Valladolid_20220202_00(self):
         _testValladolidNoCorr(self, 1662, 7.9724e-10, FEB_NEW_MOON_00)
 
-if __name__ == '__main__':
+
+def main():
+    global prop_error
     if len(sys.argv) > 1:
-        prop_error = float(sys.argv[1])/100
+        prop_error = float(sys.argv[1]) / 100
     else:
         prop_error = DEFAULT_PROP_ERROR
-    unittest.main(argv=['first-arg-is-ignored'], exit=False)
+    unittest.main(argv=["first-arg-is-ignored"], exit=False)
+
+
+if __name__ == "__main__":
+    main()
