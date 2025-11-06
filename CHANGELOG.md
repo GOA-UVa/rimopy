@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [//]: # "## [unreleased] - yyyy-mm-dd"
 
-## [unreleased] - yyyy-mm-dd
+## [0.3.0] - 2025-11-06
 
 ### Added
 - Complete vectorisation based on wavelengths and lunar geometries.
@@ -29,5 +29,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Initial version that serves as the baseline for tracking changes in the change log.
 
 
-[unreleased]: https://gitlab.com/GOA-UVa/rimopy/compare/v0.2.1...HEAD
-[0.2.1]: https://gitlab.com/GOA-UVa/rimopy/-/tags/v0.2.1
+[unreleased]: https://github.com/GOA-UVa/rimopy/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/GOA-UVa/rimopy/compare/v0.2.1...0.3.0
+[0.2.1]: https://github.com/GOA-UVa/rimopy/releases/tag/v0.2.1
