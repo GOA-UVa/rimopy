@@ -37,7 +37,7 @@ compile:
   script:
     - pip install build
     - python -m build
-    - pip install --force-reinstall dist/*
+    - pip install --force-reinstall dist/*.whl
   artifacts:
     paths:
       - dist/*.whl
