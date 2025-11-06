@@ -18,7 +18,9 @@ It exports the following functions:
 """
 
 from dataclasses import dataclass
-from typing import List
+from typing import List, Iterable
+
+from numpy.typing import NDArray
 import numpy as np
 
 @dataclass
@@ -28,16 +30,16 @@ class CorrectionParams:
 
     Attributes
     ----------
-    a_coeff : float
+    a_coeff : np.array of float
         RCF coefficient 'a'
-    b_coeff : float
+    b_coeff : np.array of float
         RCF coefficient 'b'
-    c_coeff : float
+    c_coeff : np.array of float
         RCF coefficient 'c'
     """
-    a_coeff: float
-    b_coeff: float
-    c_coeff: float
+    a_coeff: NDArray[np.float32]
+    b_coeff: NDArray[np.float32]
+    c_coeff: NDArray[np.float32]
 
 def _get_corrected_wavelengths() -> List[float]:
     """Gets all wavelengths (in nanometers) presented in the RCF model
@@ -94,13 +96,13 @@ def _get_all_cs() -> List[float]:
     """
     return list(map(lambda x: x[2], _get_all_correction_params()))
 
-def _get_interpolated_correction_params(wavelength_nm: float) -> 'CorrectionParams':
+def _get_interpolated_correction_params(wavelengths_nm: Iterable[float]) -> 'CorrectionParams':
     """Estimate the RCF params with interpolation
 
     Parameters
     ----------
-    wavelength_nm : float
-        Wavelength (in nanometers) of which one wants to linearly interpolate the RCF params
+    wavelengths_nm : iterable of float
+        Wavelengths (in nanometers) of which one wants to linearly interpolate the RCF params
 
     Returns
     -------
@@ -108,37 +110,27 @@ def _get_interpolated_correction_params(wavelength_nm: float) -> 'CorrectionPara
         Estimated correction params
     """
     x_values = _get_corrected_wavelengths()
-    if wavelength_nm < x_values[0]:
-        # Is this the best solution?
-        return get_correction_params(x_values[0])
-    if wavelength_nm > x_values[-1]:
-        # Is this the best solution?
-        return get_correction_params(x_values[-1])
+    wavelengths_nm = np.where(wavelengths_nm < x_values[0], x_values[0], wavelengths_nm)
+    wavelengths_nm = np.where(wavelengths_nm > x_values[-1], x_values[-1], wavelengths_nm)
     all_as = _get_all_as()
-    a_coeff = np.interp(wavelength_nm, x_values, all_as)
+    a_coeff = np.interp(wavelengths_nm, x_values, all_as)
     all_bs = _get_all_bs()
-    b_coeff = np.interp(wavelength_nm, x_values, all_bs)
+    b_coeff = np.interp(wavelengths_nm, x_values, all_bs)
     all_cs = _get_all_cs()
-    c_coeff = np.interp(wavelength_nm, x_values, all_cs)
+    c_coeff = np.interp(wavelengths_nm, x_values, all_cs)
     return CorrectionParams(a_coeff, b_coeff, c_coeff)
 
-def get_correction_params(wavelength_nm: float) -> 'CorrectionParams':
+def get_correction_params(wavelengths_nm: Iterable[float]) -> 'CorrectionParams':
     """Gets the RCF correction parameters for a specific wavelength in nanometers
 
     Parameters
     ----------
-    wavelength_nm : float
-        Wavelength (in nanometers) of which one wants to estimate the RCF params
+    wavelengths_nm : iterable of float
+        Wavelengths (in nanometers) of which one wants to estimate the RCF params
 
     Returns
     -------
     'CorrectionParams'
         Estimated correction params
     """
-    wvs = _get_corrected_wavelengths()
-    if wavelength_nm in wvs:
-        index = wvs.index(wavelength_nm)
-        corr_params = _get_all_correction_params()
-        return CorrectionParams(corr_params[index][0], corr_params[index][1],
-                                corr_params[index][2])
-    return _get_interpolated_correction_params(wavelength_nm)
+    return _get_interpolated_correction_params(wavelengths_nm)

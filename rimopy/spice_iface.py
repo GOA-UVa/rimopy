@@ -10,12 +10,20 @@ It exports the following functions:
 """
 
 from typing import List
-from spicedmoon import spicedmoon
-from .types import MoonData
 
-def get_moon_datas_from_extra_kernels(utc_times: List[str], kernels_path: str,
-                                      extra_kernels: List[str], extra_kernels_path: str,
-                                      observer_name: str) -> List[MoonData]:
+import numpy as np
+from spicedmoon import spicedmoon
+
+from .types import MoonDatas
+
+
+def get_moon_datas_from_extra_kernels(
+    utc_times: List[str],
+    kernels_path: str,
+    extra_kernels: List[str],
+    extra_kernels_path: str,
+    observer_name: str,
+) -> MoonDatas:
     """Calculation of needed Moon data from SPICE toolbox
 
     Moon phase angle, selenographic coordinates and distance from observer point to moon.
@@ -35,17 +43,38 @@ def get_moon_datas_from_extra_kernels(utc_times: List[str], kernels_path: str,
         Name of the body of the observer that will be loaded from the extra kernels.
     Returns
     -------
-    list of MoonData
+    MoonDatas
         Moon data obtained from SPICE toolbox
     """
-    spmds = spicedmoon.get_moon_datas_from_extra_kernels(utc_times, kernels_path, extra_kernels, extra_kernels_path, observer_name, 'ITRF93', ignore_bodvrd=False)
-    result = []
+    spmds = spicedmoon.get_moon_datas_from_extra_kernels(
+        utc_times,
+        kernels_path,
+        extra_kernels,
+        extra_kernels_path,
+        observer_name,
+        "ITRF93",
+        ignore_bodvrd=False,
+    )
+    mds = []
     for spmd in spmds:
-        result.append(MoonData(spmd.dist_sun_moon_au, spmd.dist_obs_moon, spmd.lon_sun_rad, spmd.lat_obs, spmd.lon_obs, abs(spmd.mpa_deg)))
-    return result
+        mds.append(
+            [
+                spmd.dist_sun_moon_au,
+                spmd.dist_obs_moon,
+                spmd.lon_sun_rad,
+                spmd.lat_obs,
+                spmd.lon_obs,
+                spmd.mpa_deg,
+            ]
+        )
+    mds = np.array(mds).T
+    mds = MoonDatas(mds[0], mds[1], mds[2], mds[3], mds[4], mds[5])
+    return mds
 
-def get_moon_datas(lat: float, lon: float, altitude: float, utc_times: List[str],
-                   kernels_path: str) -> List[MoonData]:
+
+def get_moon_datas(
+    lat: float, lon: float, altitude: float, utc_times: List[str], kernels_path: str
+) -> MoonDatas:
     """Calculation of needed Moon data from SPICE toolbox
 
     Moon phase angle, selenographic coordinates and distance from observer point to moon.
@@ -65,11 +94,24 @@ def get_moon_datas(lat: float, lon: float, altitude: float, utc_times: List[str]
         Path where the SPICE kernels are stored
     Returns
     -------
-    list of MoonData
+    MoonDatas
         Moon data obtained from SPICE toolbox
     """
-    spmds = spicedmoon.get_moon_datas(lat, lon, altitude, utc_times, kernels_path, ignore_bodvrd=False)
-    result = []
+    spmds = spicedmoon.get_moon_datas(
+        lat, lon, altitude, utc_times, kernels_path, ignore_bodvrd=False
+    )
+    mds = []
     for spmd in spmds:
-        result.append(MoonData(spmd.dist_sun_moon_au, spmd.dist_obs_moon, spmd.lon_sun_rad, spmd.lat_obs, spmd.lon_obs, abs(spmd.mpa_deg)))
-    return result
+        mds.append(
+            [
+                spmd.dist_sun_moon_au,
+                spmd.dist_obs_moon,
+                spmd.lon_sun_rad,
+                spmd.lat_obs,
+                spmd.lon_obs,
+                spmd.mpa_deg,
+            ]
+        )
+    mds = np.array(mds).T
+    mds = MoonDatas(mds[0], mds[1], mds[2], mds[3], mds[4], mds[5])
+    return mds

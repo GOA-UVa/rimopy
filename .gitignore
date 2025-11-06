@@ -2,5 +2,5 @@ __pycache__
 .venv
 dist
 *.egg-info
-tests/kernels/custom.bsp
+rimopy/tests/kernels/custom.bsp
 *.temp.*
