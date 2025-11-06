@@ -5,7 +5,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/goa-uva/rimopy">
-    <img src="./docs/images/rimo_logo.png" alt="RIMO logo" height="80" style="height: 80px !important;">
+    <img src="https://raw.githubusercontent.com/GOA-UVa/rimopy/master/docs/images/rimo_logo.png" alt="RIMO logo" height="80" style="height: 80px !important;">
   </a>
 
   <h3 align="center">rimopy</h3>
@@ -168,7 +168,7 @@ can be chosen by the user, creating an instance of ESICalculator selecting the m
 - **types**: Contains types, like MoonData class, which represents some of the needed data
 for the calculation of extraterrestrial lunar irradiance.
 
-![ModuleStructure UML Diagram](docs/ModuleStructure.png)
+![ModuleStructure UML Diagram](https://raw.githubusercontent.com/GOA-UVa/rimopy/master/docs/ModuleStructure.png)
 
 ## Development Guide
 
