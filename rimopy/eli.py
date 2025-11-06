@@ -20,7 +20,6 @@ It exports the following functions:
 """
 
 from dataclasses import dataclass
-import math
 from typing import List, Union, Iterable
 
 import numpy as np
@@ -230,7 +229,7 @@ def get_eli_bypass(
         Moon data needed to calculate Moon's irradiance
     esi_calc : esi.ESICalculator
         ESI Calculator that will be used in the calculation of the Extraterrestrial Solar
-        Irradiance.
+        Irradiance. By default it will use a linearly interpolated Wehrli based one.
     eli_settings : ELISettings
         Configuration of the ELI calculation method.
 
@@ -244,7 +243,7 @@ def get_eli_bypass(
     if eli_settings is None:
         eli_settings = ELISettings()
     if esi_calc is None:
-        esi_calc = esi.ESICalculator()
+        esi_calc = esi.ESICalculatorWehrli()
     elis = _calculate_eli(wavelengths_nm, mds, esi_calc, eli_settings)
     return elis
 
@@ -256,8 +255,8 @@ def get_eli_from_extra_kernels(
     extra_kernels: List[str],
     extra_kernels_path: str,
     observer_name: str,
-    esi_calc: esi.ESICalculator = esi.ESICalculator(),
-    eli_settings: ELISettings = ELISettings(),
+    esi_calc: esi.ESICalculator = None,
+    eli_settings: ELISettings = None,
 ) -> NDArray[np.float32]:
     """Calculation of Extraterrestrial Lunar Irradiance from geographic coordinates
 
@@ -286,7 +285,7 @@ def get_eli_from_extra_kernels(
         Name of the body of the observer that will be loaded from the extra kernels.
     esi_calc : esi.ESICalculator
         ESI Calculator that will be used in the calculation of the Extraterrestrial Solar
-        Irradiance.
+        Irradiance. By default it will use a linearly interpolated Wehrli based one.
     eli_settings : ELISettings
         Configuration of the ELI calculation method.
 
@@ -333,7 +332,7 @@ def get_eli(
         Folder where the needed SPICE kernels are stored.
     esi_calc : esi.ESICalculator
         ESI Calculator that will be used in the calculation of the Extraterrestrial Solar
-        Irradiance.
+        Irradiance. By default it will use a linearly interpolated Wehrli based one.
     eli_settings : ELISettings
         Configuration of the ELI calculation method.
 
