@@ -1,7 +1,6 @@
 [build-system]
-requires = ["setuptools>=42", "wheel", "setuptools_scm[toml]>=6.0"]
+requires = ["setuptools>=68", "wheel", "setuptools_scm[toml]>=8.0"]
 build-backend = "setuptools.build_meta"
-
 
 [project]
 name = "rimopy"
@@ -46,31 +45,9 @@ Issues = "https://github.com/GOA-UVa/rimopy/issues"
 
 
 [tool.setuptools_scm]
-root = "."
-fallback_version = "1"
+# Use your repo tags for versions (e.g., v0.1.0). If absent, fallback applies:
+fallback_version = "0.1.0"
 
-[tool.versioneer]
-VCS = "git"
-style = "pep440"
-versionfile_source = "rimopy/_version.py"
-versionfile_build = "rimopy/_version.py"
-tag_prefix = ""
-parentdir_prefix = ""
-
-[tool.flake8]
-exclude = ["docs"]
-max-line-length = 120
-extend-ignore = ["W291"]
-
-[tool.mypy]
-allow_untyped_globals = true
-ignore_missing_imports = true
-
-[tool.mypy-setup]
-ignore_errors = true
-
-[tool.mypy-tests]
-ignore_errors = true
-
-[tool.mypy-versioneer]
-ignore_errors = true
+# Explicit package discovery (makes builds more robust)
+[tool.setuptools.packages.find]
+include = ["rimopy*"]
