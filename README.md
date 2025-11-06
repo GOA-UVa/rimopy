@@ -1,6 +1,7 @@
 # rimopy
 
 [![Latest Tag][version-shield]][version-url]
+[![License: LGPL 3.0][license-shield]][license-url]
 [![Stargazers][stars-shield]][stars-url]
 
 
@@ -194,6 +195,10 @@ pytest -v
 
 - [Javier Gatón Herguedas](mailto:gaton@goa.uva.es) - *Maintainer* - [GOA-UVa](https://goa.uva.es)
 
+## License
+
+Distributed under the LGPL-v3 License. See [LGPL v3](./LICENSE) for more information.
+
 ## References
 
 - Barreto, Á., Román, R., Cuevas, E., Pérez-Ramírez, D., Berjón, A. J., Kouremeti, N., Kazadzis, S., Gröbner, J., Mazzola, M., Toledano, C., Benavent-Oltra, J. A., Doppler, L., Juryšek, J., Almansa, A. F., Victori, S., Maupin, F., Guirado-Fuentes, C., González, R., Vitale, V., Goloub, P., Blarel, L., Alados-Arboledas, L., Woolliams, E., Taylor, S., Antuña, J. C., & Yela, M. (2019). Evaluation of night-time aerosols measurements and lunar irradiance models in the frame of the first multi-instrument nocturnal intercomparison campaign. Atmospheric Environment, 202, 190–211. [https://doi.org/10.1016/j.atmosenv.2019.01.006](https://doi.org/10.1016/j.atmosenv.2019.01.006).
@@ -205,3 +210,5 @@ pytest -v
 [stars-url]: https://github.com/goa-uva/rimopy/stargazers
 [version-shield]: https://img.shields.io/github/v/tag/goa-uva/rimopy?style=for-the-badge
 [version-url]: https://github.com/goa-uva/rimopy/tags
+[license-shield]: https://img.shields.io/github/license/goa-uva/rimopy.svg?style=for-the-badge
+[license-url]: https://github.com/goa-uva/rimopy/blob/master/LICENSE
