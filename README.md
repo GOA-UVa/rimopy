@@ -12,15 +12,6 @@
 
   <p align="center">
     ROLO Implementation for Moon photometry Observation (RIMO), in Python.
-    <br />
-    <!--<a href=""><strong>Explore the docs »</strong></a>
-    <br />
-    <br />
-    <a href="https://github.com/goa-uva/rimopy">View Demo</a>
-    ·
-    <a href="https://github.com/goa-uva/rimopy/issues/new?labels=bug&template=bug_report.md">Report Bug</a>
-    ·
-    <a href="https://github.com/goa-uva/rimopy/issues/new?labels=enhancement&template=feature_request.md">Request Feature</a>-->
   </p>
 </div>
 
