@@ -59,9 +59,8 @@ lint:
 test:
   stage: test
   script:
-    - cd tests
     - pip install pytest
-    - pytest -v --junitxml=../report.xml
+    - pytest -v --junitxml=report.xml
   artifacts:
     when: always
     reports:
