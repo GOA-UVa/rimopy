@@ -1,11 +1,28 @@
-# rimopy
-
 [![Latest Tag][version-shield]][version-url]
 [![License: LGPL 3.0][license-shield]][license-url]
 [![Stargazers][stars-shield]][stars-url]
 
+<br />
+<div align="center">
+  <a href="https://github.com/goa-uva/rimopy">
+    <img src="./docs/images/rimo_logo.png" alt="RIMO logo" height="80" style="height: 80px !important;">
+  </a>
 
-ROLO Implementation for Moon photometry Observation (RIMO), in Python.
+  <h3 align="center">rimopy</h3>
+
+  <p align="center">
+    ROLO Implementation for Moon photometry Observation (RIMO), in Python.
+    <br />
+    <!--<a href=""><strong>Explore the docs »</strong></a>
+    <br />
+    <br />
+    <a href="https://github.com/goa-uva/rimopy">View Demo</a>
+    ·
+    <a href="https://github.com/goa-uva/rimopy/issues/new?labels=bug&template=bug_report.md">Report Bug</a>
+    ·
+    <a href="https://github.com/goa-uva/rimopy/issues/new?labels=enhancement&template=feature_request.md">Request Feature</a>-->
+  </p>
+</div>
 
 ## About the project
 
@@ -25,7 +42,7 @@ adjustment that improves AOD retrieval accuracy (Román et al., 2020). RIMO buil
 
 In order to use the package, a directory with all the needed SPICE kernels must be downloaded.
 
-That directory must contain the same elements as **/tests/kernels**, and the execution must
+That directory must contain the same elements as `rimopy/tests/kernels`, and the execution must
 be allowed to read and write from that directory.
 
 Alternatively, kernels can be downloaded manually from the following urls:
@@ -138,6 +155,13 @@ having passed the original "Wm⁻²" data through the same filters.
 - **gaussian_filter_params**: Parameters for the gaussian filter method, in case that that one is the chosen one. It contains
 the radius and the standard deviation, which by default both are equal to one.
 
+
+## Roadmap
+
+- [ ] Adding tests based on AEMET RimoApp output that don't require to compute the lunar geometries (have them precomputed
+- [ ] Adding unit tests for every submodule.
+- [ ] Adding a TSIS-based ESICalculator implementation.
+
 ## Structure
 
 The package is divided in multiple modules, each dealing with different calculations and
@@ -155,9 +179,9 @@ for the calculation of extraterrestrial lunar irradiance.
 
 ![ModuleStructure UML Diagram](docs/ModuleStructure.png)
 
-## Development Information
+## Development Guide
 
-### Set up the environment
+### Setting up the environment
 
 To set up the development environment, install the pre-commit hooks as follows:
 ```sh
