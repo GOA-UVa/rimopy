@@ -10,7 +10,6 @@ from numpy.typing import NDArray
 
 from . import coefficients as coeffs
 from .types import MoonDatas
-from . import coefficients as coeffs
 from . import correction_factor as corr_f
 
 
