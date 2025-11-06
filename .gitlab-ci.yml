@@ -44,7 +44,7 @@ compile:
   only:
     variables:
     - $CI_PIPELINE_SOURCE == "web"
-    #- $CI_COMMIT_REF_NAME == "master"
+    - $CI_COMMIT_REF_NAME == "master"
 
 lint:
   stage: test
@@ -54,7 +54,7 @@ lint:
   only:
     variables:
     - $CI_PIPELINE_SOURCE == "web"
-    #- $CI_COMMIT_REF_NAME == "master"
+    - $CI_COMMIT_REF_NAME == "master"
 
 test:
   stage: test
@@ -69,4 +69,4 @@ test:
   only:
     variables:
     - $CI_PIPELINE_SOURCE == "web"
-    #- $CI_COMMIT_REF_NAME == "master"
+    - $CI_COMMIT_REF_NAME == "master"
