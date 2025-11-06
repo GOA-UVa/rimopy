@@ -140,47 +140,58 @@ def _ln_moon_disk_reflectance(
     return result
 
 
-def _neighbors_set_linear_exact(A, B):
+def _neighbors_set_linear_exact(query: Iterable[float], reference: Iterable[float]):
     """
-    B must be sorted ascending.
-    Returns the set of B-values that are:
-      - exactly a, if a is in B
-      - otherwise the nearest left and right neighbors in B
-      - if a < B[0], include B[0] and B[1] (if exists)
-      - if a > B[-1], include B[-2] and B[-1] (if exists)
+    Find nearest neighbors of query values within a sorted reference sequence.
+
+    For each element in `query`, the function selects:
+      - The value itself, if it exists in `reference`.
+      - Otherwise, the nearest left and right neighbors in `reference`.
+      - If the query value is out of the reference range, the two closest
+        boundary values are included.
+
+    Parameters
+    ----------
+    query : Iterable of float
+        Values for which to find nearest neighbors.
+    reference : Iterable of float
+        Sorted sequence of reference values (must be in ascending order).
+
+    Returns
+    -------
+    neighbors : set of float
+        Unique set of reference values that are either exact matches or
+        nearest neighbors of the query values.
     """
-    nB = len(B)
-    if nB == 0:
+    n_ref = len(reference)
+    if n_ref == 0:
         return set()
-    if nB == 1:
-        # Only one possible neighbor for everything
-        present = set(B)  # {B[0]}
-        # If any a equals B[0], it's included anyway; out-of-range can't add two
-        return present
-    A_sorted = sorted(A)
+    if n_ref == 1:
+        return set(reference)
+    query = sorted(query)
     j = 0
     out = set()
-    first_two = (B[0], B[1])
-    last_two = (B[-2], B[-1])
-    for a in A_sorted:
-        # advance j until B[j] >= a (or j == nB)
-        while j < nB and B[j] < a:
+    first_two = (reference[0], reference[1])
+    last_two = (reference[-2], reference[-1])
+    for qv in query:
+        # advance j until reference[j] >= qv (or j == n_ref)
+        while j < n_ref and reference[j] < qv:
             j += 1
-        if j < nB and B[j] == a:
-            # exact hit → include only a
-            out.add(B[j])
+        if j < n_ref and reference[j] == qv:
+            # exact hit: include only qv
+            out.add(reference[j])
         elif j == 0:
-            # a < B[0]
+            # qv < reference[0]
             out.add(first_two[0])
             out.add(first_two[1])
-        elif j == nB:
-            # a > B[-1]
+        elif j == n_ref:
+            # qv > reference[-1]
             out.add(last_two[0])
             out.add(last_two[1])
         else:
-            # interior miss → include neighbors
-            out.add(B[j - 1])
-            out.add(B[j])
+            # interior miss: include neighbors
+            out.add(reference[j - 1])
+            out.add(reference[j])
     return out
 
 
