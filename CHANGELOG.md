@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased] - yyyy-mm-dd
 
+### Added
+- Added support for configurable handling of missing RCF wavelengths by introducing the `MissingRCFBehavior`
+  enum (ERROR, WARN, IGNORE, INTERPOLATE) as a new `missing_rcf` parameter in `ELISettings`.
+
 ### Removed
 
 - Removed the option to run RIMO with interpolated coefficients, as this approach was incorrect.

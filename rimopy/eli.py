@@ -26,30 +26,33 @@ import numpy as np
 from numpy.typing import NDArray
 
 from . import spice_iface, esi, elref
-from .types import MoonDatas
+from .types import MoonDatas, MissingRCFBehavior
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class ELISettings:
     """
-    Settings that will modify the methodology of calculating the ELI
+    Settings controlling the methodology for calculating the Extraterrestrial Lunar Irradiance (ELI).
 
     Attributes
     ----------
-    apply_correction : bool
-        If True the result will have been multiplied by the RCF (Rimo Correction Factor),
-        which corrects the data for the photometers' calibration.
-        Otherwise it won't.
-    adjust_apollo : bool
-        If True the ROLO model reflectance will be adjusted using Apollo spectra. The Apollo
-        spectra is the spectra generated with the Moon samples from Apollo 16th mission.
-    per_nm : bool
-        If True the ELI will be in Wm⁻²/nm, otherwise it will be in Wm⁻². Default is False.
+    apply_correction : bool, default False
+        If True, multiply the modeled irradiance by the RIMO Correction Factor (RCF) for
+        each CIMEL wavelength (empirical correction from Román et al. 2020). If False,
+        return the raw RIMO irradiance (no correction).
+    adjust_apollo : bool, default True
+        If True, adjust the ROLO model reflectance using Apollo spectra (derived from
+        Apollo 16 lunar samples).
+    per_nm : bool, default False
+        If True, output ELI in W·m⁻²·nm⁻¹. Otherwise, output in W·m⁻².
+    missing_rcf : MissingRCFBehavior, default MissingRCFBehavior.ERROR
+        Behavior when at least one requested wavelength has no RCF available and
+        `apply_correction` is True.
     """
-
     apply_correction: bool = False
     adjust_apollo: bool = True
     per_nm: bool = False
+    missing_rcf: MissingRCFBehavior = MissingRCFBehavior.ERROR
 
 
 @dataclass
@@ -175,6 +178,7 @@ def _calculate_eli(
         wavelengths_nm,
         mds,
         eli_settings.apply_correction,
+        eli_settings.missing_rcf,
         eli_settings.adjust_apollo,
     )
 

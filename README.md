@@ -86,14 +86,16 @@ result = eli.get_eli(wavelengths, full_moon_Valladolid, kernels_path, eli_settin
 
 These calculations can be customized, defining the settings and the methods used for the calculation of
 the extraterrestrial solar irradiance. For example, if someone wanted to calculate the lunar irradiance per nm
-applying the RIMO correction factor, and with a different source data for the extraterrestrial solar irradiance,
+applying the RIMO correction factor for the available wavelengths, and with a different source data for
+the extraterrestrial solar irradiance,
 in this case the original Wehrli 1985 data, something like the following code block would do the work:
 ```python
+from rimopy.types import MissingRCFBehavior
 from rimopy import esi
 
 wavelengths = [500, 550]
 calc = esi.ESICalculatorWehrli(esi.WehrliFile.ORIGINAL_WEHRLI, esi.ESIMethod.LINEAR_INTERPOLATION)
-eli_settings = eli.ELISettings(True, True, True)
+eli_settings = eli.ELISettings(True, True, True, MissingRCFBehavior.WARN)
 result = eli.get_eli(wavelengths, full_moon_Valladolid, kernels_path, calc, eli_settings)
 
 # result:
@@ -118,14 +120,27 @@ observer body.
 
 **ELISettings**
 
-`ELISettings` is a dataclass that contains settings that will modify the methodology of calculating the ELI.
+`ELISettings` is a dataclass containing the configuration parameters that control
+how the Extraterrestrial Lunar Irradiance (ELI) is calculated.
 
-These settings are:
-- **apply_correction**: If True the result will have been multiplied by the RCF (Rimo Correction Factor),
-which corrects the data for the photometers' calibration. Otherwise it won't. The default value is *False*.
-- **adjust_apollo**: If True the ROLO model reflectance will be adjusted using Apollo spectra. The Apollo
-  spectra is the spectra generated with the Moon samples from Apollo 16th mission. The default value is *True*.
-- **per_nm** : If True the ELI will be in Wm⁻²/nm, otherwise it will be in Wm⁻². Default is *False*.
+**Attributes:**
+- **apply_correction** : `bool`, default *False*  
+  If `True`, multiply the modeled irradiance by the RIMO Correction Factor (RCF)
+  for each CIMEL wavelength (i.e., apply the empirical correction derived in Román et al. 2020).  
+  If `False`, return the raw RIMO irradiance (no correction).
+- **adjust_apollo** : `bool`, default *True*  
+  If `True`, adjust the ROLO model reflectance using Apollo spectra.
+  The Apollo spectra were obtained from lunar samples of the Apollo 16 mission.
+- **per_nm** : `bool`, default *False*  
+  If `True`, the output ELI is given in `W·m^-2·nm^-1`; otherwise, it is given in `W·m^-2`.
+- **missing_rcf** : `MissingRCFBehavior`, default `MissingRCFBehavior.ERROR`  
+  Behavior when at least one requested wavelength has no RCF available and
+  `apply_correction` is `True`.  
+  - `MissingRCFBehavior.ERROR` - raise a `ValueError` listing the offending wavelengths.  
+  - `MissingRCFBehavior.WARN` - issue a warning and return uncorrected values for those wavelengths.  
+  - `MissingRCFBehavior.IGNORE` - silently return uncorrected values for those wavelengths.
+  - `MissingRCFBehavior.INTERPOLATE` - linearly interpolate the coefficients for non-present wavelengths.
+
 
 **ESICalculator**
 

@@ -19,9 +19,12 @@ It exports the following functions:
 
 from dataclasses import dataclass
 from typing import List, Iterable
+import logging
 
 from numpy.typing import NDArray
 import numpy as np
+
+from .types import MissingRCFBehavior
 
 @dataclass
 class CorrectionParams:
@@ -120,17 +123,74 @@ def _get_interpolated_correction_params(wavelengths_nm: Iterable[float]) -> 'Cor
     c_coeff = np.interp(wavelengths_nm, x_values, all_cs)
     return CorrectionParams(a_coeff, b_coeff, c_coeff)
 
-def get_correction_params(wavelengths_nm: Iterable[float]) -> 'CorrectionParams':
+
+def _get_correction_params_fill_ones(wavelengths_nm: Iterable[float], atol_nm: float) -> 'CorrectionParams':
+    """Obtain the RCF params, and mock values for invalid wavelengths
+
+    Parameters
+    ----------
+    wavelengths_nm : iterable of float
+        Wavelengths (in nanometers) of which one wants to obtain the RCF params.
+        If there's no RCF for the wavelength, it will return (1, 0, 0), which will
+        render a RCF = 1.
+    atol_nm: float
+        Absolute tolerance for matching wavelengths to the supported set.
+
+    Returns
+    -------
+    'CorrectionParams'
+        RIMO RCF correction params
+    """
+    x_values = _get_corrected_wavelengths()
+    wl = np.array(wavelengths_nm)
+    all_as = _get_all_as()
+    all_bs = _get_all_bs()
+    all_cs = _get_all_cs()
+    a_coeff = np.ones_like(wl, dtype=float)
+    b_coeff = np.zeros_like(wl, dtype=float)
+    c_coeff = np.zeros_like(wl, dtype=float)
+    # Fill real coefficients ONLY for wavelengths that have an RCF defined.
+    # Treat "has RCF" as "equals one of x_values within a tiny tolerance".
+    for i, w in enumerate(wl):
+        idx = np.where(np.isclose(x_values, w, rtol=0.0, atol=atol_nm))[0]
+        if idx.size:  # wavelength is supported → copy its coefficients
+            j = int(idx[0])
+            a_coeff[i] = all_as[j]
+            b_coeff[i] = all_bs[j]
+            c_coeff[i] = all_cs[j]
+    return CorrectionParams(a_coeff, b_coeff, c_coeff)
+
+
+def get_correction_params(wavelengths_nm: Iterable[float], missing_rcf: MissingRCFBehavior, atol_nm: float = 0.1) -> 'CorrectionParams':
     """Gets the RCF correction parameters for a specific wavelength in nanometers
 
     Parameters
     ----------
     wavelengths_nm : iterable of float
         Wavelengths (in nanometers) of which one wants to estimate the RCF params
+    missing_rcf: MissingRCFBehavior
+        Behavior when at least one requested wavelength has no RCF available.
+    atol_nm : float, default 0.1
+        Absolute tolerance for matching wavelengths to the supported set.
 
     Returns
     -------
     'CorrectionParams'
-        Estimated correction params
+        Arrays of (a, b, c) aligned with the input order.
     """
-    return _get_interpolated_correction_params(wavelengths_nm)
+    wavelengths_nm = np.array(list(wavelengths_nm))
+    supported = np.array(_get_corrected_wavelengths())
+    mask = np.any(np.isclose(wavelengths_nm[:, None], supported[None, :], rtol=0.0, atol=atol_nm), axis=1)
+    if not np.all(mask):
+        missing_list: List[float] = [float(w) for w in wavelengths_nm[~mask]]
+        msg = f"RCF not available for the wavelengths: {missing_list}"
+        if missing_rcf is MissingRCFBehavior.ERROR:
+            raise ValueError(msg)
+        elif missing_rcf is MissingRCFBehavior.WARN:
+            logging.warning(msg)
+    # TODO: Should this INTERPOLATE option be removed? It doesn't make sense to do it this way.
+    if missing_rcf == MissingRCFBehavior.INTERPOLATE:
+        pars = _get_interpolated_correction_params(wavelengths_nm)
+    else:
+        pars = _get_correction_params_fill_ones(wavelengths_nm, atol_nm)
+    return pars

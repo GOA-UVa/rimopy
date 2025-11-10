@@ -5,9 +5,11 @@ extraterrestrial lunar irradiance. The data is probably obtained from NASA's SPI
 
 It exports the following classes:
     * MoonDatas - Moon data needed to calculate Moon's irradiance.
+    * MissingRCFBehavior - Enum with the options to do when an RCF is missing for a wavelength.
 """
 
 from typing import Iterable
+from enum import Enum
 
 import numpy as np
 from numpy.typing import NDArray
@@ -69,3 +71,11 @@ class MoonDatas:
 
     def get_moondata(self, i) -> NDArray[np.float32]:
         return self._data[:, i]
+
+
+class MissingRCFBehavior(str, Enum):
+    """What to do when an RCF is missing for a wavelength."""
+    ERROR = "error"   # raise ValueError
+    WARN = "warn"     # issue a warning, return uncorrected values
+    IGNORE = "ignore" # silently return uncorrected values
+    INTERPOLATE = "interpolate" # linearly interpolate the coefficients for non-present wavelengths

@@ -9,7 +9,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from . import coefficients as coeffs
-from .types import MoonDatas
+from .types import MoonDatas, MissingRCFBehavior
 from . import correction_factor as corr_f
 
 
@@ -62,7 +62,7 @@ def _summatory_b(
 
 
 def _get_correction_factor(
-    wavelengths_nm: Iterable[float], mpa: NDArray[np.float32]
+    wavelengths_nm: Iterable[float], mpa: NDArray[np.float32], missing_rcf: MissingRCFBehavior,
 ) -> NDArray[np.float32]:
     """Calculation of RIMO correction factor (RCF) following Eq 9 in Roman et al., 2020
 
@@ -73,14 +73,16 @@ def _get_correction_factor(
         calculated
     mpa : array of float
         Absolute Moon phase angle (in radians)
-
+    missing_rcf: MissingRCFBehavior
+        Behavior when at least one requested wavelength has no RCF available and
+        `apply_correction` is True.
     Returns
     -------
     array of float
         The calculated RCF. One array per amount of `mpa`.
         Then, each inner array has the amount of values as the amount of wavelengths.
     """
-    params = corr_f.get_correction_params(wavelengths_nm)
+    params = corr_f.get_correction_params(wavelengths_nm, missing_rcf)
     mpa = np.array([mpa]).T
     rcf = params.a_coeff + params.b_coeff * mpa + params.c_coeff * mpa**2
     return rcf
@@ -241,6 +243,7 @@ def get_interpolated_reflectance(
     wavelengths_nm: Iterable[float],
     mds: MoonDatas,
     apply_correction: bool = True,
+    missing_rcf: MissingRCFBehavior = MissingRCFBehavior.ERROR,
     adjust_apollo: bool = True,
 ):
     """The calculation of the reflectance of the Moon's disk, following Eq.2 in Roman et al., 2020
@@ -258,6 +261,9 @@ def get_interpolated_reflectance(
     apply_correction: bool
         If True the RIMO Correction Factor will be calculated and applied to the obtained
         reflectance.
+    missing_rcf: MissingRCFBehavior
+        Behavior when at least one requested wavelength has no RCF available and
+        `apply_correction` is True.
     adjust_apollo : bool
         If True, the calculated reflectance will be adjusted to the Apollo spectra.
 
@@ -272,7 +278,7 @@ def get_interpolated_reflectance(
     a_l = _interpolated_moon_disk_reflectance(wavelengths_nm, mds, adjust_apollo)
     if apply_correction:
         mr_correction_factor = _get_correction_factor(
-            wavelengths_nm, np.radians(mds.ampa)
+            wavelengths_nm, np.radians(mds.ampa), missing_rcf,
         ).T
         a_l = a_l * mr_correction_factor
     return a_l
