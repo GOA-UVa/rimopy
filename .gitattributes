@@ -1,2 +1,13 @@
 tests/kernels/de440.bsp filter=lfs diff=lfs merge=lfs -text
 tests/kernels/de421.bsp filter=lfs diff=lfs merge=lfs -text
+
+tests/kernels/** linguist-vendored
+**/*.tf   linguist-language=Text linguist-vendored
+**/*.tpc  linguist-language=Text linguist-vendored
+**/*.ti   linguist-language=Text linguist-vendored
+**/*.tls  linguist-language=Text linguist-vendored
+**/*.tsc  linguist-language=Text linguist-vendored
+**/*.tm   linguist-language=Text linguist-vendored
+**/*.bsp  linguist-vendored
+**/*.bc   linguist-vendored
+**/*.bpc  linguist-vendored
