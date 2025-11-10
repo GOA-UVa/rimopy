@@ -149,9 +149,10 @@ the radius and the standard deviation, which by default both are equal to one.
 
 ## Roadmap
 
-- [ ] Adding tests based on AEMET RimoApp output that don't require to compute the lunar geometries (have them precomputed
-- [ ] Adding unit tests for every submodule.
-- [ ] Adding a TSIS-based ESICalculator implementation.
+- [ ] Add validation tests based on AEMET RimoApp output using precomputed lunar geometries
+  to remove the need for SPICE kernels during testing.
+- [ ] Add unit tests for all submodules.
+- [ ] Implement a TSIS-based `ESICalculator`.
 
 ## Structure
 
