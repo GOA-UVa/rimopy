@@ -93,7 +93,7 @@ from rimopy import esi
 
 wavelengths = [500, 550]
 calc = esi.ESICalculatorWehrli(esi.WehrliFile.ORIGINAL_WEHRLI, esi.ESIMethod.LINEAR_INTERPOLATION)
-eli_settings = eli.ELISettings(True, False, True, True)
+eli_settings = eli.ELISettings(True, True, True)
 result = eli.get_eli(wavelengths, full_moon_Valladolid, kernels_path, calc, eli_settings)
 
 # result:
@@ -123,9 +123,8 @@ observer body.
 These settings are:
 - **apply_correction**: If True the result will have been multiplied by the RCF (Rimo Correction Factor),
 which corrects the data for the photometers' calibration. Otherwise it won't. The default value is *False*.
-- **adjust_apollo**: If True the ROLO model reflectance will be adjusted using Apollo spectra, in case
-it's calculated interpolating surrounding reflectances. The Apollo spectra is the spectra generated
-with the Moon samples from Apollo 16th mission. The default value is *True*.
+- **adjust_apollo**: If True the ROLO model reflectance will be adjusted using Apollo spectra. The Apollo
+  spectra is the spectra generated with the Moon samples from Apollo 16th mission. The default value is *True*.
 - **per_nm** : If True the ELI will be in Wm⁻²/nm, otherwise it will be in Wm⁻². Default is *False*.
 
 **ESICalculator**

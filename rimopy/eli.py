@@ -41,9 +41,8 @@ class ELISettings:
         which corrects the data for the photometers' calibration.
         Otherwise it won't.
     adjust_apollo : bool
-        If True the ROLO model reflectance will be adjusted using Apollo spectra, in case it's
-        calculated interpolating surrounding reflectances. The Apollo spectra is the spectra
-        generated with the Moon samples from Apollo 16th mission.
+        If True the ROLO model reflectance will be adjusted using Apollo spectra. The Apollo
+        spectra is the spectra generated with the Moon samples from Apollo 16th mission.
     per_nm : bool
         If True the ELI will be in Wm⁻²/nm, otherwise it will be in Wm⁻². Default is False.
     """
