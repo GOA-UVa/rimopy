@@ -237,43 +237,6 @@ def _interpolated_moon_disk_reflectance(
     return np.array([np.interp(wavelengths_nm, x_values, yval) for yval in y_values]).T
 
 
-def get_reflectance_interpolating_coefficients(
-    wavelengths_nm: Iterable[float],
-    mds: MoonDatas,
-    apply_correction: bool = True,
-):
-    """The calculation of the reflectance of the Moon's disk, following Eq.2 in Roman et al., 2020
-
-    If the wavelength has no associated ROLO coefficients, it uses some linearly interpolated
-    ones.
-
-    Parameters
-    ----------
-    wavelength_nm : iterable of float
-        Wavelengths in nanometers from which one wants to obtain the MDRs.
-    mds : MoonDatas
-        Moon data needed to calculate Moon's irradiance
-    apply_correction: bool
-        If True the RIMO Correction Factor will be calculated and applied to the obtained
-        reflectance.
-
-    Returns
-    -------
-    array of float
-        The ln of the reflectance of the Moon's disk for the inputed data.
-        One array per amount of moon geometry. Then, each inner array has the
-        amount of values as the amount of wavelengths.
-    """
-    wavelengths_nm = np.array(wavelengths_nm)
-    a_l = np.exp(_ln_moon_disk_reflectance(wavelengths_nm, mds))
-    if apply_correction:
-        mr_correction_factor = _get_correction_factor(
-            wavelengths_nm, np.radians(mds.ampa)
-        ).T
-        a_l = a_l * mr_correction_factor
-    return a_l
-
-
 def get_interpolated_reflectance(
     wavelengths_nm: Iterable[float],
     mds: MoonDatas,

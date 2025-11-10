@@ -22,20 +22,17 @@ EXK_PATH = "./extra.temp.kernels"
 VALL_NAME = "VALLADOLID"
 
 prop_error = DEFAULT_PROP_ERROR
-gfp = esi.GaussianFilterParams(1, 1)
-calc = esi.ESICalculatorWehrli(
-    esi.WehrliFile.ASC_WEHRLI, esi.ESIMethod.LINEAR_INTERPOLATION, gfp
+GAUSS_FILPARAMS = esi.GaussianFilterParams(1, 1)
+ESICALC = esi.ESICalculatorWehrli(
+    esi.WehrliFile.ASC_WEHRLI, esi.ESIMethod.LINEAR_INTERPOLATION, GAUSS_FILPARAMS
 )
-eli_settings = eli.ELISettings(False, False, True, False)
+ELI_SETTINGS = eli.ELISettings(False, True, True)
 
 
 def _testValladolidNoCorr(ts: "TestSum", wavelength, expected, date):
     ed_Vall.set_utc_times(date)
-    eli_setts_2 = eli.ELISettings(False, False, True, True)
-    res = eli.get_eli([wavelength], ed_Vall, KERNELS_PATH, calc, eli_setts_2)[0]
-    # res = eli.get_eli_per_nm_from_extra_kernels(wavelength, ed_Vall.utc_times,
-    #    KERNELS_PATH, EXK, EXK_PATH, VALL_NAME, calc, eli_settings)
-    res = float("{:0.4e}".format(res))
+    res = eli.get_eli([wavelength], ed_Vall, KERNELS_PATH, ESICALC, ELI_SETTINGS)[0]
+    res = float(f"{res:0.4e}")
     ts.assertAlmostEqual(res, expected, delta=expected * prop_error)
 
 

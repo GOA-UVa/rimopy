@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [//]: # "## [unreleased] - yyyy-mm-dd"
 
+
+## [unreleased] - yyyy-mm-dd
+
+### Removed
+
+- Removed the option to run RIMO with interpolated coefficients, as this approach was incorrect.
+  Consequently, the `interpolate_rolo_coefficients` parameter was removed from `ELISettings`.
+
 ## [0.3.0] - 2025-11-06
 
 ### Added

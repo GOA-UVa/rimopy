@@ -40,10 +40,6 @@ class ELISettings:
         If True the result will have been multiplied by the RCF (Rimo Correction Factor),
         which corrects the data for the photometers' calibration.
         Otherwise it won't.
-    interpolate_rolo_coefficients : bool
-        If True the reflectance will be calculated linearly interpolating the ROLO coefficients.
-        Otherwise it will be calculated interpolating the surrounding reflectances, calculated
-        with empirical coefficients.
     adjust_apollo : bool
         If True the ROLO model reflectance will be adjusted using Apollo spectra, in case it's
         calculated interpolating surrounding reflectances. The Apollo spectra is the spectra
@@ -53,7 +49,6 @@ class ELISettings:
     """
 
     apply_correction: bool = False
-    interpolate_rolo_coefficients: bool = False
     adjust_apollo: bool = True
     per_nm: bool = False
 
@@ -177,19 +172,12 @@ def _calculate_eli(
         One array per amount of moon geometry. Then, each inner array has the
         amount of values as the amount of wavelengths.
     """
-    if not eli_settings.interpolate_rolo_coefficients:
-        a_l = elref.get_interpolated_reflectance(
-            wavelengths_nm,
-            mds,
-            eli_settings.apply_correction,
-            eli_settings.adjust_apollo,
-        )
-    else:
-        a_l = elref.get_reflectance_interpolating_coefficients(
-            wavelengths_nm,
-            mds,
-            eli_settings.apply_correction,
-        )
+    a_l = elref.get_interpolated_reflectance(
+        wavelengths_nm,
+        mds,
+        eli_settings.apply_correction,
+        eli_settings.adjust_apollo,
+    )
 
     solid_angle_moon: float = 6.4177e-05
     omega = solid_angle_moon

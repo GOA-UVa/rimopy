@@ -123,9 +123,6 @@ observer body.
 These settings are:
 - **apply_correction**: If True the result will have been multiplied by the RCF (Rimo Correction Factor),
 which corrects the data for the photometers' calibration. Otherwise it won't. The default value is *False*.
-- **interpolate_rolo_coefficients**: If True the reflectance will be calculated linearly interpolating
-the ROLO coefficients. Otherwise it will be calculated interpolating the surrounding reflectances,
-calculated with empirical coefficients. The default value is *False*.
 - **adjust_apollo**: If True the ROLO model reflectance will be adjusted using Apollo spectra, in case
 it's calculated interpolating surrounding reflectances. The Apollo spectra is the spectra generated
 with the Moon samples from Apollo 16th mission. The default value is *True*.
