@@ -98,9 +98,10 @@ calc = esi.ESICalculatorWehrli(esi.WehrliFile.ORIGINAL_WEHRLI, esi.ESIMethod.LIN
 eli_settings = eli.ELISettings(True, True, True, MissingRCFBehavior.WARN)
 result = eli.get_eli(wavelengths, full_moon_Valladolid, kernels_path, calc, eli_settings)
 
+# WARNING:root:RCF not available for the wavelengths: [550.0]
 # result:
 # array([[3.29045832e-06],
-#       [3.52460413e-06]])
+#       [3.25669721e-06]])
 ```
 
 ### Main functions
@@ -162,6 +163,7 @@ the radius and the standard deviation, which by default both are equal to one.
 
 - [ ] Add validation tests based on AEMET RimoApp output using precomputed lunar geometries
   to remove the need for SPICE kernels during testing.
+- [ ] Add validation tests based on CAELIS RIMO implementation.
 - [ ] Add unit tests for all submodules.
 - [ ] Implement a TSIS-based `ESICalculator`.
 
