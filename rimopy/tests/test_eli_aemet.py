@@ -31,7 +31,7 @@ ELI_SETTINGS = eli.ELISettings(False, True, True)
 
 def _testValladolidNoCorr(ts: "TestSum", wavelength, expected, date):
     ed_Vall.set_utc_times(date)
-    res = eli.get_eli([wavelength], ed_Vall, KERNELS_PATH, ESICALC, ELI_SETTINGS)[0]
+    res = eli.get_irradiance([wavelength], earth_data=ed_Vall, kernels_path=KERNELS_PATH, esi_calc=ESICALC, eli_settings=ELI_SETTINGS)[0]
     res = float(f"{res:0.4e}")
     ts.assertAlmostEqual(res, expected, delta=expected * prop_error)
 
@@ -39,7 +39,7 @@ def _testValladolidNoCorr(ts: "TestSum", wavelength, expected, date):
 class TestSum(unittest.TestCase):
     def test_get_eli_Valladolid(self):
         ed_Vall_t = eli.EarthPoint(VALL_LAT, VALL_LON, "2022-01-17 02:30:00", VALL_ALT)
-        res = eli.get_eli([400], ed_Vall_t, KERNELS_PATH)
+        res = eli.get_irradiance([400], earth_data=ed_Vall_t, kernels_path=KERNELS_PATH)
         self.assertGreater(res, 0, "Should be greater than 0")
 
     def test_eli336_uncorrected_Valladolid_20220117_00(self):

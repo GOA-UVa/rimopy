@@ -1,15 +1,26 @@
-"""ELRef Extraterrestrial Lunar Reflectance
+"""
+Extraterrestrial Lunar Reflectance (ELRef)
 
-This module allows for the calculation of the extraterrestrial lunar reflectance.
+This module provides the functions to compute the modeled **Extraterrestrial Lunar Reflectance (ELRef)**,
+following Eq. 2 in Román et al. (2020).  It evaluates the disk-integrated lunar reflectance at
+given wavelengths and geometries, optionally applying RIMO correction factors and Apollo-based
+spectral adjustments.
+
+Exports
+-------
+Functions
+    get_reflectance
+        Main entry point to compute the modeled lunar disk reflectance.
 """
 
-from typing import Iterable
+from typing import Iterable, Union, List, overload
 
 import numpy as np
 from numpy.typing import NDArray
 
 from . import coefficients as coeffs
-from .types import MoonDatas, MissingRCFBehavior
+from .types import MoonDatas, MissingRCFBehavior, EarthPoint
+from .geometry import resolve_mds
 from . import correction_factor as corr_f
 
 
@@ -212,41 +223,106 @@ def _interpolated_moon_disk_reflectance(
     return np.array([np.interp(wavelengths_nm, x_values, yval) for yval in y_values]).T
 
 
-def get_interpolated_reflectance(
+@overload
+def get_reflectance(
     wavelengths_nm: Iterable[float],
+    *,
     mds: MoonDatas,
     apply_correction: bool = True,
     missing_rcf: MissingRCFBehavior = MissingRCFBehavior.ERROR,
     adjust_apollo: bool = True,
-):
-    """The calculation of the reflectance of the Moon's disk, following Eq.2 in Roman et al., 2020
+) -> NDArray[np.float32]: ...
+@overload
+def get_reflectance(
+    wavelengths_nm: Iterable[float],
+    *,
+    earth_data: EarthPoint,
+    kernels_path: str,
+    apply_correction: bool = True,
+    missing_rcf: MissingRCFBehavior = MissingRCFBehavior.ERROR,
+    adjust_apollo: bool = True,
+) -> NDArray[np.float32]: ...
+@overload
+def get_reflectance(
+    wavelengths_nm: Iterable[float],
+    *,
+    utc_times: Union[str, List[str]],
+    kernels_path: str,
+    extra_kernels: List[str],
+    extra_kernels_path: str,
+    observer_name: str,
+    apply_correction: bool = True,
+    missing_rcf: MissingRCFBehavior = MissingRCFBehavior.ERROR,
+    adjust_apollo: bool = True,
+) -> NDArray[np.float32]: ...
 
-    If the wavelength is not present in the ROLO coefficients, it calculates the linear
-    interpolation between the previous and the next one, or the extrapolation with the two
-    nearest ones in case that it's on an extreme.
+def get_reflectance(
+    wavelengths_nm: Iterable[float],
+    *,
+    # source A: directly moon datas
+    mds: MoonDatas = None,
+    # source B: earth point + kernels path
+    earth_data: EarthPoint = None,
+    # shared B & C
+    kernels_path: str = None,
+    # source C: extra kernels
+    utc_times: Union[str, List[str]] = None,
+    extra_kernels: List[str] = None,
+    extra_kernels_path: str = None,
+    observer_name: str = None,
+    # common
+    apply_correction: bool = True,
+    missing_rcf: MissingRCFBehavior = MissingRCFBehavior.ERROR,
+    adjust_apollo: bool = True,
+) -> NDArray[np.float32]:
+    """
+    Compute the reflectance of the Moon's disk following Eq. 2 in Román et al. (2020).
+
+    This function calculates the modeled disk-integrated lunar reflectance for one or more
+    wavelengths. If the wavelength is not present in the ROLO coefficients, a linear interpolation
+    (or extrapolation at the ends) is performed between the two nearest valid bands.
+
+    Provide exactly one geometry source:
+
+      - **A)** `mds`: precomputed Moon geometry data (`MoonDatas`).
+      - **B)** `earth` + `kernels_path`: compute geometry from an EarthPoint and base SPICE kernels.
+      - **C)** `utc_times` + `kernels_path` + `extra_kernels` + `extra_kernels_path` + `observer_name`:
+        compute geometry using extra SPICE kernels for a custom observer body.
 
     Parameters
     ----------
     wavelengths_nm : iterable of float
-        Wavelengths in nanometers from which one wants to obtain the MDR.
-    mds : MoonDatas
-        Moon data needed to calculate Moon's irradiance
-    apply_correction: bool
-        If True the RIMO Correction Factor will be calculated and applied to the obtained
-        reflectance.
-    missing_rcf: MissingRCFBehavior
-        Behavior when at least one requested wavelength has no RCF available and
+        Wavelengths in nanometers for which to obtain the disk-integrated reflectance.
+    mds : MoonDatas, optional
+        Precomputed Moon geometry and distances.
+    earth : EarthPoint, optional
+        Geographic location and times of the observation (used with `kernels_path`).
+    kernels_path : str, optional
+        Directory containing the necessary SPICE kernels.
+    utc_times : str or list of str, optional
+        UTC datetimes of the observations (used with extra kernels).
+    extra_kernels : list of str, optional
+        List of extra kernel filenames defining the observer body.
+    extra_kernels_path : str, optional
+        Directory containing the extra kernels.
+    observer_name : str, optional
+        Name of the observer body as defined in the extra kernels.
+    apply_correction : bool, default True
+        If True, apply the RIMO Correction Factor (RCF) to the computed reflectance.
+    missing_rcf : MissingRCFBehavior, default MissingRCFBehavior.ERROR
+        Behavior when at least one requested wavelength lacks an RCF and
         `apply_correction` is True.
-    adjust_apollo : bool
-        If True, the calculated reflectance will be adjusted to the Apollo spectra.
+    adjust_apollo : bool, default True
+        If True, adjust the modeled reflectance using Apollo spectral measurements.
 
     Returns
     -------
-    array of float
-        The ln of the reflectance of the Moon's disk for the inputed data.
-        One array per amount of moon geometry. Then, each inner array has the
-        amount of values as the amount of wavelengths.
+    ndarray of float
+        The modeled lunar disk reflectance for the given geometries and wavelengths.
+        The output has shape ``(N_geometries, N_wavelengths)``; if there is only one geometry,
+        the first dimension is squeezed and a 1-D array of wavelengths is returned.
     """
+    mds = resolve_mds(mds, earth_data, kernels_path, utc_times, extra_kernels, extra_kernels_path, observer_name)
     wavelengths_nm = np.array(wavelengths_nm)
     a_l = _interpolated_moon_disk_reflectance(wavelengths_nm, mds, adjust_apollo)
     if apply_correction:
