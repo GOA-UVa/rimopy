@@ -203,7 +203,7 @@ def _calc_correction_factor(
     wavelengths_nm : iterable of float
         Wavelengths (in nanometers) of which the RCFs will be calculated
     mpa : array of float
-        Absolute Moon phase angle (in radians)
+        Moon phase angle (in radians)
     missing_rcf: MissingRCFBehavior
         Behavior when at least one requested wavelength has no RCF available and
         `apply_correction` is True.
@@ -227,6 +227,8 @@ def _interpolated_rcfs(wavelengths_nm: Iterable[float], mpa: NDArray[np.float32]
     ----------
     wavelengths_nm : iterable of float
         Wavelengths (in nanometers) of which one wants to obtain the RCF
+    mpa : array of float
+        Moon phase angle (in radians)
 
     Returns
     -------
@@ -256,7 +258,7 @@ def get_correction_factor(
         Wavelengths (in nanometers) of which the extraterrestrial lunar irradiance will be
         calculated
     mpa : array of float
-        Absolute Moon phase angle (in radians)
+        Moon phase angle (in radians)
     missing_rcf: MissingRCFBehavior
         Behavior when at least one requested wavelength has no RCF available and
         `apply_correction` is True.

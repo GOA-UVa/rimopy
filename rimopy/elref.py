@@ -252,7 +252,7 @@ def get_interpolated_reflectance(
     if apply_correction:
         correction_factor = corr_f.get_correction_factor(
             wavelengths_nm,
-            np.radians(mds.ampa),
+            np.radians(mds.mpa),
             missing_rcf,
         ).T
         a_l = a_l * correction_factor

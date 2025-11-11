@@ -14,10 +14,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added support for configurable handling of missing RCF wavelengths by introducing the `MissingRCFBehavior`
   enum (ERROR, WARN, IGNORE, INTERPOLATE) as a new `missing_rcf` parameter in `ELISettings`.
 
-
 ### Changed
 - Irradiance interpolation for wavelengths without RCFs is now performed by linearly
   interpolating the valid RCF values, instead of their coefficients.
+
+### Fixed
+- RCF is calculated using the moon phase angle instead of using the absolute moon phase angle, which was wrong.
 
 ### Removed
 
