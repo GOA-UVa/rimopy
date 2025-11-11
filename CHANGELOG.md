@@ -17,6 +17,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Irradiance interpolation for wavelengths without RCFs is now performed by linearly
   interpolating the valid RCF values, instead of their coefficients.
+- Unified all public ELI retrieval functions into a single `get_irradiance` entry point,
+  replacing the former `get_eli`, `get_eli_bypass`, and `get_eli_from_extra_kernels`.
+  The new function automatically handles the three geometry input modes
+  (`MoonDatas`, `EarthPoint` + kernels, or extra observer kernels).
+- Renamed and extended `get_interpolated_reflectance` to `get_reflectance`,
+  providing the same unified geometry adaptability as `get_irradiance`.
+
 
 ### Fixed
 - RCF is calculated using the moon phase angle instead of using the absolute moon phase angle, which was wrong.
