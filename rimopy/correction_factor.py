@@ -26,6 +26,7 @@ import numpy as np
 
 from .types import MissingRCFBehavior
 
+
 @dataclass
 class CorrectionParams:
     """
@@ -40,9 +41,11 @@ class CorrectionParams:
     c_coeff : np.array of float
         RCF coefficient 'c'
     """
+
     a_coeff: NDArray[np.float32]
     b_coeff: NDArray[np.float32]
     c_coeff: NDArray[np.float32]
+
 
 def _get_corrected_wavelengths() -> List[float]:
     """Gets all wavelengths (in nanometers) presented in the RCF model
@@ -54,6 +57,7 @@ def _get_corrected_wavelengths() -> List[float]:
     """
     return [340, 380, 440, 500, 675, 870, 935, 1020, 1640]
 
+
 def _get_all_correction_params() -> List[List[float]]:
     """Gets all RCF coefficients
 
@@ -63,11 +67,18 @@ def _get_all_correction_params() -> List[List[float]]:
         A list containing multiple list of floats. Each sublist is the list of coefficients
         for a wavelength
     """
-    return [[1.186, -2.35 * 10**-2, 1.92 * 10**-1], [1.082, -4.17 * 10**-3, 7.10 * 10**-2],
-            [1.062, -5.35 * 10**-4, 1.14 * 10**-2], [1.078, -8.93 * 10**-4, 1.11 * 10**-2],
-            [1.092, -4.50 * 10**-4, 1.38 * 10**-2], [1.075, -2.05 * 10**-3, 1.37 * 10**-2],
-            [1.071, -2.41 * 10**-3, 1.36 * 10**-2], [1.035, 5.55 * 10**-3, 2.79 * 10**-2],
-            [1.047, -1.25 * 10**-3, 2.26 * 10**-2]]
+    return [
+        [1.186, -2.35 * 10**-2, 1.92 * 10**-1],
+        [1.082, -4.17 * 10**-3, 7.10 * 10**-2],
+        [1.062, -5.35 * 10**-4, 1.14 * 10**-2],
+        [1.078, -8.93 * 10**-4, 1.11 * 10**-2],
+        [1.092, -4.50 * 10**-4, 1.38 * 10**-2],
+        [1.075, -2.05 * 10**-3, 1.37 * 10**-2],
+        [1.071, -2.41 * 10**-3, 1.36 * 10**-2],
+        [1.035, 5.55 * 10**-3, 2.79 * 10**-2],
+        [1.047, -1.25 * 10**-3, 2.26 * 10**-2],
+    ]
+
 
 def _get_all_as() -> List[float]:
     """Gets all 'a' RCF coefficients
@@ -79,6 +90,7 @@ def _get_all_as() -> List[float]:
     """
     return list(map(lambda x: x[0], _get_all_correction_params()))
 
+
 def _get_all_bs() -> List[float]:
     """Gets all 'b' RCF coefficients
 
@@ -88,6 +100,7 @@ def _get_all_bs() -> List[float]:
         A list containing all 'b' coefficients in wavelength order
     """
     return list(map(lambda x: x[1], _get_all_correction_params()))
+
 
 def _get_all_cs() -> List[float]:
     """Gets all 'c' RCF coefficients
@@ -99,32 +112,10 @@ def _get_all_cs() -> List[float]:
     """
     return list(map(lambda x: x[2], _get_all_correction_params()))
 
-def _get_interpolated_correction_params(wavelengths_nm: Iterable[float]) -> 'CorrectionParams':
-    """Estimate the RCF params with interpolation
 
-    Parameters
-    ----------
-    wavelengths_nm : iterable of float
-        Wavelengths (in nanometers) of which one wants to linearly interpolate the RCF params
-
-    Returns
-    -------
-    'CorrectionParams'
-        Estimated correction params
-    """
-    x_values = _get_corrected_wavelengths()
-    wavelengths_nm = np.where(wavelengths_nm < x_values[0], x_values[0], wavelengths_nm)
-    wavelengths_nm = np.where(wavelengths_nm > x_values[-1], x_values[-1], wavelengths_nm)
-    all_as = _get_all_as()
-    a_coeff = np.interp(wavelengths_nm, x_values, all_as)
-    all_bs = _get_all_bs()
-    b_coeff = np.interp(wavelengths_nm, x_values, all_bs)
-    all_cs = _get_all_cs()
-    c_coeff = np.interp(wavelengths_nm, x_values, all_cs)
-    return CorrectionParams(a_coeff, b_coeff, c_coeff)
-
-
-def _get_correction_params_fill_ones(wavelengths_nm: Iterable[float], atol_nm: float) -> 'CorrectionParams':
+def _get_correction_params_fill_ones(
+    wavelengths_nm: Iterable[float], atol_nm: float
+) -> "CorrectionParams":
     """Obtain the RCF params, and mock values for invalid wavelengths
 
     Parameters
@@ -161,7 +152,11 @@ def _get_correction_params_fill_ones(wavelengths_nm: Iterable[float], atol_nm: f
     return CorrectionParams(a_coeff, b_coeff, c_coeff)
 
 
-def get_correction_params(wavelengths_nm: Iterable[float], missing_rcf: MissingRCFBehavior, atol_nm: float = 0.1) -> 'CorrectionParams':
+def _get_correction_params(
+    wavelengths_nm: Iterable[float],
+    missing_rcf: MissingRCFBehavior,
+    atol_nm: float = 0.1,
+) -> "CorrectionParams":
     """Gets the RCF correction parameters for a specific wavelength in nanometers
 
     Parameters
@@ -180,7 +175,10 @@ def get_correction_params(wavelengths_nm: Iterable[float], missing_rcf: MissingR
     """
     wavelengths_nm = np.array(list(wavelengths_nm))
     supported = np.array(_get_corrected_wavelengths())
-    mask = np.any(np.isclose(wavelengths_nm[:, None], supported[None, :], rtol=0.0, atol=atol_nm), axis=1)
+    mask = np.any(
+        np.isclose(wavelengths_nm[:, None], supported[None, :], rtol=0.0, atol=atol_nm),
+        axis=1,
+    )
     if not np.all(mask):
         missing_list: List[float] = [float(w) for w in wavelengths_nm[~mask]]
         msg = f"RCF not available for the wavelengths: {missing_list}"
@@ -188,9 +186,88 @@ def get_correction_params(wavelengths_nm: Iterable[float], missing_rcf: MissingR
             raise ValueError(msg)
         elif missing_rcf is MissingRCFBehavior.WARN:
             logging.warning(msg)
-    # TODO: Should this INTERPOLATE option be removed? It doesn't make sense to do it this way.
-    if missing_rcf == MissingRCFBehavior.INTERPOLATE:
-        pars = _get_interpolated_correction_params(wavelengths_nm)
-    else:
-        pars = _get_correction_params_fill_ones(wavelengths_nm, atol_nm)
+    pars = _get_correction_params_fill_ones(wavelengths_nm, atol_nm)
     return pars
+
+
+def _calc_correction_factor(
+    wavelengths_nm: Iterable[float],
+    mpa: NDArray[np.float32],
+    missing_rcf: MissingRCFBehavior,
+    atol_nm: float = 0.1,
+) -> NDArray[np.float32]:
+    """Calculation of RIMO correction factor (RCF) following Eq 9 in Roman et al., 2020
+
+    Parameters
+    ----------
+    wavelengths_nm : iterable of float
+        Wavelengths (in nanometers) of which the RCFs will be calculated
+    mpa : array of float
+        Absolute Moon phase angle (in radians)
+    missing_rcf: MissingRCFBehavior
+        Behavior when at least one requested wavelength has no RCF available and
+        `apply_correction` is True.
+    Returns
+    -------
+    array of float
+        The calculated RCF. One array per amount of `mpa`.
+        Then, each inner array has the amount of values as the amount of wavelengths.
+
+    """
+    params = _get_correction_params(wavelengths_nm, missing_rcf, atol_nm)
+    mpa = np.array([mpa]).T
+    rcf = params.a_coeff + params.b_coeff * mpa + params.c_coeff * mpa**2
+    return rcf
+
+
+def _interpolated_rcfs(wavelengths_nm: Iterable[float], mpa: NDArray[np.float32]):
+    """Estimate the RCF with interpolation
+
+    Parameters
+    ----------
+    wavelengths_nm : iterable of float
+        Wavelengths (in nanometers) of which one wants to obtain the RCF
+
+    Returns
+    -------
+    array of float
+        The estimated RCF. One array per amount of `mpa`.
+        Then, each inner array has the amount of values as the amount of wavelengths.
+    """
+    x_values = np.array(_get_corrected_wavelengths())
+    y_values = _calc_correction_factor(x_values, mpa, MissingRCFBehavior.IGNORE)
+    wavelengths_nm = np.where(wavelengths_nm < x_values[0], x_values[0], wavelengths_nm)
+    wavelengths_nm = np.where(
+        wavelengths_nm > x_values[-1], x_values[-1], wavelengths_nm
+    )
+    return np.array([np.interp(wavelengths_nm, x_values, yval) for yval in y_values])
+
+
+def get_correction_factor(
+    wavelengths_nm: Iterable[float],
+    mpa: NDArray[np.float32],
+    missing_rcf: MissingRCFBehavior,
+) -> NDArray[np.float32]:
+    """Calculation of RIMO correction factor (RCF) following Eq 9 in Roman et al., 2020
+
+    Parameters
+    ----------
+    wavelengths_nm : iterable of float
+        Wavelengths (in nanometers) of which the extraterrestrial lunar irradiance will be
+        calculated
+    mpa : array of float
+        Absolute Moon phase angle (in radians)
+    missing_rcf: MissingRCFBehavior
+        Behavior when at least one requested wavelength has no RCF available and
+        `apply_correction` is True.
+    Returns
+    -------
+    array of float
+        The calculated RCF. One array per amount of `mpa`.
+        Then, each inner array has the amount of values as the amount of wavelengths.
+    """
+    if missing_rcf == MissingRCFBehavior.INTERPOLATE:
+        rcf = _interpolated_rcfs(wavelengths_nm, mpa)
+    else:
+        rcf = _calc_correction_factor(wavelengths_nm, mpa, missing_rcf)
+    return rcf

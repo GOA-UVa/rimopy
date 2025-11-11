@@ -14,6 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added support for configurable handling of missing RCF wavelengths by introducing the `MissingRCFBehavior`
   enum (ERROR, WARN, IGNORE, INTERPOLATE) as a new `missing_rcf` parameter in `ELISettings`.
 
+
+### Changed
+- Irradiance interpolation for wavelengths without RCFs is now performed by linearly
+  interpolating the valid RCF values, instead of their coefficients.
+
 ### Removed
 
 - Removed the option to run RIMO with interpolated coefficients, as this approach was incorrect.

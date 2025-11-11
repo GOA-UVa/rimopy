@@ -61,33 +61,6 @@ def _summatory_b(
     return sb
 
 
-def _get_correction_factor(
-    wavelengths_nm: Iterable[float], mpa: NDArray[np.float32], missing_rcf: MissingRCFBehavior,
-) -> NDArray[np.float32]:
-    """Calculation of RIMO correction factor (RCF) following Eq 9 in Roman et al., 2020
-
-    Parameters
-    ----------
-    wavelengths_nm : iterable of float
-        Wavelengths (in nanometers) of which the extraterrestrial lunar irradiance will be
-        calculated
-    mpa : array of float
-        Absolute Moon phase angle (in radians)
-    missing_rcf: MissingRCFBehavior
-        Behavior when at least one requested wavelength has no RCF available and
-        `apply_correction` is True.
-    Returns
-    -------
-    array of float
-        The calculated RCF. One array per amount of `mpa`.
-        Then, each inner array has the amount of values as the amount of wavelengths.
-    """
-    params = corr_f.get_correction_params(wavelengths_nm, missing_rcf)
-    mpa = np.array([mpa]).T
-    rcf = params.a_coeff + params.b_coeff * mpa + params.c_coeff * mpa**2
-    return rcf
-
-
 def _ln_moon_disk_reflectance(
     wavelengths_nm: NDArray[np.float32],
     mds: MoonDatas,
@@ -277,8 +250,10 @@ def get_interpolated_reflectance(
     wavelengths_nm = np.array(wavelengths_nm)
     a_l = _interpolated_moon_disk_reflectance(wavelengths_nm, mds, adjust_apollo)
     if apply_correction:
-        mr_correction_factor = _get_correction_factor(
-            wavelengths_nm, np.radians(mds.ampa), missing_rcf,
+        correction_factor = corr_f.get_correction_factor(
+            wavelengths_nm,
+            np.radians(mds.ampa),
+            missing_rcf,
         ).T
-        a_l = a_l * mr_correction_factor
+        a_l = a_l * correction_factor
     return a_l
