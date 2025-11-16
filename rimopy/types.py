@@ -83,7 +83,6 @@ class MissingRCFBehavior(str, Enum):
     INTERPOLATE = "interpolate" # linearly interpolate the coefficients for non-present wavelengths
 
 
-
 @dataclass
 class EarthPoint:
     """

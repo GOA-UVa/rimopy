@@ -220,7 +220,7 @@ def _interpolated_moon_disk_reflectance(
     y_values = (
         np.exp(_ln_moon_disk_reflectance(x_values, mds)) * apollo_coeffs[ap_indices]
     )
-    return np.array([np.interp(wavelengths_nm, x_values, yval) for yval in y_values]).T
+    return np.array([np.interp(wavelengths_nm, x_values, yval) for yval in y_values])
 
 
 @overload

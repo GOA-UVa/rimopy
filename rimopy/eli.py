@@ -128,11 +128,11 @@ def _calculate_eli(
     dom = mds.dom
     distance_earth_moon_km: int = 384400
     lunar_irr = (
-        ((a_l.T * omega * esk) / np.pi).T
+        ((a_l * omega * esk) / np.pi).T
         * ((1 / dsm) ** 2)
         * (distance_earth_moon_km / dom) ** 2
     )
-    return lunar_irr
+    return lunar_irr.T
 
 
 @overload
