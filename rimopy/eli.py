@@ -1,122 +1,59 @@
-"""ELI Extraterrestrial Lunar Irradiance
+"""
+Extraterrestrial Lunar Irradiance (ELI)
 
-This module is the main module, as it allowes the user to calculate the Extraterrestrial Lunar
-Irradiance at a concrete wavelength, at an absolute Moon phase angle, and giving selenographic
-parameters.
+This module provides the main high-level interface for calculating the modeled
+**Extraterrestrial Lunar Irradiance (ELI)**, following Román et al. (2020).
 
-It exports the following classes:
-    * ELISettings - Settings that will modify the methodology of calculating the ELI
-    * EarthPoint - Data of the point on Earth surface of which the ELI will be calculated.
+It allows users to compute the top-of-atmosphere lunar irradiance for any wavelength
+and observation geometry, either from precomputed Moon data, from geographic coordinates
+on Earth, or from custom observer kernels.
 
-It exports the following functions:
+Exports
+-------
+Classes
+    ELISettings
+        Configuration controlling correction factors, Apollo adjustment, and output units.
 
-    * get_eli_bypass - returns the expected extraterrestrial lunar irradiation of a wavelength for
-        any observer/solar selenographic coordinates.
-    * get_eli - returns the expected extraterrestrial lunar irradiation of a wavelength in any
-        geographic coordinates.
-    * get_eli_from_extra_kernels - returns the expected extraterrestrial lunar irradiation of
-        a wavelength in any geographic coordinates, using data from extra kernels for the
-        observer body.
+Functions
+    get_irradiance
+        Main entry point to compute the modeled extraterrestrial lunar irradiance.
 """
 
 from dataclasses import dataclass
-from typing import List, Union, Iterable
+from typing import List, Union, Iterable, overload
 
 import numpy as np
 from numpy.typing import NDArray
 
-from . import spice_iface, esi, elref
-from .types import MoonDatas
+from . import esi, elref
+from .types import MoonDatas, MissingRCFBehavior, EarthPoint
+from .geometry import resolve_mds
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class ELISettings:
     """
-    Settings that will modify the methodology of calculating the ELI
+    Settings controlling the methodology for calculating the Extraterrestrial Lunar Irradiance (ELI).
 
     Attributes
     ----------
-    apply_correction : bool
-        If True the result will have been multiplied by the RCF (Rimo Correction Factor),
-        which corrects the data for the photometers' calibration.
-        Otherwise it won't.
-    interpolate_rolo_coefficients : bool
-        If True the reflectance will be calculated linearly interpolating the ROLO coefficients.
-        Otherwise it will be calculated interpolating the surrounding reflectances, calculated
-        with empirical coefficients.
-    adjust_apollo : bool
-        If True the ROLO model reflectance will be adjusted using Apollo spectra, in case it's
-        calculated interpolating surrounding reflectances. The Apollo spectra is the spectra
-        generated with the Moon samples from Apollo 16th mission.
-    per_nm : bool
-        If True the ELI will be in Wm⁻²/nm, otherwise it will be in Wm⁻². Default is False.
+    apply_correction : bool, default False
+        If True, multiply the modeled irradiance by the RIMO Correction Factor (RCF) for
+        each CIMEL wavelength (empirical correction from Román et al. 2020). If False,
+        return the raw RIMO irradiance (no correction).
+    adjust_apollo : bool, default True
+        If True, adjust the ROLO model reflectance using Apollo spectra (derived from
+        Apollo 16 lunar samples).
+    per_nm : bool, default False
+        If True, output ELI in W·m⁻²·nm⁻¹. Otherwise, output in W·m⁻².
+    missing_rcf : MissingRCFBehavior, default MissingRCFBehavior.ERROR
+        Behavior when at least one requested wavelength has no RCF available and
+        `apply_correction` is True.
     """
-
     apply_correction: bool = False
-    interpolate_rolo_coefficients: bool = False
     adjust_apollo: bool = True
     per_nm: bool = False
-
-
-@dataclass
-class EarthPoint:
-    """
-    Data of the point on Earth surface of which the ELI will be calculated.
-
-    Attributes
-    ----------
-    lat : float
-        Geographic latitude (in degrees) of the location.
-    lon : float
-        Geographic longitude (in degrees) of the location.
-    utc_times : list of str | str
-        Time/s at which the ELI will be calculated, in a valid UTC DateTime format.
-    altitude : float
-        Altitude over the sea level in meters. Default = 0.
-    """
-
-    __slots__ = ["lat", "lon", "utc_times", "altitude"]
-
-    def __init__(
-        self,
-        lat: float,
-        lon: float,
-        utc_times: Union[List[str], str],
-        altitude: float = 0,
-    ):
-        """
-        Parameters
-        ----------
-        lat : float
-            Geographic latitude (in degrees) of the location.
-        lon : float
-            Geographic longitude (in degrees) of the location.
-        utc_times : list of str | str
-            Time/s at which the ELI will be calculated, in a valid UTC DateTime format.
-        altitude : float
-            Altitude over the sea level in meters. Default = 0.
-        """
-        self.lat = lat
-        self.lon = lon
-        self.altitude = altitude
-        if isinstance(utc_times, list):
-            self.utc_times = utc_times
-        else:
-            self.utc_times = [utc_times]
-
-    def set_utc_times(self, utc_times: Union[List[str], str]):
-        """
-        Modifies the utc_times attribute
-
-        Parameters
-        ----------
-        utc_times : list of str | str
-            Time/s at which the ELI will be calculated, in a valid UTC DateTime format.
-        """
-        if isinstance(utc_times, list):
-            self.utc_times = utc_times
-        else:
-            self.utc_times = [utc_times]
+    missing_rcf: MissingRCFBehavior = MissingRCFBehavior.ERROR
 
 
 def _get_esi(
@@ -177,79 +114,48 @@ def _calculate_eli(
         One array per amount of moon geometry. Then, each inner array has the
         amount of values as the amount of wavelengths.
     """
-    if not eli_settings.interpolate_rolo_coefficients:
-        a_l = elref.get_interpolated_reflectance(
-            wavelengths_nm,
-            mds,
-            eli_settings.apply_correction,
-            eli_settings.adjust_apollo,
-        )
-    else:
-        a_l = elref.get_reflectance_interpolating_coefficients(
-            wavelengths_nm,
-            mds,
-            eli_settings.apply_correction,
-        )
-
+    a_l = elref.get_reflectance(
+        wavelengths_nm,
+        mds=mds,
+        apply_correction=eli_settings.apply_correction,
+        missing_rcf=eli_settings.missing_rcf,
+        adjust_apollo=eli_settings.adjust_apollo,
+    )
     solid_angle_moon: float = 6.4177e-05
     omega = solid_angle_moon
     esk = _get_esi(esi_calc, wavelengths_nm, eli_settings)
     dsm = mds.dsm
     dom = mds.dom
     distance_earth_moon_km: int = 384400
-
     lunar_irr = (
-        ((a_l.T * omega * esk) / np.pi).T
+        ((a_l * omega * esk) / np.pi).T
         * ((1 / dsm) ** 2)
         * (distance_earth_moon_km / dom) ** 2
     )
-    return lunar_irr
+    return lunar_irr.T
 
 
-def get_eli_bypass(
+@overload
+def get_irradiance(
     wavelengths_nm: Iterable[float],
+    *,
     mds: MoonDatas,
     esi_calc: esi.ESICalculator = None,
     eli_settings: ELISettings = None,
-) -> NDArray[np.float32]:
-    """Calculation of Extraterrestrial Lunar Irradiance following Eq 3 in Roman et al., 2020
-
-    Allow users to simulate lunar observation for any observer/solar selenographic
-    latitude and longitude (thus bypassing the need for their computation from the
-    position/time of the observer).
-
-    Returns the data in Wm⁻²
-
-    Parameters
-    ----------
-    wavelengths_nm : iterable of float
-        Wavelengths (in nanometers) of which the extraterrestrial lunar irradiance will be
-        calculated.
-    mds : MoonDatas
-        Moon data needed to calculate Moon's irradiance
-    esi_calc : esi.ESICalculator
-        ESI Calculator that will be used in the calculation of the Extraterrestrial Solar
-        Irradiance. By default it will use a linearly interpolated Wehrli based one.
-    eli_settings : ELISettings
-        Configuration of the ELI calculation method.
-
-    Returns
-    -------
-    array of float
-        The extraterrestrial lunar irradiances calculated.
-        One array per amount of moon geometry. Then, each inner array has the
-        amount of values as the amount of wavelengths.
-    """
-    if eli_settings is None:
-        eli_settings = ELISettings()
-    if esi_calc is None:
-        esi_calc = esi.ESICalculatorWehrli()
-    elis = _calculate_eli(wavelengths_nm, mds, esi_calc, eli_settings)
-    return elis
-
-
-def get_eli_from_extra_kernels(
+) -> NDArray[np.float32]: ...
+@overload
+def get_irradiance(
     wavelengths_nm: Iterable[float],
+    *,
+    earth_data: EarthPoint,
+    kernels_path: str,
+    esi_calc: esi.ESICalculator = None,
+    eli_settings: ELISettings = None,
+) -> NDArray[np.float32]: ...
+@overload
+def get_irradiance(
+    wavelengths_nm: Iterable[float],
+    *,
     utc_times: Union[str, List[str]],
     kernels_path: str,
     extra_kernels: List[str],
@@ -257,102 +163,75 @@ def get_eli_from_extra_kernels(
     observer_name: str,
     esi_calc: esi.ESICalculator = None,
     eli_settings: ELISettings = None,
-) -> NDArray[np.float32]:
-    """Calculation of Extraterrestrial Lunar Irradiance from geographic coordinates
+) -> NDArray[np.float32]: ...
 
-    Allow users to simulate lunar observations for any observer position around the Earth
-    and at any time.
-
-    It loads the observer body data from custom extra kernels instead of generating it from
-    basic kernels.
-
-    Returns the data in Wm⁻²
-
-    Parameters
-    ----------
-    wavelengths_nm : iterable of float
-        Wavelengths (in nanometers) of which the extraterrestrial lunar irradiance will be
-        calculated.
-    utc_times: str | list of str
-        Time/s at which the ELI will be calculated, in a valid UTC DateTime format.
-    kernels_path : str
-        Folder where the needed SPICE kernels are stored.
-    extra_kernels: list of str
-        Custom kernels from which the observer body will be loaded, instead of calculating it.
-    extra_kernels_path: str
-        Folder where the extra kernels are located.
-    observer_name: str
-        Name of the body of the observer that will be loaded from the extra kernels.
-    esi_calc : esi.ESICalculator
-        ESI Calculator that will be used in the calculation of the Extraterrestrial Solar
-        Irradiance. By default it will use a linearly interpolated Wehrli based one.
-    eli_settings : ELISettings
-        Configuration of the ELI calculation method.
-
-    Returns
-    -------
-    array of float
-        The extraterrestrial lunar irradiances calculated.
-        One array per amount of moon geometry. Then, each inner array has the
-        amount of values as the amount of wavelengths. If there is only one moon geometry,
-        thus only one date inside `earth_data`, the wavelengths array will be presented
-        directly, reducing the dimensions by one.
-    """
-    mds = spice_iface.get_moon_datas_from_extra_kernels(
-        utc_times, kernels_path, extra_kernels, extra_kernels_path, observer_name
-    )
-    irradiances = get_eli_bypass(wavelengths_nm, mds, esi_calc, eli_settings)
-    if len(irradiances) == 1:
-        return irradiances[0]
-    return irradiances
-
-
-def get_eli(
+def get_irradiance(
     wavelengths_nm: Iterable[float],
-    earth_data: EarthPoint,
-    kernels_path: str,
+    *,
+    # source A: directly moon datas
+    mds: MoonDatas = None,
+    # source B: earth point + kernels path
+    earth_data: EarthPoint = None,
+    # shared B & C
+    kernels_path: str = None,
+    # source C: extra kernels
+    utc_times: Union[str, List[str]] = None,
+    extra_kernels: List[str] = None,
+    extra_kernels_path: str = None,
+    observer_name: str = None,
+    # common
     esi_calc: esi.ESICalculator = None,
     eli_settings: ELISettings = None,
 ) -> NDArray[np.float32]:
-    """Calculation of Extraterrestrial Lunar Irradiance from geographic coordinates
+    """
+    Compute the Extraterrestrial Lunar Irradiance (ELI) following Eq. 3 in Román et al. (2020).
 
-    Allow users to simulate lunar observations for any observer position around the Earth
-    and at any time.
+    This function calculates the modeled lunar irradiance at the top of the atmosphere for
+    a given set of wavelengths and observation geometry.  The geometry can be provided in
+    one of three equivalent ways:
 
-    Returns the data in Wm⁻²
+      - **A)** `mds`: precomputed lunar geometry (`MoonDatas`).
+      - **B)** `earth_data` + `kernels_path`: geographic coordinates and time(s) on Earth.
+      - **C)** `utc_times`, `kernels_path`, `extra_kernels`, `extra_kernels_path`, `observer_name`:
+        observer geometry defined by extra SPICE kernels.
 
     Parameters
     ----------
     wavelengths_nm : iterable of float
-        Wavelengths (in nanometers) of which the extraterrestrial lunar irradiance will be
-        calculated.
-    earth_data : EarthPoint
-        Data of the point on Earth surface of which the ELI will be calculated.
-    kernels_path : str
-        Folder where the needed SPICE kernels are stored.
-    esi_calc : esi.ESICalculator
-        ESI Calculator that will be used in the calculation of the Extraterrestrial Solar
-        Irradiance. By default it will use a linearly interpolated Wehrli based one.
-    eli_settings : ELISettings
-        Configuration of the ELI calculation method.
+        Wavelengths in nanometers at which to compute the extraterrestrial lunar irradiance.
+    mds : MoonDatas, optional
+        Precomputed Moon geometry and distances (source A).
+    earth_data : EarthPoint, optional
+        Geographic location and times of the observation (source B).
+    kernels_path : str, optional
+        Directory containing the required SPICE kernels.
+    utc_times : str or list of str, optional
+        UTC datetimes of the observation(s) (source C).
+    extra_kernels : list of str, optional
+        Filenames of additional SPICE kernels describing the observer body (source C).
+    extra_kernels_path : str, optional
+        Directory containing the extra kernels (source C).
+    observer_name : str, optional
+        Name of the observer body as defined in the extra kernels (source C).
+    esi_calc : esi.ESICalculator, optional
+        Calculator for the extraterrestrial solar irradiance.
+        Defaults to a linearly interpolated Wehrli-based implementation.
+    eli_settings : ELISettings, optional
+        Configuration controlling correction factors, Apollo adjustment, and output units.
 
     Returns
     -------
-    array of float
-        The extraterrestrial lunar irradiances calculated.
-        One array per amount of moon geometry. Then, each inner array has the
-        amount of values as the amount of wavelengths. If there is only one moon geometry,
-        thus only one date inside `earth_data`, the wavelengths array will be presented
-        directly, reducing the dimensions by one.
+    ndarray of float
+        Modeled extraterrestrial lunar irradiance in W·m⁻² (or W·m⁻²·nm⁻¹ if `per_nm=True` in
+        `ELISettings`).  The output has shape ``(N_geometries, N_wavelengths)``; if there is only
+        one geometry, the first dimension is squeezed and a one-dimensional array is returned.
     """
-    mds = spice_iface.get_moon_datas(
-        earth_data.lat,
-        earth_data.lon,
-        earth_data.altitude,
-        earth_data.utc_times,
-        kernels_path,
-    )
-    irradiances = get_eli_bypass(wavelengths_nm, mds, esi_calc, eli_settings)
+    if eli_settings is None:
+        eli_settings = ELISettings()
+    if esi_calc is None:
+        esi_calc = esi.ESICalculatorWehrli()
+    mds = resolve_mds(mds, earth_data, kernels_path, utc_times, extra_kernels, extra_kernels_path, observer_name)
+    irradiances = _calculate_eli(wavelengths_nm, mds, esi_calc, eli_settings)
     if len(irradiances) == 1:
         return irradiances[0]
     return irradiances

@@ -62,74 +62,106 @@ pip install rimopy
 
 ## Usage
 
-The main function is `eli.get_eli`. It returns the extraterrestrial
-lunar irradiance for a set of wavelengths in nanometers. This irradiance is
-calculated at a specific location on Earth's surface, for a set of date and time instants.
-It returns the irradiance in Wm⁻² or in Wm⁻²/nm, depending on the configuration.
+The main entry point is `eli.get_irradiance`. It returns the modeled **extraterrestrial lunar irradiance (ELI)**
+for one or more wavelengths (in nanometers) and observation geometries.
+The irradiance is calculated at the top of the atmosphere and can be returned either in Wm⁻² or Wm⁻²/nm, depending on the configuration.
 
-In order to calculate the extraterrestrial lunar irradiance per nm for 500 and 550 nm at the city of
-Valladolid, the morning of the 2022-01-17, one would do something like the following code block:
+For example, to compute the irradiance per nanometer at 500 nm and 550 nm for Valladolid (Spain) on 2022-01-17 at 03:00 UTC:
 
 ```python
 from rimopy import eli
 
 wavelengths = [500, 550]
-full_moon_Valladolid = eli.EarthPoint(41.652251, -4.7245321, "2022-01-17 03:00:00", 700)
+earth_point = eli.EarthPoint(41.652251, -4.7245321, "2022-01-17 03:00:00", altitude=700)
 kernels_path = "./kernels"
 eli_settings = eli.ELISettings(per_nm=True)
-result = eli.get_eli(wavelengths, full_moon_Valladolid, kernels_path, eli_settings=eli_settings)
+
+result = eli.get_irradiance(
+    wavelengths,
+    earth_data=earth_point,
+    kernels_path=kernels_path,
+    eli_settings=eli_settings,
+)
 
 # result:
 # array([[3.05176826e-06],
-#       [3.25669721e-06]])
+#        [3.25669721e-06]])
 ```
 
-These calculations can be customized, defining the settings and the methods used for the calculation of
-the extraterrestrial solar irradiance. For example, if someone wanted to calculate the lunar irradiance per nm
-applying the RIMO correction factor, and with a different source data for the extraterrestrial solar irradiance,
-in this case the original Wehrli 1985 data, something like the following code block would do the work:
+### Customization
+
+The calculations can be customized via the `ELISettings` and the choice of the extraterrestrial solar irradiance (ESI) model.
+For example, to calculate irradiance per nanometer applying the RIMO correction factor (`apply_correction=True`) and using
+the original Wehrli (1985) dataset for solar irradiance:
+
 ```python
-from rimopy import esi
+from rimopy import eli, esi
+from rimopy.types import MissingRCFBehavior
 
 wavelengths = [500, 550]
-calc = esi.ESICalculatorWehrli(esi.WehrliFile.ORIGINAL_WEHRLI, esi.ESIMethod.LINEAR_INTERPOLATION)
-eli_settings = eli.ELISettings(True, False, True, True)
-result = eli.get_eli(wavelengths, full_moon_Valladolid, kernels_path, calc, eli_settings)
+earth_point = eli.EarthPoint(41.652251, -4.7245321, "2022-01-17 03:00:00", altitude=700)
+kernels_path = "./kernels"
 
+calc = esi.ESICalculatorWehrli(
+    esi.WehrliFile.ORIGINAL_WEHRLI,
+    esi.ESIMethod.LINEAR_INTERPOLATION,
+)
+
+eli_settings = eli.ELISettings(
+    apply_correction=True,
+    adjust_apollo=True,
+    per_nm=True,
+    missing_rcf=MissingRCFBehavior.WARN,
+)
+
+result = eli.get_irradiance(
+    wavelengths,
+    earth_data=earth_point,
+    kernels_path=kernels_path,
+    esi_calc=calc,
+    eli_settings=eli_settings,
+)
+
+# WARNING:root:RCF not available for the wavelengths: [550.0]
 # result:
 # array([[3.29045832e-06],
-#       [3.52460413e-06]])
+#        [3.25669721e-06]])
 ```
 
-### Main functions
+### Main function
 
-The most important functions are the ones that obtain the extraterrestrial lunar irradiance, so they
-are all contained in the **eli** module.
+All high-level irradiance calculations are performed through **`eli.get_irradiance`**.
+It automatically handles all geometry input modes:
+- Precomputed `MoonDatas`
+- Geographic coordinates (`EarthPoint` + kernels)
+- Extra observer kernels
 
-* **get_eli_bypass** - returns the expected extraterrestrial lunar irradiation of a wavelength for
-any observer and solar selenographic coordinates.
-* **get_eli** - returns the expected extraterrestrial lunar irradiation of a wavelength in any
-geographic coordinates.
-* **get_eli_from_extra_kernels** - returns the expected extraterrestrial lunar irradiation of
-a wavelength in any geographic coordinates, using data from extra kernels for the
-observer body.
 
 ### Configuration options
 
 **ELISettings**
 
-`ELISettings` is a dataclass that contains settings that will modify the methodology of calculating the ELI.
+`ELISettings` is a dataclass containing the configuration parameters that control
+how the Extraterrestrial Lunar Irradiance (ELI) is calculated.
 
-These settings are:
-- **apply_correction**: If True the result will have been multiplied by the RCF (Rimo Correction Factor),
-which corrects the data for the photometers' calibration. Otherwise it won't. The default value is *False*.
-- **interpolate_rolo_coefficients**: If True the reflectance will be calculated linearly interpolating
-the ROLO coefficients. Otherwise it will be calculated interpolating the surrounding reflectances,
-calculated with empirical coefficients. The default value is *False*.
-- **adjust_apollo**: If True the ROLO model reflectance will be adjusted using Apollo spectra, in case
-it's calculated interpolating surrounding reflectances. The Apollo spectra is the spectra generated
-with the Moon samples from Apollo 16th mission. The default value is *True*.
-- **per_nm** : If True the ELI will be in Wm⁻²/nm, otherwise it will be in Wm⁻². Default is *False*.
+**Attributes:**
+- **apply_correction** : `bool`, default *False*
+  If `True`, multiply the modeled irradiance by the RIMO Correction Factor (RCF)
+  for each CIMEL wavelength (i.e., apply the empirical correction derived in Román et al. 2020).
+  If `False`, return the raw RIMO irradiance (no correction).
+- **adjust_apollo** : `bool`, default *True*
+  If `True`, adjust the ROLO model reflectance using Apollo spectra.
+  The Apollo spectra were obtained from lunar samples of the Apollo 16 mission.
+- **per_nm** : `bool`, default *False*
+  If `True`, the output ELI is given in `W·m^-2·nm^-1`; otherwise, it is given in `W·m^-2`.
+- **missing_rcf** : `MissingRCFBehavior`, default `MissingRCFBehavior.ERROR`
+  Behavior when at least one requested wavelength has no RCF available and
+  `apply_correction` is `True`.
+  - `MissingRCFBehavior.ERROR` - raise a `ValueError` listing the offending wavelengths.
+  - `MissingRCFBehavior.WARN` - issue a warning and return uncorrected values for those wavelengths.
+  - `MissingRCFBehavior.IGNORE` - silently return uncorrected values for those wavelengths.
+  - `MissingRCFBehavior.INTERPOLATE` - linearly interpolate the coefficients for non-present wavelengths.
+
 
 **ESICalculator**
 
@@ -140,7 +172,7 @@ Currently there's only one implementation: `ESICalculatorWehrli`. Its attributes
 - **wehrli_file**: Wehrli data source that will be used in the calculation of the ESI. It could be the original
 data or some filtered data. The default value is "ASC_WEHRLI", the Wehrli data passed throught some filters, and it's
 the one used in AEMET's RimoApp and others. Although it's the default value, it might not be the best for obtaining
-"Wm⁻²" data (**get_eli()**), as in this file the solar irradiance in "Wm⁻²" is obtained from the "Wm⁻²/nm" data, instead of
+"Wm⁻²" data, as in this file the solar irradiance in "Wm⁻²" is obtained from the "Wm⁻²/nm" data, instead of
 having passed the original "Wm⁻²" data through the same filters.
 - **method**: Interpolation method that will be used in the calculation of the ESI. The default one is "LINEAR_INTERPOLATION".
 - **gaussian_filter_params**: Parameters for the gaussian filter method, in case that that one is the chosen one. It contains
@@ -149,9 +181,11 @@ the radius and the standard deviation, which by default both are equal to one.
 
 ## Roadmap
 
-- [ ] Adding tests based on AEMET RimoApp output that don't require to compute the lunar geometries (have them precomputed
-- [ ] Adding unit tests for every submodule.
-- [ ] Adding a TSIS-based ESICalculator implementation.
+- [ ] Add validation tests based on AEMET RimoApp output using precomputed lunar geometries
+  to remove the need for SPICE kernels during testing.
+- [ ] Add validation tests based on CAELIS RIMO implementation.
+- [ ] Add unit tests for all submodules.
+- [ ] Implement a TSIS-based `ESICalculator`.
 
 ## Structure
 
@@ -163,7 +197,8 @@ functionalities:
 - **esi**: Calculates the Extraterrestrial Solar Irradiance using data from Wehrli 1985. The methodology for calculating this data
 can be chosen by the user, creating an instance of ESICalculator selecting the methodology and data source they want.
 - **coefficients**: Contains the coefficient data from the ROLO model.
-- **correction_factor**: Calculates the correction factor as stated in RIMO papers.
+- **correction_factor**: Calculates the RIMO correction factor (RCF) as stated in RIMO papers.
+- **geometry**: Manages the conversion between the different accepted geometry inputs to the standard `MoonDatas`.
 - **spice_iface**: Encapsulates the access to functionalities from SPICE Toolbox.
 - **types**: Contains types, like MoonData class, which represents some of the needed data
 for the calculation of extraterrestrial lunar irradiance.

@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "rimopy"
 dynamic = ["version"]
-description = "ROLO Implementation for Moon Observation (RIMO), in Python"
+description = "ROLO Implementation for Moon photometry Observation (RIMO), in Python"
 readme = "README.md"
 license = "LGPL-3.0-only"
 license-files = ["LICENSE"]

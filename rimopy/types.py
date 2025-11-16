@@ -5,9 +5,13 @@ extraterrestrial lunar irradiance. The data is probably obtained from NASA's SPI
 
 It exports the following classes:
     * MoonDatas - Moon data needed to calculate Moon's irradiance.
+    * MissingRCFBehavior - Enum with the options to do when an RCF is missing for a wavelength.
+    * EarthPoint - Data of the point on Earth surface of which RIMO will be computed.
 """
 
-from typing import Iterable
+from typing import Iterable, Union, List
+from dataclasses import dataclass
+from enum import Enum
 
 import numpy as np
 from numpy.typing import NDArray
@@ -69,3 +73,72 @@ class MoonDatas:
 
     def get_moondata(self, i) -> NDArray[np.float32]:
         return self._data[:, i]
+
+
+class MissingRCFBehavior(str, Enum):
+    """What to do when an RCF is missing for a wavelength."""
+    ERROR = "error"   # raise ValueError
+    WARN = "warn"     # issue a warning, return uncorrected values
+    IGNORE = "ignore" # silently return uncorrected values
+    INTERPOLATE = "interpolate" # linearly interpolate the coefficients for non-present wavelengths
+
+
+@dataclass
+class EarthPoint:
+    """
+    Data of the point on Earth surface of which the ELI will be calculated.
+
+    Attributes
+    ----------
+    lat : float
+        Geographic latitude (in degrees) of the location.
+    lon : float
+        Geographic longitude (in degrees) of the location.
+    utc_times : list of str | str
+        Time/s at which the ELI will be calculated, in a valid UTC DateTime format.
+    altitude : float
+        Altitude over the sea level in meters. Default = 0.
+    """
+
+    __slots__ = ["lat", "lon", "utc_times", "altitude"]
+
+    def __init__(
+        self,
+        lat: float,
+        lon: float,
+        utc_times: Union[List[str], str],
+        altitude: float = 0,
+    ):
+        """
+        Parameters
+        ----------
+        lat : float
+            Geographic latitude (in degrees) of the location.
+        lon : float
+            Geographic longitude (in degrees) of the location.
+        utc_times : list of str | str
+            Time/s at which the ELI will be calculated, in a valid UTC DateTime format.
+        altitude : float
+            Altitude over the sea level in meters. Default = 0.
+        """
+        self.lat = lat
+        self.lon = lon
+        self.altitude = altitude
+        if isinstance(utc_times, list):
+            self.utc_times = utc_times
+        else:
+            self.utc_times = [utc_times]
+
+    def set_utc_times(self, utc_times: Union[List[str], str]):
+        """
+        Modifies the utc_times attribute
+
+        Parameters
+        ----------
+        utc_times : list of str | str
+            Time/s at which the ELI will be calculated, in a valid UTC DateTime format.
+        """
+        if isinstance(utc_times, list):
+            self.utc_times = utc_times
+        else:
+            self.utc_times = [utc_times]
