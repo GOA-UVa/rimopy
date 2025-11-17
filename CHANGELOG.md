@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased] - yyyy-mm-dd
 
+### Added
+
+- Implemented `ESICalculatorCustom` which allowes the user to load any ESI spectrum they want to use,
+  and linearly interpolate for the desired wavelengths.
+
 ### Changed
 - Set default value of `apply_correction` in `elref.get_reflectance` to `False` (previously `True`),
   to be aligned with the default values in `ELISettings`.

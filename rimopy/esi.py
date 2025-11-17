@@ -368,3 +368,71 @@ class ESICalculatorWehrli(ESICalculator):
         ):  # There was no wehrli data near enough from the given wavelength_nm
             return _linear_interpolation(wavelengths_nm, wehrli_x, wehrli_y)
         return gauss_res
+
+
+class ESICalculatorCustom(ESICalculator):
+    """
+    Calculator of Extraterrestrial Solar Irradiance.
+    Based on a custom spectrum and linear interpolation.
+
+    Attributes
+    ----------
+    wavelengths_nm: array-like of float
+        Wavelengths of the custom spectrum
+    irradiances: array-like of float
+        Extraterrestrial solar irradiances for each wavelength in `wavelengths_nm`, in Wm⁻².
+    """
+
+    def __init__(
+        self,
+        wavelengths_nm: List[float],
+        irradiances: List[float],
+        per_nm: bool = False,
+    ):
+        """
+        Parameters
+        ----------
+        wavelengths_nm: list of float
+            Wavelengths of the custom spectrum
+        irradiances: list of float
+            Extraterrestrial solar irradiances for each wavelength in `wavelengths_nm`.
+            Its units (Wm⁻² or Wm⁻²/nm) depends on `per_nm`.
+        per_nm: bool
+            If True, `irradiances` must be specified in Wm⁻²/nm. If False, in Wm⁻².
+            Default is False.
+        """
+        if len(wavelengths_nm) != len(irradiances):
+            raise ValueError()
+        self.wavelengths_nm = np.asarray(wavelengths_nm)
+        self.irradiances = np.asarray(irradiances)
+        idx = np.argsort(self.wavelengths_nm)
+        self.wavelengths_nm = self.wavelengths_nm[idx]
+        self.irradiances = self.irradiances[idx]
+        if per_nm:
+            self.irradiances *= self.wavelengths_nm
+
+    def get_esi(
+        self, wavelengths_nm: Iterable[float], per_nm: bool = False
+    ) -> NDArray[np.float32]:
+        """Gets the expected extraterrestrial solar irradiance at a concrete wavelength
+        Returns the data in Wm⁻² or Wm⁻²/nm
+
+        Parameters
+        ----------
+        wavelengths_nm : iterable of float
+            Wavelengths (in nanometers) of which the extraterrestrial solar irradiance will be
+            obtained
+        per_nm : bool
+            If True the irradiance will be in Wm⁻²/nm, otherwise it will be in Wm⁻².
+            Default is False.
+
+        Returns
+        -------
+        np.array of float
+            The expected extraterrestrial solar irradiance
+        """
+        x = self.wavelengths_nm
+        y = self.irradiances
+        if per_nm:
+            y = y / x
+        return _linear_interpolation(wavelengths_nm, x, y)
