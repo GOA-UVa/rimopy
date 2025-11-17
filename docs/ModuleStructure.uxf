@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<diagram program="umlet" version="15.1">
-  <zoom_level>11</zoom_level>
+<diagram program="umlet" version="15.0.0">
+  <zoom_level>8</zoom_level>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>418</x>
-      <y>77</y>
-      <w>110</w>
-      <h>44</h>
+      <x>640</x>
+      <y>232</y>
+      <w>80</w>
+      <h>32</h>
     </coordinates>
     <panel_attributes>**MoonDatas**
 layer=1
@@ -18,10 +18,10 @@ valign=center</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>220</x>
-      <y>187</y>
-      <w>176</w>
-      <h>297</h>
+      <x>488</x>
+      <y>312</y>
+      <w>128</w>
+      <h>216</h>
     </coordinates>
     <panel_attributes>lt=.&gt;
 &lt;&lt;import&gt;&gt;</panel_attributes>
@@ -30,10 +30,10 @@ valign=center</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>561</x>
-      <y>671</y>
-      <w>154</w>
-      <h>44</h>
+      <x>736</x>
+      <y>664</y>
+      <w>112</w>
+      <h>32</h>
     </coordinates>
     <panel_attributes>&lt;&lt;interface&gt;&gt;
 **ESICalculator**
@@ -44,10 +44,10 @@ bg=yellow</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>759</x>
-      <y>671</y>
-      <w>132</w>
-      <h>44</h>
+      <x>880</x>
+      <y>664</y>
+      <w>96</w>
+      <h>32</h>
     </coordinates>
     <panel_attributes>&lt;&lt;enum&gt;&gt;
 **WehrliFile**
@@ -58,10 +58,10 @@ bg=yellow</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>759</x>
-      <y>726</y>
-      <w>132</w>
-      <h>44</h>
+      <x>880</x>
+      <y>704</y>
+      <w>96</w>
+      <h>32</h>
     </coordinates>
     <panel_attributes>&lt;&lt;enum&gt;&gt;
 **ESIMethod**
@@ -72,10 +72,10 @@ bg=yellow</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>748</x>
-      <y>781</y>
-      <w>154</w>
-      <h>66</h>
+      <x>872</x>
+      <y>744</y>
+      <w>112</w>
+      <h>48</h>
     </coordinates>
     <panel_attributes>&lt;&lt;dataclass&gt;&gt;
 **GaussianFilter**
@@ -87,10 +87,10 @@ bg=yellow</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>132</x>
-      <y>484</y>
-      <w>121</w>
-      <h>44</h>
+      <x>424</x>
+      <y>528</y>
+      <w>88</w>
+      <h>32</h>
     </coordinates>
     <panel_attributes>&lt;&lt;dataclass&gt;&gt;
 **ELISettings**
@@ -101,10 +101,10 @@ bg=yellow</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>880</x>
-      <y>462</y>
-      <w>176</w>
-      <h>44</h>
+      <x>968</x>
+      <y>512</y>
+      <w>128</w>
+      <h>32</h>
     </coordinates>
     <panel_attributes>&lt;&lt;dataclass&gt;&gt;
 **CorrectionParams**
@@ -115,10 +115,10 @@ bg=yellow</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>275</x>
-      <y>440</y>
-      <w>275</w>
-      <h>99</h>
+      <x>528</x>
+      <y>496</y>
+      <w>200</w>
+      <h>72</h>
     </coordinates>
     <panel_attributes>lt=.&gt;
 m1=&lt;&lt;import&gt;&gt;</panel_attributes>
@@ -127,10 +127,10 @@ m1=&lt;&lt;import&gt;&gt;</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>374</x>
-      <y>561</y>
-      <w>176</w>
-      <h>33</h>
+      <x>600</x>
+      <y>584</y>
+      <w>128</w>
+      <h>24</h>
     </coordinates>
     <panel_attributes>lt=.&gt;</panel_attributes>
     <additional_attributes>10.0;10.0;140.0;10.0</additional_attributes>
@@ -138,10 +138,10 @@ m1=&lt;&lt;import&gt;&gt;</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>374</x>
-      <y>495</y>
-      <w>176</w>
-      <h>231</h>
+      <x>600</x>
+      <y>536</y>
+      <w>128</w>
+      <h>168</h>
     </coordinates>
     <panel_attributes>lt=.&gt;</panel_attributes>
     <additional_attributes>10.0;10.0;10.0;190.0;140.0;190.0</additional_attributes>
@@ -149,10 +149,10 @@ m1=&lt;&lt;import&gt;&gt;</panel_attributes>
   <element>
     <id>UMLPackage</id>
     <coordinates>
-      <x>99</x>
-      <y>440</y>
-      <w>187</w>
-      <h>110</h>
+      <x>400</x>
+      <y>496</y>
+      <w>136</w>
+      <h>80</h>
     </coordinates>
     <panel_attributes>*eli*
 --
@@ -163,10 +163,10 @@ halign=left</panel_attributes>
   <element>
     <id>UMLPackage</id>
     <coordinates>
-      <x>374</x>
-      <y>44</y>
-      <w>198</w>
-      <h>198</h>
+      <x>600</x>
+      <y>208</y>
+      <w>160</w>
+      <h>144</h>
     </coordinates>
     <panel_attributes>*types*
 --
@@ -177,10 +177,10 @@ halign=left</panel_attributes>
   <element>
     <id>UMLPackage</id>
     <coordinates>
-      <x>528</x>
-      <y>418</y>
-      <w>165</w>
-      <h>77</h>
+      <x>712</x>
+      <y>480</y>
+      <w>120</w>
+      <h>56</h>
     </coordinates>
     <panel_attributes>*geometry*
 bg=yellow</panel_attributes>
@@ -189,22 +189,22 @@ bg=yellow</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>561</x>
-      <y>187</y>
-      <w>253</w>
-      <h>308</h>
+      <x>752</x>
+      <y>312</y>
+      <w>168</w>
+      <h>224</h>
     </coordinates>
     <panel_attributes>lt=.&gt;
 m1=    &lt;&lt;import&gt;&gt;</panel_attributes>
-    <additional_attributes>120.0;250.0;150.0;250.0;150.0;10.0;10.0;10.0</additional_attributes>
+    <additional_attributes>100.0;250.0;130.0;250.0;130.0;10.0;10.0;10.0</additional_attributes>
   </element>
   <element>
     <id>UMLPackage</id>
     <coordinates>
-      <x>858</x>
-      <y>429</y>
-      <w>220</w>
-      <h>88</h>
+      <x>952</x>
+      <y>488</y>
+      <w>160</w>
+      <h>64</h>
     </coordinates>
     <panel_attributes>*correction_factor*
 bg=yellow</panel_attributes>
@@ -213,10 +213,10 @@ bg=yellow</panel_attributes>
   <element>
     <id>UMLPackage</id>
     <coordinates>
-      <x>858</x>
-      <y>539</y>
-      <w>198</w>
-      <h>66</h>
+      <x>952</x>
+      <y>568</y>
+      <w>144</w>
+      <h>48</h>
     </coordinates>
     <panel_attributes>*coefficients*
 bg=yellow</panel_attributes>
@@ -225,10 +225,10 @@ bg=yellow</panel_attributes>
   <element>
     <id>UMLPackage</id>
     <coordinates>
-      <x>528</x>
-      <y>627</y>
-      <w>385</w>
-      <h>231</h>
+      <x>712</x>
+      <y>632</y>
+      <w>280</w>
+      <h>184</h>
     </coordinates>
     <panel_attributes>*esi*
 bg=yellow</panel_attributes>
@@ -237,10 +237,10 @@ bg=yellow</panel_attributes>
   <element>
     <id>UMLPackage</id>
     <coordinates>
-      <x>528</x>
-      <y>517</y>
-      <w>165</w>
-      <h>88</h>
+      <x>712</x>
+      <y>552</y>
+      <w>120</w>
+      <h>64</h>
     </coordinates>
     <panel_attributes>*elref*
 bg=yellow</panel_attributes>
@@ -249,10 +249,10 @@ bg=yellow</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>561</x>
-      <y>759</y>
-      <w>154</w>
-      <h>55</h>
+      <x>736</x>
+      <y>720</y>
+      <w>112</w>
+      <h>40</h>
     </coordinates>
     <panel_attributes>**ESICalculator**
 **Wehrli**
@@ -264,21 +264,21 @@ valign=center</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>627</x>
-      <y>704</y>
-      <w>33</w>
-      <h>77</h>
+      <x>784</x>
+      <y>688</y>
+      <w>24</w>
+      <h>48</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;.</panel_attributes>
-    <additional_attributes>10.0;10.0;10.0;50.0</additional_attributes>
+    <additional_attributes>10.0;10.0;10.0;40.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>682</x>
-      <y>473</y>
-      <w>198</w>
-      <h>132</h>
+      <x>824</x>
+      <y>520</y>
+      <w>144</w>
+      <h>96</h>
     </coordinates>
     <panel_attributes>lt=.&gt;
 m1=&lt;&lt;import&gt;&gt;</panel_attributes>
@@ -287,10 +287,10 @@ m1=&lt;&lt;import&gt;&gt;</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>803</x>
-      <y>561</y>
-      <w>77</w>
-      <h>44</h>
+      <x>912</x>
+      <y>584</y>
+      <w>56</w>
+      <h>32</h>
     </coordinates>
     <panel_attributes>lt=&lt;.</panel_attributes>
     <additional_attributes>50.0;20.0;10.0;20.0;10.0;10.0</additional_attributes>
@@ -298,10 +298,10 @@ m1=&lt;&lt;import&gt;&gt;</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>385</x>
-      <y>187</y>
-      <w>176</w>
-      <h>44</h>
+      <x>608</x>
+      <y>312</y>
+      <w>136</w>
+      <h>32</h>
     </coordinates>
     <panel_attributes>&lt;&lt;enum&gt;&gt;
 **MissingRCFBehavior**
@@ -313,10 +313,10 @@ valign=center</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>616</x>
-      <y>484</y>
-      <w>99</w>
-      <h>77</h>
+      <x>776</x>
+      <y>528</y>
+      <w>72</w>
+      <h>56</h>
     </coordinates>
     <panel_attributes>lt=.&gt;
 m1=&lt;&lt;import&gt;&gt;</panel_attributes>
@@ -325,10 +325,10 @@ m1=&lt;&lt;import&gt;&gt;</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>407</x>
-      <y>132</y>
-      <w>132</w>
-      <h>44</h>
+      <x>632</x>
+      <y>272</y>
+      <w>96</w>
+      <h>32</h>
     </coordinates>
     <panel_attributes>&lt;&lt;dataclass&gt;&gt;
 **EarthPoint**
@@ -339,10 +339,10 @@ bg=yellow</panel_attributes>
   <element>
     <id>UMLPackage</id>
     <coordinates>
-      <x>528</x>
-      <y>319</y>
-      <w>132</w>
-      <h>77</h>
+      <x>712</x>
+      <y>408</y>
+      <w>96</w>
+      <h>56</h>
     </coordinates>
     <panel_attributes>*spice_iface*
 bg=yellow</panel_attributes>
@@ -351,10 +351,10 @@ bg=yellow</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>616</x>
-      <y>385</y>
-      <w>99</w>
-      <h>77</h>
+      <x>776</x>
+      <y>456</y>
+      <w>72</w>
+      <h>56</h>
     </coordinates>
     <panel_attributes>lt=.&gt;
 m1=&lt;&lt;import&gt;&gt;</panel_attributes>
@@ -363,10 +363,10 @@ m1=&lt;&lt;import&gt;&gt;</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>539</x>
-      <y>231</y>
-      <w>99</w>
-      <h>110</h>
+      <x>720</x>
+      <y>344</y>
+      <w>72</w>
+      <h>80</h>
     </coordinates>
     <panel_attributes>lt=.&gt;
 &lt;&lt;import&gt;&gt;</panel_attributes>
@@ -375,10 +375,10 @@ m1=&lt;&lt;import&gt;&gt;</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>682</x>
-      <y>451</y>
-      <w>66</w>
-      <h>121</h>
+      <x>824</x>
+      <y>504</y>
+      <w>48</w>
+      <h>88</h>
     </coordinates>
     <panel_attributes>lt=.</panel_attributes>
     <additional_attributes>10.0;90.0;40.0;90.0;40.0;10.0</additional_attributes>
@@ -386,12 +386,38 @@ m1=&lt;&lt;import&gt;&gt;</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>715</x>
-      <y>451</y>
-      <w>165</w>
-      <h>33</h>
+      <x>848</x>
+      <y>504</y>
+      <w>120</w>
+      <h>24</h>
     </coordinates>
     <panel_attributes>lt=.</panel_attributes>
     <additional_attributes>130.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>736</x>
+      <y>768</y>
+      <w>112</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>**ESICalculator**
+**Custom**
+layer=1
+bg=yellow
+valign=center</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>720</x>
+      <y>704</y>
+      <w>88</w>
+      <h>96</h>
+    </coordinates>
+    <panel_attributes>lt=.</panel_attributes>
+    <additional_attributes>90.0;10.0;10.0;10.0;10.0;100.0;20.0;100.0</additional_attributes>
   </element>
 </diagram>
