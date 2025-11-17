@@ -228,20 +228,26 @@ def get_reflectance(
     wavelengths_nm: Iterable[float],
     *,
     mds: MoonDatas,
-    apply_correction: bool = True,
+    apply_correction: bool = False,
     missing_rcf: MissingRCFBehavior = MissingRCFBehavior.ERROR,
     adjust_apollo: bool = True,
-) -> NDArray[np.float32]: ...
+) -> NDArray[np.float32]:
+    ...
+
+
 @overload
 def get_reflectance(
     wavelengths_nm: Iterable[float],
     *,
     earth_data: EarthPoint,
     kernels_path: str,
-    apply_correction: bool = True,
+    apply_correction: bool = False,
     missing_rcf: MissingRCFBehavior = MissingRCFBehavior.ERROR,
     adjust_apollo: bool = True,
-) -> NDArray[np.float32]: ...
+) -> NDArray[np.float32]:
+    ...
+
+
 @overload
 def get_reflectance(
     wavelengths_nm: Iterable[float],
@@ -251,10 +257,12 @@ def get_reflectance(
     extra_kernels: List[str],
     extra_kernels_path: str,
     observer_name: str,
-    apply_correction: bool = True,
+    apply_correction: bool = False,
     missing_rcf: MissingRCFBehavior = MissingRCFBehavior.ERROR,
     adjust_apollo: bool = True,
-) -> NDArray[np.float32]: ...
+) -> NDArray[np.float32]:
+    ...
+
 
 def get_reflectance(
     wavelengths_nm: Iterable[float],
@@ -271,7 +279,7 @@ def get_reflectance(
     extra_kernels_path: str = None,
     observer_name: str = None,
     # common
-    apply_correction: bool = True,
+    apply_correction: bool = False,
     missing_rcf: MissingRCFBehavior = MissingRCFBehavior.ERROR,
     adjust_apollo: bool = True,
 ) -> NDArray[np.float32]:
@@ -322,7 +330,15 @@ def get_reflectance(
         The output has shape ``(N_geometries, N_wavelengths)``; if there is only one geometry,
         the first dimension is squeezed and a 1-D array of wavelengths is returned.
     """
-    mds = resolve_mds(mds, earth_data, kernels_path, utc_times, extra_kernels, extra_kernels_path, observer_name)
+    mds = resolve_mds(
+        mds,
+        earth_data,
+        kernels_path,
+        utc_times,
+        extra_kernels,
+        extra_kernels_path,
+        observer_name,
+    )
     wavelengths_nm = np.array(wavelengths_nm)
     a_l = _interpolated_moon_disk_reflectance(wavelengths_nm, mds, adjust_apollo)
     if apply_correction:

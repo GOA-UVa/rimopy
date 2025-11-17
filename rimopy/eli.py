@@ -30,10 +30,10 @@ from .types import MoonDatas, MissingRCFBehavior, EarthPoint
 from .geometry import resolve_mds
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class ELISettings:
     """
-    Settings controlling the methodology for calculating the Extraterrestrial Lunar Irradiance (ELI).
+    Settings of the methodology for calculating the Extraterrestrial Lunar Irradiance (ELI).
 
     Attributes
     ----------
@@ -50,6 +50,7 @@ class ELISettings:
         Behavior when at least one requested wavelength has no RCF available and
         `apply_correction` is True.
     """
+
     apply_correction: bool = False
     adjust_apollo: bool = True
     per_nm: bool = False
@@ -142,7 +143,10 @@ def get_irradiance(
     mds: MoonDatas,
     esi_calc: esi.ESICalculator = None,
     eli_settings: ELISettings = None,
-) -> NDArray[np.float32]: ...
+) -> NDArray[np.float32]:
+    ...
+
+
 @overload
 def get_irradiance(
     wavelengths_nm: Iterable[float],
@@ -151,7 +155,10 @@ def get_irradiance(
     kernels_path: str,
     esi_calc: esi.ESICalculator = None,
     eli_settings: ELISettings = None,
-) -> NDArray[np.float32]: ...
+) -> NDArray[np.float32]:
+    ...
+
+
 @overload
 def get_irradiance(
     wavelengths_nm: Iterable[float],
@@ -163,7 +170,9 @@ def get_irradiance(
     observer_name: str,
     esi_calc: esi.ESICalculator = None,
     eli_settings: ELISettings = None,
-) -> NDArray[np.float32]: ...
+) -> NDArray[np.float32]:
+    ...
+
 
 def get_irradiance(
     wavelengths_nm: Iterable[float],
@@ -230,7 +239,15 @@ def get_irradiance(
         eli_settings = ELISettings()
     if esi_calc is None:
         esi_calc = esi.ESICalculatorWehrli()
-    mds = resolve_mds(mds, earth_data, kernels_path, utc_times, extra_kernels, extra_kernels_path, observer_name)
+    mds = resolve_mds(
+        mds,
+        earth_data,
+        kernels_path,
+        utc_times,
+        extra_kernels,
+        extra_kernels_path,
+        observer_name,
+    )
     irradiances = _calculate_eli(wavelengths_nm, mds, esi_calc, eli_settings)
     if len(irradiances) == 1:
         return irradiances[0]

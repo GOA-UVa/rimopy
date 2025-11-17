@@ -8,6 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [//]: # "## [unreleased] - yyyy-mm-dd"
 
 
+## [unreleased] - yyyy-mm-dd
+
+### Changed
+- Set default value of `apply_correction` in `elref.get_reflectance` to `False` (previously `True`),
+  to be aligned with the default values in `ELISettings`.
+
+### Fixed
+- Removed `slots=True` from `ELISettings` dataclass annotation to restore compatibility with Python 3.8 and 3.9.
+
+
 ## [0.4.0] - 2025-11-16
 
 ### Added
