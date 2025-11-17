@@ -402,7 +402,10 @@ class ESICalculatorCustom(ESICalculator):
             Default is False.
         """
         if len(wavelengths_nm) != len(irradiances):
-            raise ValueError()
+            raise ValueError(
+                "`wavelengths_nm` and `irradiances` have different lengths: "
+                f"{len(wavelengths_nm)} vs {len(irradiances)}"
+            )
         self.wavelengths_nm = np.asarray(wavelengths_nm)
         self.irradiances = np.asarray(irradiances)
         idx = np.argsort(self.wavelengths_nm)
