@@ -168,7 +168,9 @@ how the Extraterrestrial Lunar Irradiance (ELI) is calculated.
 `ESICalculator` is the interface of which implementations contain the functions that calculate the extraterrestrial
 solar irradiance. This calculations will vary depending on the implementation.
 
-Currently there's only one implementation: `ESICalculatorWehrli`. Its attributes are:
+Currently there are two implementations: `ESICalculatorWehrli` and `ESICalculatorCustom`.
+
+`ESICalculatorWehrli` uses 1985 Wehrli Standard Extraterrestrial Solar Irradiance Spectrum as the base data. Its attributes are:
 - **wehrli_file**: Wehrli data source that will be used in the calculation of the ESI. It could be the original
 data or some filtered data. The default value is "ASC_WEHRLI", the Wehrli data passed throught some filters, and it's
 the one used in AEMET's RimoApp and others. Although it's the default value, it might not be the best for obtaining
@@ -177,6 +179,11 @@ having passed the original "Wm⁻²" data through the same filters.
 - **method**: Interpolation method that will be used in the calculation of the ESI. The default one is "LINEAR_INTERPOLATION".
 - **gaussian_filter_params**: Parameters for the gaussian filter method, in case that that one is the chosen one. It contains
 the radius and the standard deviation, which by default both are equal to one.
+
+`ESICalculatorCustom` allowes the user to input a custom spectrum. Its parameters are:
+- **wavelengths_nm**: Wavelengths of the custom spectrum
+- **irradiances**: Extraterrestrial solar irradiances for each wavelength in `wavelengths_nm`. Its units (Wm⁻² or Wm⁻²/nm) depends on `per_nm`.
+- **per_nm**: If True, `irradiances` must be specified in Wm⁻²/nm. If False, in Wm⁻². Default is False.
 
 
 ## Roadmap
