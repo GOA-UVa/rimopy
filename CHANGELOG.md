@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [//]: # "## [unreleased] - yyyy-mm-dd"
 
 
+## [unreleased] - yyyy-mm-dd
+
+### Fixed
+- Correctly multiplying reflectance matrix by RCF, fixing wrong dimension match-up.
+
+
 ## [0.4.1] - 2025-11-17
 
 ### Added

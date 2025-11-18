@@ -327,8 +327,7 @@ def get_reflectance(
     -------
     ndarray of float
         The modeled lunar disk reflectance for the given geometries and wavelengths.
-        The output has shape ``(N_geometries, N_wavelengths)``; if there is only one geometry,
-        the first dimension is squeezed and a 1-D array of wavelengths is returned.
+        The output has shape ``(N_geometries, N_wavelengths)``.
     """
     mds = resolve_mds(
         mds,
@@ -346,6 +345,6 @@ def get_reflectance(
             wavelengths_nm,
             np.radians(mds.mpa),
             missing_rcf,
-        ).T
+        )
         a_l = a_l * correction_factor
     return a_l
