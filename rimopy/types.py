@@ -80,7 +80,7 @@ class MissingRCFBehavior(str, Enum):
     ERROR = "error"   # raise ValueError
     WARN = "warn"     # issue a warning, return uncorrected values
     IGNORE = "ignore" # silently return uncorrected values
-    INTERPOLATE = "interpolate" # linearly interpolate the coefficients for non-present wavelengths
+    NEAREST = "nearest" # return the RCF of the closest wavelength with an existing one
 
 
 @dataclass

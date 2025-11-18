@@ -160,7 +160,7 @@ how the Extraterrestrial Lunar Irradiance (ELI) is calculated.
   - `MissingRCFBehavior.ERROR` - raise a `ValueError` listing the offending wavelengths.
   - `MissingRCFBehavior.WARN` - issue a warning and return uncorrected values for those wavelengths.
   - `MissingRCFBehavior.IGNORE` - silently return uncorrected values for those wavelengths.
-  - `MissingRCFBehavior.INTERPOLATE` - linearly interpolate the coefficients for non-present wavelengths.
+  - `MissingRCFBehavior.NEAREST` - return the RCF of the closest wavelength with an existing one.
 
 
 **ESICalculator**

@@ -220,8 +220,8 @@ def _calc_correction_factor(
     return rcf
 
 
-def _interpolated_rcfs(wavelengths_nm: Iterable[float], mpa: NDArray[np.float32]):
-    """Estimate the RCF with interpolation
+def _nearest_rcfs(wavelengths_nm: Iterable[float], mpa: NDArray[np.float32]):
+    """Obtain the RCF of the closest wavelength if the wavelength has no RCF available
 
     Parameters
     ----------
@@ -238,11 +238,15 @@ def _interpolated_rcfs(wavelengths_nm: Iterable[float], mpa: NDArray[np.float32]
     """
     x_values = np.array(_get_corrected_wavelengths())
     y_values = _calc_correction_factor(x_values, mpa, MissingRCFBehavior.IGNORE)
+    wavelengths_nm = np.asarray(wavelengths_nm, dtype=float)
+    wavelengths_nm = np.clip(wavelengths_nm, x_values[0], x_values[-1])
     wavelengths_nm = np.where(wavelengths_nm < x_values[0], x_values[0], wavelengths_nm)
     wavelengths_nm = np.where(
         wavelengths_nm > x_values[-1], x_values[-1], wavelengths_nm
     )
-    return np.array([np.interp(wavelengths_nm, x_values, yval) for yval in y_values])
+    diff = np.abs(x_values[:, None] - wavelengths_nm[None, :])
+    nearest_idx = diff.argmin(axis=0)
+    return y_values[:, nearest_idx]
 
 
 def get_correction_factor(
@@ -268,8 +272,8 @@ def get_correction_factor(
         The calculated RCF. One array per amount of `mpa`.
         Then, each inner array has the amount of values as the amount of wavelengths.
     """
-    if missing_rcf == MissingRCFBehavior.INTERPOLATE:
-        rcf = _interpolated_rcfs(wavelengths_nm, mpa)
+    if missing_rcf == MissingRCFBehavior.NEAREST:
+        rcf = _nearest_rcfs(wavelengths_nm, mpa)
     else:
         rcf = _calc_correction_factor(wavelengths_nm, mpa, missing_rcf)
     return rcf

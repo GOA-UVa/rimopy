@@ -10,8 +10,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased] - yyyy-mm-dd
 
+### Added
+- Added support for `MissingRCFBehaviour`: `NEAREST`, to return the closest wavelength's RCF of the ones that
+  are missing. It's done so the actual photometer channel center can be used for the rest of calculations.
+
 ### Fixed
 - Correctly multiplying reflectance matrix by RCF, fixing wrong dimension match-up.
+
+### Removed
+- Removed support for `MissingRCFBehaviour`: `INTERPOLATE`, as interpolating the RCF does not make sense
+  from a scientific point of view.
 
 
 ## [0.4.1] - 2025-11-17
