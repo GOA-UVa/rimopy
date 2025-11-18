@@ -44,7 +44,7 @@ class ELISettings:
     adjust_apollo : bool, default True
         If True, adjust the ROLO model reflectance using Apollo spectra (derived from
         Apollo 16 lunar samples).
-    per_nm : bool, default False
+    per_nm : bool, default True
         If True, output ELI in W·m⁻²·nm⁻¹. Otherwise, output in W·m⁻².
     missing_rcf : MissingRCFBehavior, default MissingRCFBehavior.ERROR
         Behavior when at least one requested wavelength has no RCF available and
@@ -53,7 +53,7 @@ class ELISettings:
 
     apply_correction: bool = False
     adjust_apollo: bool = True
-    per_nm: bool = False
+    per_nm: bool = True
     missing_rcf: MissingRCFBehavior = MissingRCFBehavior.ERROR
 
 

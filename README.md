@@ -152,7 +152,7 @@ how the Extraterrestrial Lunar Irradiance (ELI) is calculated.
 - **adjust_apollo** : `bool`, default *True*
   If `True`, adjust the ROLO model reflectance using Apollo spectra.
   The Apollo spectra were obtained from lunar samples of the Apollo 16 mission.
-- **per_nm** : `bool`, default *False*
+- **per_nm** : `bool`, default *True*
   If `True`, the output ELI is given in `W·m^-2·nm^-1`; otherwise, it is given in `W·m^-2`.
 - **missing_rcf** : `MissingRCFBehavior`, default `MissingRCFBehavior.ERROR`
   Behavior when at least one requested wavelength has no RCF available and
@@ -183,7 +183,7 @@ the radius and the standard deviation, which by default both are equal to one.
 `ESICalculatorCustom` allowes the user to input a custom spectrum. Its parameters are:
 - **wavelengths_nm**: Wavelengths of the custom spectrum
 - **irradiances**: Extraterrestrial solar irradiances for each wavelength in `wavelengths_nm`. Its units (Wm⁻² or Wm⁻²/nm) depends on `per_nm`.
-- **per_nm**: If True, `irradiances` must be specified in Wm⁻²/nm. If False, in Wm⁻². Default is False.
+- **per_nm**: If True, `irradiances` must be specified in Wm⁻²/nm. If False, in Wm⁻². Default is True.
 
 
 ## Roadmap
