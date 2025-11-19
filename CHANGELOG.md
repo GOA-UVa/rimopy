@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [//]: # "## [unreleased] - yyyy-mm-dd"
 
 
-## [unreleased] - yyyy-mm-dd
+## [0.4.2] - 2025-11-18
 
 ### Added
 - Added support for `MissingRCFBehaviour`: `NEAREST`, to return the closest wavelength's RCF of the ones that
@@ -88,6 +88,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Initial version that serves as the baseline for tracking changes in the change log.
 
 
-[unreleased]: https://github.com/GOA-UVa/rimopy/compare/v0.3.0...HEAD
+[unreleased]: https://github.com/GOA-UVa/rimopy/compare/v0.4.2...HEAD
+[0.4.2]: https://github.com/GOA-UVa/rimopy/compare/v0.4.1...0.4.2
+[0.4.1]: https://github.com/GOA-UVa/rimopy/compare/v0.4.0...0.4.1
+[0.4.0]: https://github.com/GOA-UVa/rimopy/compare/v0.3.0...0.4.0
 [0.3.0]: https://github.com/GOA-UVa/rimopy/compare/v0.2.1...0.3.0
 [0.2.1]: https://github.com/GOA-UVa/rimopy/releases/tag/v0.2.1
