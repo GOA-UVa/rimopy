@@ -39,48 +39,57 @@ class MoonDatas:
         Absolute Moon phase angle (in degrees)
     """
 
-    def __init__(self, dsm: Iterable[float], dom: Iterable[float], lonsun: Iterable[float], latobs: Iterable[float], lonobs: Iterable[float], mpa: Iterable[float]):
-        ampa = ((np.abs(mpa)+180) % 360) - 180
+    def __init__(
+        self,
+        dsm: Iterable[float],
+        dom: Iterable[float],
+        lonsun: Iterable[float],
+        latobs: Iterable[float],
+        lonobs: Iterable[float],
+        mpa: Iterable[float],
+    ):
+        ampa = ((np.abs(mpa) + 180) % 360) - 180
         self._data = np.array([dsm, dom, lonsun, latobs, lonobs, mpa, ampa])
 
     @property
-    def dsm(self) -> NDArray[np.float32]:
+    def dsm(self) -> NDArray[np.float64]:
         return self._data[0]
 
     @property
-    def dom(self) -> NDArray[np.float32]:
+    def dom(self) -> NDArray[np.float64]:
         return self._data[1]
 
     @property
-    def lonsun(self) -> NDArray[np.float32]:
+    def lonsun(self) -> NDArray[np.float64]:
         return self._data[2]
 
     @property
-    def latobs(self) -> NDArray[np.float32]:
+    def latobs(self) -> NDArray[np.float64]:
         return self._data[3]
 
     @property
-    def lonobs(self) -> NDArray[np.float32]:
+    def lonobs(self) -> NDArray[np.float64]:
         return self._data[4]
 
     @property
-    def mpa(self) -> NDArray[np.float32]:
+    def mpa(self) -> NDArray[np.float64]:
         return self._data[5]
 
     @property
-    def ampa(self) -> NDArray[np.float32]:
+    def ampa(self) -> NDArray[np.float64]:
         return self._data[6]
 
-    def get_moondata(self, i) -> NDArray[np.float32]:
+    def get_moondata(self, i) -> NDArray[np.float64]:
         return self._data[:, i]
 
 
 class MissingRCFBehavior(str, Enum):
     """What to do when an RCF is missing for a wavelength."""
-    ERROR = "error"   # raise ValueError
-    WARN = "warn"     # issue a warning, return uncorrected values
-    IGNORE = "ignore" # silently return uncorrected values
-    INTERPOLATE = "interpolate" # linearly interpolate the coefficients for non-present wavelengths
+
+    ERROR = "error"  # raise ValueError
+    WARN = "warn"  # issue a warning, return uncorrected values
+    IGNORE = "ignore"  # silently return uncorrected values
+    NEAREST = "nearest"  # return the RCF of the closest wavelength with an existing one
 
 
 @dataclass

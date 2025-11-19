@@ -219,8 +219,8 @@ class ESICalculator(ABC):
 
     @abstractmethod
     def get_esi(
-        self, wavelengths_nm: Iterable[float], per_nm: bool = False
-    ) -> NDArray[np.float32]:
+        self, wavelengths_nm: Iterable[float], per_nm: bool = True
+    ) -> NDArray[np.float64]:
         """Gets the expected extraterrestrial solar irradiance at a concrete wavelength
         Returns the data in Wm⁻² or Wm⁻²/nm
 
@@ -231,7 +231,7 @@ class ESICalculator(ABC):
             obtained
         per_nm : bool
             If True the irradiance will be in Wm⁻²/nm, otherwise it will be in Wm⁻².
-            Default is False.
+            Default is True.
 
         Returns
         -------
@@ -325,8 +325,8 @@ class ESICalculatorWehrli(ESICalculator):
         return data
 
     def get_esi(
-        self, wavelengths_nm: Iterable[float], per_nm: bool = False
-    ) -> NDArray[np.float32]:
+        self, wavelengths_nm: Iterable[float], per_nm: bool = True
+    ) -> NDArray[np.float64]:
         """Gets the expected extraterrestrial solar irradiance at a concrete wavelength
         Returns the data in Wm⁻² or Wm⁻²/nm
 
@@ -337,7 +337,7 @@ class ESICalculatorWehrli(ESICalculator):
             obtained
         per_nm : bool
             If True the irradiance will be in Wm⁻²/nm, otherwise it will be in Wm⁻².
-            Default is False.
+            Default is True.
 
         Returns
         -------
@@ -387,7 +387,7 @@ class ESICalculatorCustom(ESICalculator):
         self,
         wavelengths_nm: List[float],
         irradiances: List[float],
-        per_nm: bool = False,
+        per_nm: bool = True,
     ):
         """
         Parameters
@@ -399,7 +399,7 @@ class ESICalculatorCustom(ESICalculator):
             Its units (Wm⁻² or Wm⁻²/nm) depends on `per_nm`.
         per_nm: bool
             If True, `irradiances` must be specified in Wm⁻²/nm. If False, in Wm⁻².
-            Default is False.
+            Default is True.
         """
         if len(wavelengths_nm) != len(irradiances):
             raise ValueError(
@@ -415,8 +415,8 @@ class ESICalculatorCustom(ESICalculator):
             self.irradiances *= self.wavelengths_nm
 
     def get_esi(
-        self, wavelengths_nm: Iterable[float], per_nm: bool = False
-    ) -> NDArray[np.float32]:
+        self, wavelengths_nm: Iterable[float], per_nm: bool = True
+    ) -> NDArray[np.float64]:
         """Gets the expected extraterrestrial solar irradiance at a concrete wavelength
         Returns the data in Wm⁻² or Wm⁻²/nm
 
@@ -427,7 +427,7 @@ class ESICalculatorCustom(ESICalculator):
             obtained
         per_nm : bool
             If True the irradiance will be in Wm⁻²/nm, otherwise it will be in Wm⁻².
-            Default is False.
+            Default is True.
 
         Returns
         -------

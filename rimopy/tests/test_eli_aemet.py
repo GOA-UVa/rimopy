@@ -17,9 +17,7 @@ JAN_FULL_MOON_17 = "2022-01-17 17:00:00"
 FEB_NEW_MOON_00 = "2022-02-02 00:00:00"
 DEFAULT_PROP_ERROR = 0  # 0% error, now the result is formatted as the one in AEMET's
 ed_Vall = eli.EarthPoint(VALL_LAT, VALL_LON, JAN_FULL_MOON_00, VALL_ALT)
-EXK = ["EarthStations.bsp", "EarthStations.tf"]
-EXK_PATH = "./extra.temp.kernels"
-VALL_NAME = "VALLADOLID"
+
 
 prop_error = DEFAULT_PROP_ERROR
 GAUSS_FILPARAMS = esi.GaussianFilterParams(1, 1)
@@ -31,7 +29,13 @@ ELI_SETTINGS = eli.ELISettings(False, True, True)
 
 def _testValladolidNoCorr(ts: "TestSum", wavelength, expected, date):
     ed_Vall.set_utc_times(date)
-    res = eli.get_irradiance([wavelength], earth_data=ed_Vall, kernels_path=KERNELS_PATH, esi_calc=ESICALC, eli_settings=ELI_SETTINGS)[0]
+    res = eli.get_irradiance(
+        [wavelength],
+        earth_data=ed_Vall,
+        kernels_path=KERNELS_PATH,
+        esi_calc=ESICALC,
+        eli_settings=ELI_SETTINGS,
+    )[0]
     res = float(f"{res:0.4e}")
     ts.assertAlmostEqual(res, expected, delta=expected * prop_error)
 

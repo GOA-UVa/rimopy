@@ -44,7 +44,7 @@ class ELISettings:
     adjust_apollo : bool, default True
         If True, adjust the ROLO model reflectance using Apollo spectra (derived from
         Apollo 16 lunar samples).
-    per_nm : bool, default False
+    per_nm : bool, default True
         If True, output ELI in W·m⁻²·nm⁻¹. Otherwise, output in W·m⁻².
     missing_rcf : MissingRCFBehavior, default MissingRCFBehavior.ERROR
         Behavior when at least one requested wavelength has no RCF available and
@@ -53,7 +53,7 @@ class ELISettings:
 
     apply_correction: bool = False
     adjust_apollo: bool = True
-    per_nm: bool = False
+    per_nm: bool = True
     missing_rcf: MissingRCFBehavior = MissingRCFBehavior.ERROR
 
 
@@ -61,7 +61,7 @@ def _get_esi(
     esi_calc: esi.ESICalculator,
     wavelengths_nm: Iterable[float],
     eli_settings: ELISettings,
-) -> NDArray[np.float32]:
+) -> NDArray[np.float64]:
     """Gets the expected extraterrestrial solar irradiance at a concrete wavelength
     Returns the data in Wm⁻²
 
@@ -89,7 +89,7 @@ def _calculate_eli(
     mds: MoonDatas,
     esi_calc: esi.ESICalculator,
     eli_settings: ELISettings,
-) -> NDArray[np.float32]:
+) -> NDArray[np.float64]:
     """Calculation of Extraterrestrial Lunar Irradiance following Eq 3 in Roman et al., 2020
 
     Simulates a lunar observation for a wavelength for any observer/solar selenographic
@@ -143,7 +143,7 @@ def get_irradiance(
     mds: MoonDatas,
     esi_calc: esi.ESICalculator = None,
     eli_settings: ELISettings = None,
-) -> NDArray[np.float32]:
+) -> NDArray[np.float64]:
     ...
 
 
@@ -155,7 +155,7 @@ def get_irradiance(
     kernels_path: str,
     esi_calc: esi.ESICalculator = None,
     eli_settings: ELISettings = None,
-) -> NDArray[np.float32]:
+) -> NDArray[np.float64]:
     ...
 
 
@@ -170,7 +170,7 @@ def get_irradiance(
     observer_name: str,
     esi_calc: esi.ESICalculator = None,
     eli_settings: ELISettings = None,
-) -> NDArray[np.float32]:
+) -> NDArray[np.float64]:
     ...
 
 
@@ -191,7 +191,7 @@ def get_irradiance(
     # common
     esi_calc: esi.ESICalculator = None,
     eli_settings: ELISettings = None,
-) -> NDArray[np.float32]:
+) -> NDArray[np.float64]:
     """
     Compute the Extraterrestrial Lunar Irradiance (ELI) following Eq. 3 in Román et al. (2020).
 

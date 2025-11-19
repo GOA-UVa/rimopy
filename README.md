@@ -152,7 +152,7 @@ how the Extraterrestrial Lunar Irradiance (ELI) is calculated.
 - **adjust_apollo** : `bool`, default *True*
   If `True`, adjust the ROLO model reflectance using Apollo spectra.
   The Apollo spectra were obtained from lunar samples of the Apollo 16 mission.
-- **per_nm** : `bool`, default *False*
+- **per_nm** : `bool`, default *True*
   If `True`, the output ELI is given in `W·m^-2·nm^-1`; otherwise, it is given in `W·m^-2`.
 - **missing_rcf** : `MissingRCFBehavior`, default `MissingRCFBehavior.ERROR`
   Behavior when at least one requested wavelength has no RCF available and
@@ -160,7 +160,7 @@ how the Extraterrestrial Lunar Irradiance (ELI) is calculated.
   - `MissingRCFBehavior.ERROR` - raise a `ValueError` listing the offending wavelengths.
   - `MissingRCFBehavior.WARN` - issue a warning and return uncorrected values for those wavelengths.
   - `MissingRCFBehavior.IGNORE` - silently return uncorrected values for those wavelengths.
-  - `MissingRCFBehavior.INTERPOLATE` - linearly interpolate the coefficients for non-present wavelengths.
+  - `MissingRCFBehavior.NEAREST` - return the RCF of the closest wavelength with an existing one.
 
 
 **ESICalculator**
@@ -168,7 +168,9 @@ how the Extraterrestrial Lunar Irradiance (ELI) is calculated.
 `ESICalculator` is the interface of which implementations contain the functions that calculate the extraterrestrial
 solar irradiance. This calculations will vary depending on the implementation.
 
-Currently there's only one implementation: `ESICalculatorWehrli`. Its attributes are:
+Currently there are two implementations: `ESICalculatorWehrli` and `ESICalculatorCustom`.
+
+`ESICalculatorWehrli` uses 1985 Wehrli Standard Extraterrestrial Solar Irradiance Spectrum as the base data. Its attributes are:
 - **wehrli_file**: Wehrli data source that will be used in the calculation of the ESI. It could be the original
 data or some filtered data. The default value is "ASC_WEHRLI", the Wehrli data passed throught some filters, and it's
 the one used in AEMET's RimoApp and others. Although it's the default value, it might not be the best for obtaining
@@ -178,12 +180,16 @@ having passed the original "Wm⁻²" data through the same filters.
 - **gaussian_filter_params**: Parameters for the gaussian filter method, in case that that one is the chosen one. It contains
 the radius and the standard deviation, which by default both are equal to one.
 
+`ESICalculatorCustom` allowes the user to input a custom spectrum. Its parameters are:
+- **wavelengths_nm**: Wavelengths of the custom spectrum
+- **irradiances**: Extraterrestrial solar irradiances for each wavelength in `wavelengths_nm`. Its units (Wm⁻² or Wm⁻²/nm) depends on `per_nm`.
+- **per_nm**: If True, `irradiances` must be specified in Wm⁻²/nm. If False, in Wm⁻². Default is True.
+
 
 ## Roadmap
 
-- [ ] Add validation tests based on AEMET RimoApp output using precomputed lunar geometries
+- [ ] Add validation tests based on output from AEMET RimoApp or CAELIS RIMO using precomputed lunar geometries
   to remove the need for SPICE kernels during testing.
-- [ ] Add validation tests based on CAELIS RIMO implementation.
 - [ ] Add unit tests for all submodules.
 - [ ] Implement a TSIS-based `ESICalculator`.
 

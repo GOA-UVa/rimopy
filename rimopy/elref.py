@@ -25,8 +25,8 @@ from . import correction_factor as corr_f
 
 
 def _summatory_a(
-    wavelengths_nm: NDArray[np.float32], gr: NDArray[np.float32]
-) -> NDArray[np.float32]:
+    wavelengths_nm: NDArray[np.float64], gr: NDArray[np.float64]
+) -> NDArray[np.float64]:
     """The first summatory of Eq. 2 in Roman et al., 2020
 
     Parameters
@@ -49,8 +49,8 @@ def _summatory_a(
 
 
 def _summatory_b(
-    wavelengths_nm: NDArray[np.float32], phi: NDArray[np.float32]
-) -> NDArray[np.float32]:
+    wavelengths_nm: NDArray[np.float64], phi: NDArray[np.float64]
+) -> NDArray[np.float64]:
     """The second summatory of Eq. 2 in Roman et al., 2020, without the erratum
 
     Parameters
@@ -73,9 +73,9 @@ def _summatory_b(
 
 
 def _ln_moon_disk_reflectance(
-    wavelengths_nm: NDArray[np.float32],
+    wavelengths_nm: NDArray[np.float64],
     mds: MoonDatas,
-) -> NDArray[np.float32]:
+) -> NDArray[np.float64]:
     """The calculation of the ln of the reflectance of the Moon's disk, following Eq.2 in
     Roman et al., 2020
 
@@ -181,10 +181,10 @@ def _neighbors_set_linear_exact(query: Iterable[float], reference: Iterable[floa
 
 
 def _interpolated_moon_disk_reflectance(
-    wavelengths_nm: NDArray[np.float32],
+    wavelengths_nm: NDArray[np.float64],
     mds: MoonDatas,
     adjust_apollo: bool,
-) -> NDArray[np.float32]:
+) -> NDArray[np.float64]:
     """The calculation of the reflectance of the Moon's disk, following Eq.2 in Roman et al., 2020
 
     If the wavelength is not present in the ROLO coefficients, it calculates the linear
@@ -231,7 +231,7 @@ def get_reflectance(
     apply_correction: bool = False,
     missing_rcf: MissingRCFBehavior = MissingRCFBehavior.ERROR,
     adjust_apollo: bool = True,
-) -> NDArray[np.float32]:
+) -> NDArray[np.float64]:
     ...
 
 
@@ -244,7 +244,7 @@ def get_reflectance(
     apply_correction: bool = False,
     missing_rcf: MissingRCFBehavior = MissingRCFBehavior.ERROR,
     adjust_apollo: bool = True,
-) -> NDArray[np.float32]:
+) -> NDArray[np.float64]:
     ...
 
 
@@ -260,7 +260,7 @@ def get_reflectance(
     apply_correction: bool = False,
     missing_rcf: MissingRCFBehavior = MissingRCFBehavior.ERROR,
     adjust_apollo: bool = True,
-) -> NDArray[np.float32]:
+) -> NDArray[np.float64]:
     ...
 
 
@@ -282,7 +282,7 @@ def get_reflectance(
     apply_correction: bool = False,
     missing_rcf: MissingRCFBehavior = MissingRCFBehavior.ERROR,
     adjust_apollo: bool = True,
-) -> NDArray[np.float32]:
+) -> NDArray[np.float64]:
     """
     Compute the reflectance of the Moon's disk following Eq. 2 in Román et al. (2020).
 
@@ -327,8 +327,7 @@ def get_reflectance(
     -------
     ndarray of float
         The modeled lunar disk reflectance for the given geometries and wavelengths.
-        The output has shape ``(N_geometries, N_wavelengths)``; if there is only one geometry,
-        the first dimension is squeezed and a 1-D array of wavelengths is returned.
+        The output has shape ``(N_geometries, N_wavelengths)``.
     """
     mds = resolve_mds(
         mds,
@@ -346,6 +345,6 @@ def get_reflectance(
             wavelengths_nm,
             np.radians(mds.mpa),
             missing_rcf,
-        ).T
+        )
         a_l = a_l * correction_factor
     return a_l
