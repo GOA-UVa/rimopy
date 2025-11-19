@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Added support for `MissingRCFBehaviour`: `NEAREST`, to return the closest wavelength's RCF of the ones that
   are missing. It's done so the actual photometer channel center can be used for the rest of calculations.
+- Updated RCF coefficients with higher resolution ones.
 
 ### Changed
 - Set default value of `per_nm` to True in the multiple places it appears.

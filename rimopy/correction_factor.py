@@ -42,9 +42,9 @@ class CorrectionParams:
         RCF coefficient 'c'
     """
 
-    a_coeff: NDArray[np.float32]
-    b_coeff: NDArray[np.float32]
-    c_coeff: NDArray[np.float32]
+    a_coeff: NDArray[np.float64]
+    b_coeff: NDArray[np.float64]
+    c_coeff: NDArray[np.float64]
 
 
 def _get_corrected_wavelengths() -> List[float]:
@@ -67,16 +67,17 @@ def _get_all_correction_params() -> List[List[float]]:
         A list containing multiple list of floats. Each sublist is the list of coefficients
         for a wavelength
     """
+    # 1020nm InGaAs would be [1.0631831749, 0.0034012042, 0.0303574822]
     return [
-        [1.186, -2.35e-2, 1.92e-1],
-        [1.082, -4.17e-3, 7.10e-2],
-        [1.062, -5.35e-4, 1.14e-2],
-        [1.078, -8.93e-4, 1.11e-2],
-        [1.092, -4.50e-4, 1.38e-2],
-        [1.075, -2.05e-3, 1.37e-2],
-        [1.071, -2.41e-3, 1.36e-2],
-        [1.035, 5.55e-3, 2.79e-2],
-        [1.047, -1.25e-3, 2.26e-2],
+        [1.1864612062, -0.0234834993, 0.1915413700],
+        [1.0815072820, -0.0041658980, 0.0709619595],
+        [1.0619083599, -0.0005349345, 0.0114449021],
+        [1.0780290449, -0.0008928949, 0.0111418757],
+        [1.0923637792, -0.0004499037, 0.0138200395],
+        [1.0751219061, -0.0020469288, 0.0137060975],
+        [1.0708760938, -0.0024125934, 0.0136285388],
+        [1.0353262198, 0.0055463001, 0.0279025976],
+        [1.0465756122, -0.0012523320, 0.0226174957],
     ]
 
 
@@ -192,10 +193,10 @@ def _get_correction_params(
 
 def _calc_correction_factor(
     wavelengths_nm: Iterable[float],
-    mpa: NDArray[np.float32],
+    mpa: NDArray[np.float64],
     missing_rcf: MissingRCFBehavior,
     atol_nm: float = 0.1,
-) -> NDArray[np.float32]:
+) -> NDArray[np.float64]:
     """Calculation of RIMO correction factor (RCF) following Eq 9 in Roman et al., 2020
 
     Parameters
@@ -220,7 +221,7 @@ def _calc_correction_factor(
     return rcf
 
 
-def _nearest_rcfs(wavelengths_nm: Iterable[float], mpa: NDArray[np.float32]):
+def _nearest_rcfs(wavelengths_nm: Iterable[float], mpa: NDArray[np.float64]):
     """Obtain the RCF of the closest wavelength if the wavelength has no RCF available
 
     Parameters
@@ -251,9 +252,9 @@ def _nearest_rcfs(wavelengths_nm: Iterable[float], mpa: NDArray[np.float32]):
 
 def get_correction_factor(
     wavelengths_nm: Iterable[float],
-    mpa: NDArray[np.float32],
+    mpa: NDArray[np.float64],
     missing_rcf: MissingRCFBehavior,
-) -> NDArray[np.float32]:
+) -> NDArray[np.float64]:
     """Calculation of RIMO correction factor (RCF) following Eq 9 in Roman et al., 2020
 
     Parameters
