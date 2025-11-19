@@ -220,7 +220,7 @@ class ESICalculator(ABC):
     @abstractmethod
     def get_esi(
         self, wavelengths_nm: Iterable[float], per_nm: bool = True
-    ) -> NDArray[np.float32]:
+    ) -> NDArray[np.float64]:
         """Gets the expected extraterrestrial solar irradiance at a concrete wavelength
         Returns the data in Wm⁻² or Wm⁻²/nm
 
@@ -326,7 +326,7 @@ class ESICalculatorWehrli(ESICalculator):
 
     def get_esi(
         self, wavelengths_nm: Iterable[float], per_nm: bool = True
-    ) -> NDArray[np.float32]:
+    ) -> NDArray[np.float64]:
         """Gets the expected extraterrestrial solar irradiance at a concrete wavelength
         Returns the data in Wm⁻² or Wm⁻²/nm
 
@@ -416,7 +416,7 @@ class ESICalculatorCustom(ESICalculator):
 
     def get_esi(
         self, wavelengths_nm: Iterable[float], per_nm: bool = True
-    ) -> NDArray[np.float32]:
+    ) -> NDArray[np.float64]:
         """Gets the expected extraterrestrial solar irradiance at a concrete wavelength
         Returns the data in Wm⁻² or Wm⁻²/nm
 

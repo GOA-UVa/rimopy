@@ -61,7 +61,7 @@ def _get_esi(
     esi_calc: esi.ESICalculator,
     wavelengths_nm: Iterable[float],
     eli_settings: ELISettings,
-) -> NDArray[np.float32]:
+) -> NDArray[np.float64]:
     """Gets the expected extraterrestrial solar irradiance at a concrete wavelength
     Returns the data in Wm⁻²
 
@@ -89,7 +89,7 @@ def _calculate_eli(
     mds: MoonDatas,
     esi_calc: esi.ESICalculator,
     eli_settings: ELISettings,
-) -> NDArray[np.float32]:
+) -> NDArray[np.float64]:
     """Calculation of Extraterrestrial Lunar Irradiance following Eq 3 in Roman et al., 2020
 
     Simulates a lunar observation for a wavelength for any observer/solar selenographic
@@ -143,7 +143,7 @@ def get_irradiance(
     mds: MoonDatas,
     esi_calc: esi.ESICalculator = None,
     eli_settings: ELISettings = None,
-) -> NDArray[np.float32]:
+) -> NDArray[np.float64]:
     ...
 
 
@@ -155,7 +155,7 @@ def get_irradiance(
     kernels_path: str,
     esi_calc: esi.ESICalculator = None,
     eli_settings: ELISettings = None,
-) -> NDArray[np.float32]:
+) -> NDArray[np.float64]:
     ...
 
 
@@ -170,7 +170,7 @@ def get_irradiance(
     observer_name: str,
     esi_calc: esi.ESICalculator = None,
     eli_settings: ELISettings = None,
-) -> NDArray[np.float32]:
+) -> NDArray[np.float64]:
     ...
 
 
@@ -191,7 +191,7 @@ def get_irradiance(
     # common
     esi_calc: esi.ESICalculator = None,
     eli_settings: ELISettings = None,
-) -> NDArray[np.float32]:
+) -> NDArray[np.float64]:
     """
     Compute the Extraterrestrial Lunar Irradiance (ELI) following Eq. 3 in Román et al. (2020).
 
