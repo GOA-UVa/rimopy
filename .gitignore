@@ -5,3 +5,4 @@ dist
 rimopy/tests/kernels/custom.bsp
 *.temp.*
 report.xml
+ignore_folder
