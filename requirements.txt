@@ -1,2 +1,2 @@
 numpy>=1.22.0
-spicedmoon>=1.0.13
+spicedmoon~=1.1

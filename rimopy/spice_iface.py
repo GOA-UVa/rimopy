@@ -12,7 +12,7 @@ It exports the following functions:
 from typing import List
 
 import numpy as np
-from spicedmoon import spicedmoon
+import spicedmoon
 
 from .types import MoonDatas
 

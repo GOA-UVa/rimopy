@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [//]: # "## [unreleased] - yyyy-mm-dd"
 
+## [unreleased] - yyyy-mm-dd
+
+### Changed
+- Updated `spicedmoon` to `~=1.1`, and removed deprecated usage.
 
 ## [0.4.2] - 2025-11-18
 
